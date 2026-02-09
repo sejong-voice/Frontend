@@ -111,6 +111,16 @@ const petitions: Petition[] = [
     author: "임*빈",
     date: "2026.01.08",
   },
+  {
+    id: 14,
+    status: "반려",
+    category: "학생복지",
+    title: "학생회비 사용 내역 분기별 공개 의무화 요청",
+    comments: 4,
+    votes: 373,
+    author: "한*준",
+    date: "2026.01.03",
+  },
 ]
 
 export default function Page() {
