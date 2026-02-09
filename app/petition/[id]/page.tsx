@@ -200,8 +200,6 @@ const petitionsDB: Record<string, PetitionData> = {
     isAuthor: false,
     isAdmin: false,
   },
-}
-
   "5": {
     id: 5,
     title: "캠퍼스 내 반려동물 동반 출입 허용 건의",
