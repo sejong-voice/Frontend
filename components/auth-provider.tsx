@@ -5,8 +5,11 @@ import {
   useContext,
   useState,
   useCallback,
+  useEffect,
   type ReactNode,
 } from "react"
+
+const AUTH_STORAGE_KEY = "sejong-sinmungo-auth"
 
 interface AuthState {
   isLoggedIn: boolean
@@ -21,12 +24,38 @@ interface AuthContextValue extends AuthState {
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
+function getStoredAuth(): AuthState {
+  if (typeof window === "undefined") {
+    return { isLoggedIn: false, studentId: null, name: null }
+  }
+  try {
+    const stored = sessionStorage.getItem(AUTH_STORAGE_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored) as AuthState
+      if (parsed.isLoggedIn && parsed.studentId) {
+        return parsed
+      }
+    }
+  } catch {
+    // ignore parse errors
+  }
+  return { isLoggedIn: false, studentId: null, name: null }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [auth, setAuth] = useState<AuthState>({
-    isLoggedIn: false,
-    studentId: null,
-    name: null,
-  })
+  const [auth, setAuth] = useState<AuthState>(getStoredAuth)
+
+  useEffect(() => {
+    try {
+      if (auth.isLoggedIn) {
+        sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth))
+      } else {
+        sessionStorage.removeItem(AUTH_STORAGE_KEY)
+      }
+    } catch {
+      // sessionStorage unavailable
+    }
+  }, [auth])
 
   const login = useCallback((studentId: string, name: string) => {
     setAuth({ isLoggedIn: true, studentId, name })
