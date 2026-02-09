@@ -6,10 +6,12 @@ import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useAuth } from "@/components/auth-provider"
 
 export function LoginForm() {
   const { refreshMe } = useAuth()
+  const router = useRouter()
   const [studentId, setStudentId] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -27,7 +29,6 @@ export function LoginForm() {
     setIsLoading(true)
 
     try {
-      console.log("[v0] LoginForm: submitting login", { studentId })
       const res = await fetch("/api/auth/login", {
         method: "POST",
         credentials: "include",
@@ -35,9 +36,7 @@ export function LoginForm() {
         body: JSON.stringify({ studentId, password }),
       })
 
-      console.log("[v0] LoginForm: login response status", res.status)
       const data = await res.json()
-      console.log("[v0] LoginForm: login response data", data)
 
       if (!res.ok) {
         setError(data.error || "로그인에 실패했습니다.")
@@ -46,11 +45,9 @@ export function LoginForm() {
       }
 
       // Cookie is set by the server; refresh auth state
-      console.log("[v0] LoginForm: calling refreshMe")
       await refreshMe()
-      console.log("[v0] LoginForm: refreshMe completed")
-    } catch (err) {
-      console.log("[v0] LoginForm: error", err)
+      router.push("/")
+    } catch {
       setError("서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.")
     } finally {
       setIsLoading(false)

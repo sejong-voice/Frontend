@@ -11,6 +11,7 @@ import { PetitionOfficialResponse } from "@/components/petition-official-respons
 import { PetitionComments, type Comment } from "@/components/petition-comments"
 import { PetitionActions } from "@/components/petition-actions"
 import { Separator } from "@/components/ui/separator"
+import { useAuth } from "@/components/auth-provider"
 
 
 // --- Mock data ---
@@ -261,6 +262,7 @@ export default function PetitionDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
+  const { isAdmin } = useAuth()
   const petition = petitionsDB[id] || defaultPetition
 
   const totalCommentCount = petition.comments.reduce(
@@ -315,7 +317,7 @@ export default function PetitionDetailPage({
           <PetitionActions
             status={petition.status}
             isAuthor={petition.isAuthor}
-            isAdmin={petition.isAdmin}
+            isAdmin={isAdmin}
             totalVotes={totalVotes}
           />
 
