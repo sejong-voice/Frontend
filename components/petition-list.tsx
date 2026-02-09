@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { MessageSquare, Vote } from "lucide-react"
 
-export type PetitionStatus = "진행중" | "승인됨" | "답변완료" | "미승인"
+export type PetitionStatus = "진행중" | "승인됨" | "답변완료" | "미승인" | "반려"
 export type PetitionCategory = "학사제도" | "학교시설" | "학생복지" | "기타"
 
 export interface Petition {
@@ -22,6 +22,7 @@ const statusStyles: Record<PetitionStatus, string> = {
   승인됨: "border-blue-200 bg-blue-50 text-blue-700",
   답변완료: "border-green-200 bg-green-50 text-green-700",
   미승인: "border-border bg-secondary text-muted-foreground",
+  반려: "border-orange-200 bg-orange-50 text-orange-700",
 }
 
 interface PetitionListProps {
