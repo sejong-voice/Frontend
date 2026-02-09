@@ -42,7 +42,7 @@ const petitionsDB: Record<string, PetitionData> = {
     title: "졸업요건 중 영어 인증 기준 완화 요청",
     status: "진행중",
     category: "학사제도",
-    author: "김*현",
+    author: "김도현",
     date: "2026.02.01",
     council: "총학생회",
     content: `안녕하세요. 본 청원은 현행 졸업요건 중 영어 인증 기준에 대한 완화를 요청드리기 위해 작성합니다.
@@ -68,56 +68,64 @@ const petitionsDB: Record<string, PetitionData> = {
     comments: [
       {
         id: 1,
-        author: "익명*1",
+        author: "이승민",
         content:
           "정말 공감합니다. 저도 4학년인데 졸업 요건 때문에 TOEIC을 세 번이나 봤네요. 시험비만 해도 부담이 큽니다.",
         date: "2026.02.02",
+        isMine: false,
         replies: [
           {
             id: 11,
-            author: "익명*5",
+            author: "박지영",
             content:
               "저도 같은 상황입니다. 교내 프로그램으로 대체할 수 있었으면 좋겠어요.",
             date: "2026.02.02",
+            isMine: false,
           },
           {
             id: 12,
-            author: "익명*8",
-            content: "시험 무료 응시 지원이라도 있으면 좋겠습니다.",
+            author: "김도현",
+            content:
+              "맞습니다. 현재 이 부분도 포함하여 요청드린 상태입니다. 지지 감사합니다.",
             date: "2026.02.03",
+            isMine: true,
           },
         ],
       },
       {
         id: 2,
-        author: "익명*2",
+        author: "정하윤",
         content:
           "영어가 중요하지 않다는 건 아니지만, 모든 학과에 동일한 기준을 적용하는 건 맞지 않다고 봅니다.",
         date: "2026.02.03",
+        isMine: false,
         replies: [],
       },
       {
         id: 3,
-        author: "익명*3",
+        author: "최은서",
         content:
           "다른 대학교들은 이미 교내 영어 수업 이수로 대체 가능한 곳이 많더라고요. 우리 학교도 이런 유연한 정책이 필요합니다.",
         date: "2026.02.04",
+        isMine: true,
         replies: [
           {
             id: 31,
-            author: "익명*7",
+            author: "한서준",
             content:
               "맞아요. 타대학 사례를 좀 정리해서 근거 자료로 제시하면 좋을 것 같아요.",
             date: "2026.02.05",
+            isMine: false,
           },
         ],
       },
       {
         id: 4,
-        author: "익명*4",
+        author: "윤채원",
         content:
           "솔직히 반대 의견도 있을 수 있지만, 최소한 학과별 차등 적용은 합리적이라고 생각합니다.",
         date: "2026.02.06",
+        isMine: false,
         replies: [],
       },
     ],
@@ -129,7 +137,7 @@ const petitionsDB: Record<string, PetitionData> = {
     title: "교내 셔틀버스 배차 간격 단축 건의",
     status: "답변완료",
     category: "학생복지",
-    author: "박*진",
+    author: "박서진",
     date: "2026.01.25",
     council: "총학생회",
     content: `세종대학교 셔틀버스 이용 학생입니다.
@@ -163,24 +171,27 @@ const petitionsDB: Record<string, PetitionData> = {
     comments: [
       {
         id: 1,
-        author: "익명*1",
+        author: "강민재",
         content: "드디어 답변이 나왔네요! 배차 간격 단축 확정 감사합니다.",
         date: "2026.02.05",
+        isMine: false,
         replies: [
           {
             id: 11,
-            author: "익명*6",
+            author: "서예린",
             content: "15분이라도 줄어드는 거니까 기대됩니다.",
             date: "2026.02.05",
+            isMine: false,
           },
         ],
       },
       {
         id: 2,
-        author: "익명*2",
+        author: "임주원",
         content:
           "실시간 위치 확인이 2학기라니 좀 아쉽지만 그래도 추진해주시니 감사합니다.",
         date: "2026.02.06",
+        isMine: true,
         replies: [],
       },
     ],
@@ -189,13 +200,13 @@ const petitionsDB: Record<string, PetitionData> = {
   },
 }
 
-// Default fallback petition for unknown IDs
+// Default fallback: admin view of an approved petition
 const defaultPetition: PetitionData = {
   id: 0,
   title: "중앙도서관 24시간 열람실 운영 재개 요청",
   status: "승인됨",
   category: "학교시설",
-  author: "이*수",
+  author: "이수빈",
   date: "2026.01.28",
   council: "총학생회",
   content: `중앙도서관 24시간 열람실 운영 재개를 강력히 요청합니다.
@@ -215,23 +226,26 @@ const defaultPetition: PetitionData = {
   comments: [
     {
       id: 1,
-      author: "익명*1",
+      author: "장유진",
       content:
         "승인되었으니 이제 학생회 답변을 기다려봅시다. 꼭 재개되었으면 좋겠어요.",
       date: "2026.02.01",
+      isMine: false,
       replies: [],
     },
     {
       id: 2,
-      author: "익명*3",
+      author: "홍태우",
       content: "시험 기간마다 갈 곳이 없어서 정말 불편했는데 기대됩니다.",
       date: "2026.02.02",
+      isMine: false,
       replies: [
         {
           id: 21,
-          author: "익명*4",
+          author: "오하늘",
           content: "맞아요, 카페비가 만만치 않죠.",
           date: "2026.02.02",
+          isMine: true,
         },
       ],
     },
@@ -252,6 +266,8 @@ export default function PetitionDetailPage({
     (acc, c) => acc + 1 + c.replies.length,
     0
   )
+
+  const totalVotes = petition.votesFor + petition.votesAgainst
 
   const showOfficialResponse =
     petition.officialResponse &&
@@ -299,6 +315,7 @@ export default function PetitionDetailPage({
             status={petition.status}
             isAuthor={petition.isAuthor}
             isAdmin={petition.isAdmin}
+            totalVotes={totalVotes}
           />
 
           <Separator />

@@ -90,7 +90,7 @@ export function MyPetitionList({
                     {petition.category}
                   </span>
                   <Link
-                    href={`/petition/${petition.id}`}
+                    href={`/petition/${petition.id}?from=my`}
                     className="truncate text-sm font-medium text-foreground hover:underline"
                   >
                     {petition.title}
@@ -213,7 +213,7 @@ export function MyPetitionList({
                     </div>
                   </div>
                   <Link
-                    href={`/petition/${petition.id}`}
+                    href={`/petition/${petition.id}?from=my`}
                     className="truncate text-sm font-medium text-foreground hover:underline"
                   >
                     {petition.title}

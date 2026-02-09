@@ -12,13 +12,16 @@ import {
   Send,
   ChevronDown,
   ChevronUp,
+  Trash2,
+  Reply,
 } from "lucide-react"
 
-interface Reply {
+interface ReplyData {
   id: number
   author: string
   content: string
   date: string
+  isMine: boolean
 }
 
 export interface Comment {
@@ -26,7 +29,8 @@ export interface Comment {
   author: string
   content: string
   date: string
-  replies: Reply[]
+  isMine: boolean
+  replies: ReplyData[]
 }
 
 interface PetitionCommentsProps {
@@ -37,20 +41,18 @@ interface PetitionCommentsProps {
 function CommentItem({
   comment,
   isReply = false,
+  onReply,
 }: {
-  comment: Comment | Reply
+  comment: Comment | ReplyData
   isReply?: boolean
+  onReply?: () => void
 }) {
   const [showReportConfirm, setShowReportConfirm] = useState(false)
-  const initial = comment.author.replace("*", "")[0] || "?"
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const initial = comment.author[0] || "?"
 
   return (
-    <div
-      className={cn(
-        "flex gap-3",
-        isReply && "ml-10 md:ml-12"
-      )}
-    >
+    <div className={cn("flex gap-3", isReply && "ml-10 md:ml-12")}>
       <Avatar className="h-8 w-8 shrink-0">
         <AvatarFallback className="bg-secondary text-xs text-muted-foreground">
           {initial}
@@ -66,8 +68,54 @@ function CommentItem({
         <p className="text-sm leading-relaxed text-foreground">
           {comment.content}
         </p>
-        <div className="mt-1 flex items-center gap-2">
-          {!showReportConfirm ? (
+        <div className="mt-1 flex items-center gap-3">
+          {/* Reply button (only for top-level comments) */}
+          {!isReply && onReply && (
+            <button
+              onClick={onReply}
+              className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+              type="button"
+            >
+              <Reply className="h-3 w-3" />
+              {"답글"}
+            </button>
+          )}
+
+          {/* Delete button - only for my comments */}
+          {comment.isMine && !showDeleteConfirm && (
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-destructive"
+              type="button"
+            >
+              <Trash2 className="h-3 w-3" />
+              {"삭제"}
+            </button>
+          )}
+          {showDeleteConfirm && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">
+                {"삭제하시겠습니까?"}
+              </span>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="text-xs font-medium text-destructive"
+                type="button"
+              >
+                {"확인"}
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="text-xs text-muted-foreground"
+                type="button"
+              >
+                {"취소"}
+              </button>
+            </div>
+          )}
+
+          {/* Report button - only for others' comments */}
+          {!comment.isMine && !showReportConfirm && (
             <button
               onClick={() => setShowReportConfirm(true)}
               className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-destructive"
@@ -76,7 +124,8 @@ function CommentItem({
               <Flag className="h-3 w-3" />
               {"신고"}
             </button>
-          ) : (
+          )}
+          {showReportConfirm && (
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground">
                 {"신고하시겠습니까?"}
@@ -103,13 +152,48 @@ function CommentItem({
   )
 }
 
+function ReplyInput({ onCancel }: { onCancel: () => void }) {
+  const [text, setText] = useState("")
+
+  return (
+    <div className="ml-10 flex flex-col gap-2 rounded-md border border-border bg-secondary/50 p-3 md:ml-12">
+      <Textarea
+        placeholder="답글을 입력하세요..."
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        className="min-h-[60px] resize-none border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
+        autoFocus
+      />
+      <div className="flex items-center justify-end gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onCancel}
+          className="text-xs"
+        >
+          {"취소"}
+        </Button>
+        <Button size="sm" disabled={!text.trim()} className="gap-1 text-xs">
+          <Send className="h-3 w-3" />
+          {"답글 등록"}
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 function CommentThread({ comment }: { comment: Comment }) {
   const [showReplies, setShowReplies] = useState(false)
+  const [showReplyInput, setShowReplyInput] = useState(false)
   const hasReplies = comment.replies.length > 0
 
   return (
     <div className="flex flex-col gap-4">
-      <CommentItem comment={comment} />
+      <CommentItem
+        comment={comment}
+        onReply={() => setShowReplyInput(!showReplyInput)}
+      />
+
       {hasReplies && (
         <>
           <button
@@ -135,11 +219,19 @@ function CommentThread({ comment }: { comment: Comment }) {
           {showReplies && (
             <div className="flex flex-col gap-4">
               {comment.replies.map((reply) => (
-                <CommentItem key={reply.id} comment={reply as Comment} isReply />
+                <CommentItem
+                  key={reply.id}
+                  comment={reply as unknown as Comment}
+                  isReply
+                />
               ))}
             </div>
           )}
         </>
+      )}
+
+      {showReplyInput && (
+        <ReplyInput onCancel={() => setShowReplyInput(false)} />
       )}
     </div>
   )
@@ -168,7 +260,7 @@ export function PetitionComments({
         {/* Comment input */}
         <div className="rounded-lg border border-border bg-card p-4">
           <Textarea
-            placeholder="의견을 남겨주세요 (익명으로 게시됩니다)"
+            placeholder="의견을 남겨주세요"
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             className="min-h-[80px] resize-none border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"

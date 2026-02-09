@@ -1,6 +1,9 @@
+"use client"
+
+import { useSearchParams } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { ArrowLeft, Calendar, Folder, User, Building2 } from "lucide-react"
+import { ArrowLeft, Calendar, User, Building2, Folder } from "lucide-react"
 import Link from "next/link"
 
 export type PetitionStatus =
@@ -15,7 +18,14 @@ const statusStyles: Record<PetitionStatus, string> = {
   승인됨: "border-blue-200 bg-blue-50 text-blue-700",
   답변완료: "border-green-200 bg-green-50 text-green-700",
   미승인: "border-border bg-secondary text-muted-foreground",
-  반려: "border-red-200 bg-red-50 text-red-700",
+  반려: "border-orange-200 bg-orange-50 text-orange-700",
+}
+
+const referrerMap: Record<string, { href: string; label: string }> = {
+  all: { href: "/", label: "전체 청원" },
+  "in-progress": { href: "/in-progress", label: "진행중" },
+  answered: { href: "/answered", label: "답변완료" },
+  my: { href: "/my-petitions", label: "내 청원" },
 }
 
 interface PetitionDetailHeaderProps {
@@ -35,14 +45,18 @@ export function PetitionDetailHeader({
   date,
   council,
 }: PetitionDetailHeaderProps) {
+  const searchParams = useSearchParams()
+  const fromParam = searchParams.get("from")
+  const back = (fromParam && referrerMap[fromParam]) || referrerMap.all
+
   return (
     <div className="flex flex-col gap-5">
       <Link
-        href="/"
+        href={back.href}
         className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
-        {"전체 청원 목록"}
+        {back.label + " 목록으로"}
       </Link>
 
       <div className="flex flex-col gap-3">
@@ -53,7 +67,6 @@ export function PetitionDetailHeader({
           >
             {status}
           </Badge>
-          <span className="text-xs text-muted-foreground">{category}</span>
         </div>
 
         <h1 className="text-balance text-2xl font-bold tracking-tight text-foreground">

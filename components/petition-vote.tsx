@@ -24,21 +24,37 @@ export function PetitionVote({
   const [userVote, setUserVote] = useState<"for" | "against" | null>(null)
 
   const totalVotes = votesFor + votesAgainst
-  const forPercent = totalVotes > 0 ? Math.round((votesFor / totalVotes) * 100) : 0
+  const forPercent =
+    totalVotes > 0 ? Math.round((votesFor / totalVotes) * 100) : 0
   const againstPercent = totalVotes > 0 ? 100 - forPercent : 0
   const isActive = status === "진행중"
   const isApproved = status === "승인됨" || status === "답변완료"
   const meetsThreshold = votesFor >= threshold
 
   function handleVote(type: "for" | "against") {
-    if (!isActive || userVote) return
+    if (!isActive) return
 
-    if (type === "for") {
-      setVotesFor((v) => v + 1)
+    if (userVote === type) {
+      // Toggle off
+      if (type === "for") setVotesFor((v) => v - 1)
+      else setVotesAgainst((v) => v - 1)
+      setUserVote(null)
+    } else if (userVote === null) {
+      // Fresh vote
+      if (type === "for") setVotesFor((v) => v + 1)
+      else setVotesAgainst((v) => v + 1)
+      setUserVote(type)
     } else {
-      setVotesAgainst((v) => v + 1)
+      // Switch vote
+      if (type === "for") {
+        setVotesFor((v) => v + 1)
+        setVotesAgainst((v) => v - 1)
+      } else {
+        setVotesAgainst((v) => v + 1)
+        setVotesFor((v) => v - 1)
+      }
+      setUserVote(type)
     }
-    setUserVote(type)
   }
 
   return (
@@ -76,14 +92,18 @@ export function PetitionVote({
           </div>
 
           <div className="flex h-3 w-full overflow-hidden rounded-full bg-secondary">
-            <div
-              className="rounded-l-full bg-primary transition-all duration-500"
-              style={{ width: `${forPercent}%` }}
-            />
-            <div
-              className="rounded-r-full bg-muted-foreground/30 transition-all duration-500"
-              style={{ width: `${againstPercent}%` }}
-            />
+            {totalVotes > 0 && (
+              <>
+                <div
+                  className="rounded-l-full bg-primary transition-all duration-500"
+                  style={{ width: `${forPercent}%` }}
+                />
+                <div
+                  className="rounded-r-full bg-muted-foreground/30 transition-all duration-500"
+                  style={{ width: `${againstPercent}%` }}
+                />
+              </>
+            )}
           </div>
 
           <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -100,14 +120,13 @@ export function PetitionVote({
           </div>
         </div>
 
-        {/* Vote buttons (only for active petitions) */}
-        {isActive && (
+        {/* Vote buttons */}
+        {isActive ? (
           <div className="flex items-center gap-3">
             <Button
               onClick={() => handleVote("for")}
-              disabled={!!userVote}
               className={cn(
-                "flex-1",
+                "flex-1 gap-2",
                 userVote === "for"
                   ? "bg-primary text-primary-foreground"
                   : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
@@ -116,22 +135,31 @@ export function PetitionVote({
             >
               <ThumbsUp className="h-4 w-4" />
               {"찬성"}
+              {userVote === "for" && (
+                <span className="text-xs opacity-75">{"(선택됨)"}</span>
+              )}
             </Button>
             <Button
               onClick={() => handleVote("against")}
-              disabled={!!userVote}
               className={cn(
-                "flex-1",
+                "flex-1 gap-2",
                 userVote === "against"
                   ? "bg-foreground text-background"
-                  : ""
+                  : "bg-transparent"
               )}
               variant={userVote === "against" ? "default" : "outline"}
             >
               <ThumbsDown className="h-4 w-4" />
               {"반대"}
+              {userVote === "against" && (
+                <span className="text-xs opacity-75">{"(선택됨)"}</span>
+              )}
             </Button>
           </div>
+        ) : (
+          <p className="text-center text-sm text-muted-foreground">
+            {"투표가 마감되었습니다."}
+          </p>
         )}
 
         {/* Status hint */}

@@ -27,9 +27,10 @@ const statusStyles: Record<PetitionStatus, string> = {
 
 interface PetitionListProps {
   petitions: Petition[]
+  from?: string
 }
 
-export function PetitionList({ petitions }: PetitionListProps) {
+export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
   if (petitions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-card py-20">
@@ -69,7 +70,7 @@ export function PetitionList({ petitions }: PetitionListProps) {
         {petitions.map((petition, index) => (
           <li key={petition.id}>
             <Link
-              href={`/petition/${petition.id}`}
+              href={`/petition/${petition.id}?from=${from}`}
               className={cn(
                 "block transition-colors hover:bg-muted/50",
                 index !== petitions.length - 1 && "border-b border-border"
