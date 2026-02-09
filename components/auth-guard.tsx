@@ -3,16 +3,24 @@
 import type { ReactNode } from "react"
 import { useAuth } from "@/components/auth-provider"
 import { LoginScreen } from "@/components/login-screen"
+import { Loader2 } from "lucide-react"
 
 export function AuthGuard({ children }: { children: ReactNode }) {
   const { loading, user } = useAuth()
 
-  // Show login screen while loading OR when not authenticated
-  // This prevents a blank screen if the /api/auth/me call is slow
+  // Still checking auth — show a neutral spinner, NOT login screen
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  // Auth check done, not logged in
   if (!user) {
     return <LoginScreen />
   }
 
-  // Authenticated: loading is done and user exists
   return <>{children}</>
 }
