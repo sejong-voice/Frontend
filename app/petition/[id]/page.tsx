@@ -134,6 +134,57 @@ const petitionsDB: Record<string, PetitionData> = {
     isAuthor: true,
     isAdmin: false,
   },
+  "2": {
+    id: 2,
+    title: "중앙도서관 24시간 열람실 운영 재개 요청",
+    status: "진행중",
+    category: "학교시설",
+    author: "이수빈",
+    date: "2026.01.28",
+    council: "총학생회",
+    content: `중앙도서관 24시간 열람실 운영 재개를 강력히 요청합니다.
+
+코로나19 이후 운영이 중단된 24시간 열람실이 아직까지 재개되지 않고 있습니다. 시험 기간뿐 아니라 일상적으로 늦은 시간까지 학습이 필요한 학생들이 많으며, 교외 독서실이나 카페를 이용하는 데 따른 추가 비용 부담이 큽니다.
+
+요청 사항:
+1. 중앙도서관 3층 열람실의 24시간 운영 재개
+2. 시험 기간 외에도 상시 운영 체제로 전환
+3. 야간 시간대 보안 인력 배치를 통한 안전 확보
+
+학생들의 학습권 보장을 위해 적극적인 검토를 부탁드립니다.`,
+    votesFor: 245,
+    votesAgainst: 42,
+    threshold: 250,
+    officialResponse: null,
+    comments: [
+      {
+        id: 1,
+        author: "장유진",
+        content: "시험 기간마다 진짜 앉을 데가 없어서 꼭 재개됐으면 좋겠어요.",
+        date: "2026.01.29",
+        isMine: false,
+        replies: [
+          {
+            id: 11,
+            author: "홍태우",
+            content: "맞아요 카페비가 만만치 않죠.",
+            date: "2026.01.29",
+            isMine: false,
+          },
+        ],
+      },
+      {
+        id: 2,
+        author: "오하늘",
+        content: "야간 보안도 같이 요청한 게 좋네요. 안전이 보장돼야 이용하죠.",
+        date: "2026.01.30",
+        isMine: false,
+        replies: [],
+      },
+    ],
+    isAuthor: false,
+    isAdmin: false,
+  },
   "3": {
     id: 3,
     title: "교내 셔틀버스 배차 간격 단축 건의",
@@ -200,6 +251,47 @@ const petitionsDB: Record<string, PetitionData> = {
     isAuthor: false,
     isAdmin: false,
   },
+  "4": {
+    id: 4,
+    title: "계절학기 수강 신청 기간 확대 요청",
+    status: "승인됨",
+    category: "학사제도",
+    author: "최다영",
+    date: "2026.01.22",
+    council: "단과대학 학생회",
+    content: `계절학기 수강 신청 기간의 확대를 요청드립니다.
+
+현재 계절학기 수강 신청 기간이 약 3일로 매우 짧아, 수강 계획을 충분히 세우지 못한 채 신청 기간이 마감되는 경우가 빈번합니다. 특히 재수강이 필요한 학생들의 경우 계절학기가 유일한 기회인 만큼, 충분한 고려 시간이 보장되어야 합니다.
+
+요청 사항:
+1. 수강 신청 기간을 현행 3일에서 최소 7일로 확대
+2. 사전 수강 희망 과목 등록 시스템 도입
+3. 개설 과목 목록의 최소 2주 전 사전 공개`,
+    votesFor: 156,
+    votesAgainst: 42,
+    threshold: 150,
+    officialResponse: null,
+    comments: [
+      {
+        id: 1,
+        author: "송유나",
+        content: "3일은 정말 너무 짧아요. 수강신청 날 서버 터지면 끝이에요.",
+        date: "2026.01.23",
+        isMine: false,
+        replies: [],
+      },
+      {
+        id: 2,
+        author: "문정훈",
+        content: "사전 등록 시스템 있으면 좋겠네요. 다른 학교는 다 있던데.",
+        date: "2026.01.24",
+        isMine: false,
+        replies: [],
+      },
+    ],
+    isAuthor: false,
+    isAdmin: false,
+  },
   "5": {
     id: 5,
     title: "캠퍼스 내 반려동물 동반 출입 허용 건의",
@@ -244,6 +336,235 @@ const petitionsDB: Record<string, PetitionData> = {
         author: "송지호",
         content: "해외 대학 사례를 보면 충분히 가능하다고 봅니다. 지지합니다.",
         date: "2026.01.22",
+        isMine: false,
+        replies: [],
+      },
+    ],
+    isAuthor: false,
+    isAdmin: false,
+  },
+  "6": {
+    id: 6,
+    title: "학생회관 카페테리아 메뉴 다양화 요청",
+    status: "진행중",
+    category: "학교시설",
+    author: "한지우",
+    date: "2026.01.18",
+    council: "총학생회",
+    content: `학생회관 카페테리아 메뉴의 다양화를 요청드립니다.
+
+현재 학생회관 카페테리아에서 판매하는 메뉴가 매우 제한적이며, 특히 채식주의자나 알레르기가 있는 학생들을 위한 메뉴가 거의 없습니다. 매일 비슷한 메뉴 구성으로 인해 많은 학생들이 교외 식당을 이용하고 있어 추가적인 시간과 비용이 발생하고 있습니다.
+
+요청 사항:
+1. 채식/비건 메뉴 상시 운영
+2. 알레르기 유발 식재료 표시 의무화
+3. 월별 신메뉴 도입 및 학생 투표를 통한 메뉴 선정`,
+    votesFor: 134,
+    votesAgainst: 22,
+    threshold: 200,
+    officialResponse: null,
+    comments: [
+      {
+        id: 1,
+        author: "김수현",
+        content: "채식 메뉴 꼭 필요합니다. 매번 도시락 싸오기 힘들어요.",
+        date: "2026.01.19",
+        isMine: false,
+        replies: [],
+      },
+    ],
+    isAuthor: false,
+    isAdmin: false,
+  },
+  "7": {
+    id: 7,
+    title: "장학금 선발 기준 투명성 강화 건의",
+    status: "답변완료",
+    category: "학생복지",
+    author: "윤지서",
+    date: "2026.01.15",
+    council: "총학생회",
+    content: `장학금 선발 기준의 투명성 강화를 건의드립니다.
+
+현재 교내 장학금 선발 과정에서 구체적인 선발 기준과 점수 배분 방식이 공개되지 않아, 탈락 시 사유를 알 수 없어 학생들의 불만이 높습니다.
+
+건의 사항:
+1. 장학금 유형별 선발 기준 및 배점 공개
+2. 선발 결과 발표 시 개인별 점수 확인 시스템 도입
+3. 이의 신청 절차 마련 및 안내`,
+    votesFor: 312,
+    votesAgainst: 66,
+    threshold: 300,
+    officialResponse: {
+      content: `안녕하세요, 총학생회입니다.
+
+장학금 선발 기준 투명성에 관한 청원을 검토하였습니다.
+
+1. 선발 기준 공개: 학생처와 협의하여 2026년 1학기부터 교내 장학금 유형별 선발 기준과 배점을 학교 홈페이지에 공개하기로 하였습니다.
+
+2. 개인별 점수 확인: 시스템 개발이 필요하여 2026년 2학기를 목표로 추진 중입니다.
+
+3. 이의 신청 절차: 기존에도 학생처를 통한 이의 신청이 가능하였으나, 절차가 명확히 안내되지 않았던 점을 개선하여 공지하겠습니다.`,
+      respondent: "제55대 총학생회 복지위원회",
+      date: "2026.02.03 11:00",
+    },
+    comments: [
+      {
+        id: 1,
+        author: "배하은",
+        content: "기준이 공개된다니 정말 다행이에요. 오래 기다렸습니다.",
+        date: "2026.02.03",
+        isMine: false,
+        replies: [],
+      },
+      {
+        id: 2,
+        author: "권도윤",
+        content: "개인별 점수 확인도 빨리 됐으면 좋겠네요.",
+        date: "2026.02.04",
+        isMine: false,
+        replies: [],
+      },
+    ],
+    isAuthor: false,
+    isAdmin: false,
+  },
+  "8": {
+    id: 8,
+    title: "복수전공 학점 인정 범위 확대 요청",
+    status: "진행중",
+    category: "학사제도",
+    author: "강서민",
+    date: "2026.01.12",
+    council: "단과대학 학생회",
+    content: `복수전공 학점 인정 범위의 확대를 요청드립니다.
+
+현재 복수전공 이수 시 전공 간 겹치는 교과목의 학점이 중복 인정되지 않아, 실질적으로 졸업에 필요한 총 이수 학점이 크게 늘어나는 문제가 있습니다.
+
+요청 사항:
+1. 전공 간 유사 교과목의 상호 인정 범위 확대 (현행 6학점 -> 12학점)
+2. 복수전공 학생 대상 통합 교과목 개설
+3. 복수전공 졸업요건의 현실적 조정`,
+    votesFor: 189,
+    votesAgainst: 45,
+    threshold: 250,
+    officialResponse: null,
+    comments: [
+      {
+        id: 1,
+        author: "이도현",
+        content: "복전하면서 졸업이 1년 늦어지는 게 현실이에요. 꼭 개선됐으면.",
+        date: "2026.01.13",
+        isMine: false,
+        replies: [
+          {
+            id: 11,
+            author: "강서민",
+            content: "동감합니다. 많은 분들의 지지가 필요합니다.",
+            date: "2026.01.13",
+            isMine: false,
+          },
+        ],
+      },
+    ],
+    isAuthor: false,
+    isAdmin: false,
+  },
+  "9": {
+    id: 9,
+    title: "공학관 강의실 냉난방 시설 개선 요청",
+    status: "승인됨",
+    category: "학교시설",
+    author: "서준호",
+    date: "2026.01.10",
+    council: "단과대학 학생회",
+    content: `공학관 강의실의 냉난방 시설 개선을 요청드립니다.
+
+공학관 건물의 노후화로 인해 냉난방 시설이 제대로 작동하지 않는 강의실이 다수 있습니다. 특히 겨울철 난방이 되지 않아 패딩을 입고 수업을 듣는 일이 빈번하며, 여름철에는 에어컨이 고장난 채로 방치되는 경우도 있습니다.
+
+요청 사항:
+1. 공학관 전체 강의실 냉난방 시설 점검 및 교체
+2. 시설 고장 시 즉시 보수 체계 구축
+3. 강의실별 온도 개별 조절 시스템 도입`,
+    votesFor: 378,
+    votesAgainst: 43,
+    threshold: 300,
+    officialResponse: null,
+    comments: [
+      {
+        id: 1,
+        author: "양채원",
+        content: "겨울에 공학관 수업은 정말 고역이에요. 빨리 개선됐으면 합니다.",
+        date: "2026.01.11",
+        isMine: false,
+        replies: [],
+      },
+      {
+        id: 2,
+        author: "조민서",
+        content: "작년에도 민원 넣었는데 아무 변화가 없었어요. 이번에는 꼭.",
+        date: "2026.01.11",
+        isMine: false,
+        replies: [
+          {
+            id: 21,
+            author: "서준호",
+            content: "이번엔 청원으로 공식 요청하니까 더 힘이 실릴 거라 믿습니다.",
+            date: "2026.01.12",
+            isMine: false,
+          },
+        ],
+      },
+    ],
+    isAuthor: false,
+    isAdmin: false,
+  },
+  "10": {
+    id: 10,
+    title: "학교 공식 앱 UI/UX 개선 건의",
+    status: "답변완료",
+    category: "기타",
+    author: "임수빈",
+    date: "2026.01.08",
+    council: "총학생회",
+    content: `학교 공식 모바일 앱의 UI/UX 개선을 건의드립니다.
+
+현재 세종대학교 공식 앱은 디자인이 오래되었고, 사용성이 매우 떨어져 대부분의 학생들이 사용을 기피하고 있습니다. 학사 일정 확인, 성적 조회, 수강 신청 등 필수 기능의 접근성이 낮아 학생들이 불편을 겪고 있습니다.
+
+건의 사항:
+1. 모던한 UI 디자인으로 전면 개편
+2. 학사 일정, 성적, 수강신청 등 핵심 기능 메인 화면 배치
+3. 푸시 알림 기능 강화 (수업 변경, 공지사항 등)`,
+    votesFor: 223,
+    votesAgainst: 44,
+    threshold: 200,
+    officialResponse: {
+      content: `안녕하세요, 총학생회입니다.
+
+학교 공식 앱 개선 건의에 대해 전산정보원과 협의한 결과를 안내드립니다.
+
+1. UI 전면 개편: 전산정보원에서 2026년 상반기 중 앱 리뉴얼 프로젝트를 진행할 예정이며, 학생 의견을 반영한 디자인을 적용하겠습니다.
+
+2. 핵심 기능 접근성: 메인 화면에 자주 사용하는 기능의 바로가기를 배치하도록 개선하겠습니다.
+
+3. 푸시 알림: 현재 기술적 검토 중이며, 리뉴얼 시 함께 반영할 계획입니다.`,
+      respondent: "제55대 총학생회 소통위원회",
+      date: "2026.01.28 09:30",
+    },
+    comments: [
+      {
+        id: 1,
+        author: "김하영",
+        content: "드디어 개편 소식이네요. 현재 앱은 정말 쓰기 힘들었거든요.",
+        date: "2026.01.28",
+        isMine: false,
+        replies: [],
+      },
+      {
+        id: 2,
+        author: "이건우",
+        content: "학생 의견 반영한다고 하니 기대됩니다. 설문조사 해주시면 좋겠어요.",
+        date: "2026.01.29",
         isMine: false,
         replies: [],
       },
