@@ -3,6 +3,8 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { LogIn } from "lucide-react"
 
 const navItems = [
   { label: "전체 청원", href: "/" },
@@ -27,22 +29,30 @@ export function SiteHeader() {
             {"세종대 신문고"}
           </span>
         </Link>
-        <nav className="hidden items-center gap-1 md:flex" aria-label="메인 메뉴">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                pathname === item.href
-                  ? "bg-accent text-accent-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {item.label}
+        <div className="flex items-center gap-4">
+          <nav className="hidden items-center gap-1 md:flex" aria-label="메인 메뉴">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  pathname === item.href
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/login" className="gap-1.5 text-muted-foreground">
+              <LogIn className="h-4 w-4" />
+              <span className="hidden sm:inline">{"로그인"}</span>
             </Link>
-          ))}
-        </nav>
+          </Button>
+        </div>
       </div>
     </header>
   )
