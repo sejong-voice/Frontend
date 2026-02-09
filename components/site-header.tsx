@@ -1,10 +1,12 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { LogIn } from "lucide-react"
+import { LogOut } from "lucide-react"
+import { useAuth } from "@/components/auth-provider"
 
 const navItems = [
   { label: "전체 청원", href: "/" },
@@ -15,22 +17,29 @@ const navItems = [
 
 export function SiteHeader() {
   const pathname = usePathname()
+  const { logout } = useAuth()
 
   return (
     <header className="border-b border-border bg-card">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
+      <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
         <Link href="/" className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
-            <span className="text-sm font-bold text-primary-foreground">
-              {"세"}
-            </span>
-          </div>
+          <Image
+            src="/sejong-logo.png"
+            alt="세종대학교 로고"
+            width={32}
+            height={32}
+            className="rounded-md"
+          />
           <span className="text-lg font-semibold tracking-tight text-foreground">
-            {"세종대 신문고"}
+            {"세종 신문고"}
           </span>
         </Link>
+
         <div className="flex items-center gap-4">
-          <nav className="hidden items-center gap-1 md:flex" aria-label="메인 메뉴">
+          <nav
+            className="hidden items-center gap-1 md:flex"
+            aria-label="메인 메뉴"
+          >
             {navItems.map((item) => (
               <Link
                 key={item.href}
@@ -46,11 +55,14 @@ export function SiteHeader() {
               </Link>
             ))}
           </nav>
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/login" className="gap-1.5 text-muted-foreground">
-              <LogIn className="h-4 w-4" />
-              <span className="hidden sm:inline">{"로그인"}</span>
-            </Link>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={logout}
+            className="gap-1.5 text-muted-foreground hover:text-foreground"
+          >
+            <LogOut className="h-4 w-4" />
+            <span className="hidden sm:inline">{"로그아웃"}</span>
           </Button>
         </div>
       </div>

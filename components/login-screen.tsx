@@ -1,13 +1,9 @@
+"use client"
+
 import Image from "next/image"
 import { LoginForm } from "@/components/login-form"
-import type { Metadata } from "next"
 
-export const metadata: Metadata = {
-  title: "로그인 - 세종대 신문고",
-  description: "세종대학교 재학생 인증 로그인",
-}
-
-export default function LoginPage() {
+export function LoginScreen() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
@@ -23,7 +19,7 @@ export default function LoginPage() {
           />
           <div className="flex flex-col items-center gap-1.5">
             <h1 className="text-xl font-bold tracking-tight text-foreground">
-              {"세종대 신문고"}
+              {"세종 신문고"}
             </h1>
             <p className="text-sm text-muted-foreground">
               {"세종대학교 재학생 인증 후 이용 가능합니다."}

@@ -7,7 +7,6 @@ import {
   useCallback,
   type ReactNode,
 } from "react"
-import { useRouter } from "next/navigation"
 
 interface AuthState {
   isLoggedIn: boolean
@@ -23,7 +22,6 @@ interface AuthContextValue extends AuthState {
 const AuthContext = createContext<AuthContextValue | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const router = useRouter()
   const [auth, setAuth] = useState<AuthState>({
     isLoggedIn: false,
     studentId: null,
@@ -36,8 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     setAuth({ isLoggedIn: false, studentId: null, name: null })
-    router.push("/login")
-  }, [router])
+  }, [])
 
   return (
     <AuthContext.Provider value={{ ...auth, login, logout }}>

@@ -1,21 +1,23 @@
 import React from "react"
-import type { Metadata, Viewport } from 'next'
-import { Noto_Sans_KR } from 'next/font/google'
+import type { Metadata, Viewport } from "next"
+import { Noto_Sans_KR } from "next/font/google"
+import { AuthProvider } from "@/components/auth-provider"
+import { AuthGuard } from "@/components/auth-guard"
 
-import './globals.css'
+import "./globals.css"
 
 const _notoSansKR = Noto_Sans_KR({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 })
 
 export const metadata: Metadata = {
-  title: '세종대 신문고',
-  description: '세종대학교 공식 학생 청원 서비스',
+  title: "세종 신문고",
+  description: "세종대학교 공식 학생 청원 서비스",
 }
 
 export const viewport: Viewport = {
-  themeColor: '#9B2335',
+  themeColor: "#9B2335",
 }
 
 export default function RootLayout({
@@ -25,7 +27,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko">
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        <AuthProvider>
+          <AuthGuard>{children}</AuthGuard>
+        </AuthProvider>
+      </body>
     </html>
   )
 }

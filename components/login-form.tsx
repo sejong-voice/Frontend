@@ -1,15 +1,13 @@
 "use client"
 
-import React from "react"
-
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import React, { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
+import { useAuth } from "@/components/auth-provider"
 
 export function LoginForm() {
-  const router = useRouter()
+  const { login } = useAuth()
   const [studentId, setStudentId] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -26,15 +24,16 @@ export function LoginForm() {
 
     setIsLoading(true)
 
-    // Simulate API call — in production this would call Sejong AUTH API
+    // Simulate Sejong AUTH API call
     setTimeout(() => {
-      // Demo: any input works for success flow
       if (studentId === "error") {
         setError("아이디 또는 비밀번호가 올바르지 않습니다.")
         setIsLoading(false)
         return
       }
-      router.push("/")
+      // On success, update auth state — AuthGuard will render the app
+      login(studentId, "홍길동")
+      setIsLoading(false)
     }, 1200)
   }
 
@@ -45,7 +44,7 @@ export function LoginForm() {
           htmlFor="student-id"
           className="text-sm font-medium text-foreground"
         >
-          {"학번 (아이디)"}
+          {"학번"}
         </label>
         <Input
           id="student-id"
