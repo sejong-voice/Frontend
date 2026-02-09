@@ -1,14 +1,18 @@
 "use client"
 
-import React from "react"
-
+import type { ReactNode } from "react"
 import { useAuth } from "@/components/auth-provider"
 import { LoginScreen } from "@/components/login-screen"
 
-export function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { isLoggedIn } = useAuth()
+export function AuthGuard({ children }: { children: ReactNode }) {
+  const { loading, user } = useAuth()
 
-  if (!isLoggedIn) {
+  // SSR/hydration-safe: always render neutral skeleton first
+  if (loading) {
+    return <div className="min-h-screen bg-background" />
+  }
+
+  if (!user) {
     return <LoginScreen />
   }
 

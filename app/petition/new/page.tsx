@@ -1,4 +1,4 @@
-import { SiteHeader } from "@/components/site-header"
+import { ConnectedHeader as SiteHeader } from "@/components/connected-header"
 import { PetitionForm } from "@/components/petition-form"
 
 export default function NewPetitionPage() {

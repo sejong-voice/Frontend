@@ -1,19 +1,21 @@
 "use client"
 
-import React, { useState } from "react"
+import React from "react"
+
+import { useState } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { useAuth } from "@/components/auth-provider"
 
 export function LoginForm() {
-  const { login } = useAuth()
+  const { refreshMe } = useAuth()
   const [studentId, setStudentId] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError("")
 
@@ -24,17 +26,28 @@ export function LoginForm() {
 
     setIsLoading(true)
 
-    // Simulate Sejong AUTH API call
-    setTimeout(() => {
-      if (studentId === "error") {
-        setError("아이디 또는 비밀번호가 올바르지 않습니다.")
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentId, password }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        setError(data.error || "로그인에 실패했습니다.")
         setIsLoading(false)
         return
       }
-      // On success, update auth state — AuthGuard will render the app
-      login(studentId, "홍길동")
+
+      // Cookie is set by the server; refresh auth state
+      await refreshMe()
+    } catch {
+      setError("서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.")
+    } finally {
       setIsLoading(false)
-    }, 1200)
+    }
   }
 
   return (
@@ -103,6 +116,10 @@ export function LoginForm() {
           {error}
         </p>
       )}
+
+      <p className="text-center text-xs text-muted-foreground">
+        {"테스트 계정: 20210001 / 1234 (학생) | admin / admin (관리자)"}
+      </p>
     </form>
   )
 }

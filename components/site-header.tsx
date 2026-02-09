@@ -5,8 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { LogOut } from "lucide-react"
-import { useAuth } from "@/components/auth-provider"
+import { LogOut, User } from "lucide-react"
 
 const navItems = [
   { label: "전체 청원", href: "/" },
@@ -15,9 +14,13 @@ const navItems = [
   { label: "내 청원", href: "/my-petitions" },
 ]
 
-export function SiteHeader() {
+interface SiteHeaderProps {
+  userName?: string | null
+  onLogout?: () => void
+}
+
+export function SiteHeader({ userName, onLogout }: SiteHeaderProps) {
   const pathname = usePathname()
-  const { logout } = useAuth()
 
   return (
     <header className="border-b border-border bg-card">
@@ -55,15 +58,24 @@ export function SiteHeader() {
               </Link>
             ))}
           </nav>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={logout}
-            className="gap-1.5 text-muted-foreground hover:text-foreground"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">{"로그아웃"}</span>
-          </Button>
+
+          {userName && (
+            <div className="flex items-center gap-2">
+              <span className="hidden items-center gap-1 text-sm text-muted-foreground sm:flex">
+                <User className="h-3.5 w-3.5" />
+                {userName}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onLogout}
+                className="gap-1.5 text-muted-foreground hover:text-foreground"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">{"로그아웃"}</span>
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </header>

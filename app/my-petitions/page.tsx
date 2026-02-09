@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import Link from "next/link"
-import { SiteHeader } from "@/components/site-header"
+import { ConnectedHeader as SiteHeader } from "@/components/connected-header"
 import { FilterBar } from "@/components/filter-bar"
 import { MyPetitionList } from "@/components/my-petition-list"
 import { Button } from "@/components/ui/button"

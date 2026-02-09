@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { SiteHeader } from "@/components/site-header"
+import { ConnectedHeader } from "@/components/connected-header"
 import { PageHeader } from "@/components/page-header"
 import { FilterBar } from "@/components/filter-bar"
 import {
@@ -144,7 +144,7 @@ export default function Page() {
 
   return (
     <div className="min-h-screen bg-background">
-      <SiteHeader />
+      <ConnectedHeader />
       <main className="mx-auto max-w-5xl px-6 py-8">
         <div className="flex flex-col gap-8">
           <PageHeader stats={stats} />

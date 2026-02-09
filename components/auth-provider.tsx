@@ -9,64 +9,62 @@ import {
   type ReactNode,
 } from "react"
 
-const AUTH_STORAGE_KEY = "sejong-sinmungo-auth"
-
-interface AuthState {
-  isLoggedIn: boolean
-  studentId: string | null
-  name: string | null
+export interface AuthUser {
+  id: string
+  name: string
+  role: "student" | "admin"
 }
 
-interface AuthContextValue extends AuthState {
-  login: (studentId: string, name: string) => void
-  logout: () => void
+interface AuthContextValue {
+  loading: boolean
+  user: AuthUser | null
+  isAdmin: boolean
+  refreshMe: () => Promise<void>
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
-function getStoredAuth(): AuthState {
-  if (typeof window === "undefined") {
-    return { isLoggedIn: false, studentId: null, name: null }
-  }
-  try {
-    const stored = sessionStorage.getItem(AUTH_STORAGE_KEY)
-    if (stored) {
-      const parsed = JSON.parse(stored) as AuthState
-      if (parsed.isLoggedIn && parsed.studentId) {
-        return parsed
-      }
-    }
-  } catch {
-    // ignore parse errors
-  }
-  return { isLoggedIn: false, studentId: null, name: null }
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [auth, setAuth] = useState<AuthState>(getStoredAuth)
+  const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<AuthUser | null>(null)
 
-  useEffect(() => {
+  const refreshMe = useCallback(async () => {
     try {
-      if (auth.isLoggedIn) {
-        sessionStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth))
+      const res = await fetch("/api/auth/me", { credentials: "include" })
+      if (res.ok) {
+        const data = (await res.json()) as AuthUser
+        setUser(data)
       } else {
-        sessionStorage.removeItem(AUTH_STORAGE_KEY)
+        setUser(null)
       }
     } catch {
-      // sessionStorage unavailable
+      setUser(null)
+    } finally {
+      setLoading(false)
     }
-  }, [auth])
-
-  const login = useCallback((studentId: string, name: string) => {
-    setAuth({ isLoggedIn: true, studentId, name })
   }, [])
 
-  const logout = useCallback(() => {
-    setAuth({ isLoggedIn: false, studentId: null, name: null })
+  const logout = useCallback(async () => {
+    try {
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      })
+    } catch {
+      // ignore
+    }
+    setUser(null)
   }, [])
+
+  useEffect(() => {
+    refreshMe()
+  }, [refreshMe])
+
+  const isAdmin = user?.role === "admin"
 
   return (
-    <AuthContext.Provider value={{ ...auth, login, logout }}>
+    <AuthContext.Provider value={{ loading, user, isAdmin, refreshMe, logout }}>
       {children}
     </AuthContext.Provider>
   )

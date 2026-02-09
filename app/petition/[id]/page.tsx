@@ -1,7 +1,7 @@
 "use client"
 
 import { use } from "react"
-import { SiteHeader } from "@/components/site-header"
+import { ConnectedHeader } from "@/components/connected-header"
 import { PetitionDetailHeader } from "@/components/petition-detail-header"
 import type { PetitionStatus } from "@/components/petition-detail-header"
 import { PetitionBody } from "@/components/petition-body"
@@ -11,6 +11,7 @@ import { PetitionOfficialResponse } from "@/components/petition-official-respons
 import { PetitionComments, type Comment } from "@/components/petition-comments"
 import { PetitionActions } from "@/components/petition-actions"
 import { Separator } from "@/components/ui/separator"
+
 
 // --- Mock data ---
 
@@ -275,7 +276,7 @@ export default function PetitionDetailPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <SiteHeader />
+      <ConnectedHeader />
       <main className="mx-auto max-w-3xl px-6 py-8">
         <div className="flex flex-col gap-6">
           <PetitionDetailHeader
