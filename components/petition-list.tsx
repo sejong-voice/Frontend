@@ -1,3 +1,4 @@
+import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { MessageSquare, Vote } from "lucide-react"
@@ -66,7 +67,7 @@ export function PetitionList({ petitions }: PetitionListProps) {
       <ul role="list">
         {petitions.map((petition, index) => (
           <li key={petition.id}>
-            <a
+            <Link
               href={`/petition/${petition.id}`}
               className={cn(
                 "block transition-colors hover:bg-muted/50",
@@ -147,7 +148,7 @@ export function PetitionList({ petitions }: PetitionListProps) {
                   </div>
                 </div>
               </div>
-            </a>
+            </Link>
           </li>
         ))}
       </ul>
