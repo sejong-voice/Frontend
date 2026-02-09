@@ -1,4 +1,3 @@
-import { cookies } from "next/headers"
 import { NextResponse } from "next/server"
 
 // Mock user database
@@ -33,34 +32,29 @@ export async function POST(request: Request) {
     )
   }
 
-  // Create a session id (mock)
-  const sid = `sid_${studentId}_${Date.now()}`
-
-  const cookieStore = await cookies()
-  cookieStore.set("sid", sid, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 4, // 4 hours
-  })
-
-  // Store session data in a cookie for the mock (in production this would be server-side session store)
-  cookieStore.set(
-    "session_data",
-    JSON.stringify({ id: studentId, name: user.name, role: user.role }),
-    {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 4,
-    }
-  )
-
-  return NextResponse.json({
+  const sessionData = JSON.stringify({
     id: studentId,
     name: user.name,
     role: user.role,
   })
+
+  const isProduction = process.env.NODE_ENV === "production"
+  const cookieOptions = `HttpOnly; Path=/; SameSite=Lax; Max-Age=${60 * 60 * 4}${isProduction ? "; Secure" : ""}`
+
+  const response = NextResponse.json({
+    id: studentId,
+    name: user.name,
+    role: user.role,
+  })
+
+  response.headers.append(
+    "Set-Cookie",
+    `sid=sid_${studentId}_${Date.now()}; ${cookieOptions}`
+  )
+  response.headers.append(
+    "Set-Cookie",
+    `session_data=${encodeURIComponent(sessionData)}; ${cookieOptions}`
+  )
+
+  return response
 }
