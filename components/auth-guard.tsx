@@ -7,6 +7,8 @@ import { LoginScreen } from "@/components/login-screen"
 export function AuthGuard({ children }: { children: ReactNode }) {
   const { loading, user } = useAuth()
 
+  console.log("[v0] AuthGuard render: loading=", loading, "user=", user)
+
   // SSR/hydration-safe: always render neutral skeleton first
   if (loading) {
     return <div className="min-h-screen bg-background" />

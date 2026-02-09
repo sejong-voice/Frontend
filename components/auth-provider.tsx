@@ -30,15 +30,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
 
   const refreshMe = useCallback(async () => {
+    console.log("[v0] refreshMe: start")
     try {
       const res = await fetch("/api/auth/me", { credentials: "include" })
+      console.log("[v0] refreshMe: /api/auth/me status", res.status)
       if (res.ok) {
         const data = (await res.json()) as AuthUser
+        console.log("[v0] refreshMe: user data", data)
         setUser(data)
       } else {
+        const errBody = await res.text()
+        console.log("[v0] refreshMe: not ok, body:", errBody)
         setUser(null)
       }
-    } catch {
+    } catch (err) {
+      console.log("[v0] refreshMe: error", err)
       setUser(null)
     } finally {
       setLoading(false)

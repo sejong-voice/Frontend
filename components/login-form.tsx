@@ -27,6 +27,7 @@ export function LoginForm() {
     setIsLoading(true)
 
     try {
+      console.log("[v0] LoginForm: submitting login", { studentId })
       const res = await fetch("/api/auth/login", {
         method: "POST",
         credentials: "include",
@@ -34,16 +35,22 @@ export function LoginForm() {
         body: JSON.stringify({ studentId, password }),
       })
 
+      console.log("[v0] LoginForm: login response status", res.status)
+      const data = await res.json()
+      console.log("[v0] LoginForm: login response data", data)
+
       if (!res.ok) {
-        const data = await res.json()
         setError(data.error || "로그인에 실패했습니다.")
         setIsLoading(false)
         return
       }
 
       // Cookie is set by the server; refresh auth state
+      console.log("[v0] LoginForm: calling refreshMe")
       await refreshMe()
-    } catch {
+      console.log("[v0] LoginForm: refreshMe completed")
+    } catch (err) {
+      console.log("[v0] LoginForm: error", err)
       setError("서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.")
     } finally {
       setIsLoading(false)
