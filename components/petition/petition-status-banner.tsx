@@ -6,7 +6,7 @@ import {
   MessageSquareText,
   AlertCircle,
 } from "lucide-react"
-import type { PetitionStatus } from "@/components/petition-detail-header"
+import type { PetitionStatus } from "@/components/petition/petition-detail-header"
 
 interface PetitionStatusBannerProps {
   status: PetitionStatus

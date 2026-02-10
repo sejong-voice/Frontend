@@ -2,12 +2,12 @@
 
 import { useState, useMemo } from "react"
 import Link from "next/link"
-import { ConnectedHeader as SiteHeader } from "@/components/connected-header"
-import { FilterBar } from "@/components/filter-bar"
-import { MyPetitionList } from "@/components/my-petition-list"
+import { ConnectedHeader as SiteHeader } from "@/components/layout/connected-header"
+import { FilterBar } from "@/components/petition/filter-bar"
+import { MyPetitionList } from "@/components/petition/my-petition-list"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
-import type { Petition } from "@/components/petition-list"
+import type { Petition } from "@/components/petition/petition-list"
 
 const myPetitions: Petition[] = [
   {

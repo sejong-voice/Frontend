@@ -1,17 +1,17 @@
 "use client"
 
 import { use } from "react"
-import { ConnectedHeader } from "@/components/connected-header"
-import { PetitionDetailHeader } from "@/components/petition-detail-header"
-import type { PetitionStatus } from "@/components/petition-detail-header"
-import { PetitionBody } from "@/components/petition-body"
-import { PetitionVote } from "@/components/petition-vote"
-import { PetitionStatusBanner } from "@/components/petition-status-banner"
-import { PetitionOfficialResponse } from "@/components/petition-official-response"
-import { PetitionComments, type Comment } from "@/components/petition-comments"
-import { PetitionActions } from "@/components/petition-actions"
+import { ConnectedHeader } from "@/components/layout/connected-header"
+import { PetitionDetailHeader } from "@/components/petition/petition-detail-header"
+import type { PetitionStatus } from "@/components/petition/petition-detail-header"
+import { PetitionBody } from "@/components/petition/petition-body"
+import { PetitionVote } from "@/components/petition/petition-vote"
+import { PetitionStatusBanner } from "@/components/petition/petition-status-banner"
+import { PetitionOfficialResponse } from "@/components/petition/petition-official-response"
+import { PetitionComments, type Comment } from "@/components/petition/petition-comments"
+import { PetitionActions } from "@/components/petition/petition-actions"
 import { Separator } from "@/components/ui/separator"
-import { useAuth } from "@/components/auth-provider"
+import { useAuth } from "@/components/auth/auth-provider"
 
 
 // --- Mock data ---
@@ -302,7 +302,7 @@ const petitionsDB: Record<string, PetitionData> = {
     council: "총학생회",
     content: `캠퍼스 내 반려동물 동반 출입을 허용해주실 것을 건의드립니다.
 
-최근 반려동물을 키우는 학생들이 증가하고 있으며, 해외 유수 대학에서는 이미 캠퍼스 내 반려동물 동반을 허용하고 있습니다. 반려동물과 함께하는 캠퍼스 생활은 학생들의 정서적 안정에 큰 도움이 될 수 있습니다.
+최근 반려동물을 키우는 학생들이 증가하고 있으며, 해외 유수 대학에서는 이미 캠퍼스 내 반려동물 동반을 허용하고 있습니다. 반려동물과 함께하는 캠퍼스 생활은 학생들의 정서적 안정에 큰 도움이 될 수 있���니다.
 
 건의 사항:
 1. 캠퍼스 야외 공간(잔디광장, 산책로 등)에서의 반려동물 동반 허용

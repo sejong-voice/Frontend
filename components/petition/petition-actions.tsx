@@ -11,7 +11,7 @@ import {
   FileText,
   Send,
 } from "lucide-react"
-import type { PetitionStatus } from "@/components/petition-detail-header"
+import type { PetitionStatus } from "@/components/petition/petition-detail-header"
 
 interface PetitionActionsProps {
   status: PetitionStatus

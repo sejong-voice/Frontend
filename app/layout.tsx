@@ -1,8 +1,8 @@
 import React from "react"
 import type { Metadata, Viewport } from "next"
 import { Noto_Sans_KR } from "next/font/google"
-import { AuthProvider } from "@/components/auth-provider"
-import { AuthGuard } from "@/components/auth-guard"
+import { AuthProvider } from "@/components/auth/auth-provider"
+import { AuthGuard } from "@/components/auth/auth-guard"
 
 import "./globals.css"
 

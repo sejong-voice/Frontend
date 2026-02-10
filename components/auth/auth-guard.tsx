@@ -1,8 +1,8 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { useAuth } from "@/components/auth-provider"
-import { LoginScreen } from "@/components/login-screen"
+import { useAuth } from "@/components/auth/auth-provider"
+import { LoginScreen } from "@/components/auth/login-screen"
 import { Loader2 } from "lucide-react"
 
 export function AuthGuard({ children }: { children: ReactNode }) {

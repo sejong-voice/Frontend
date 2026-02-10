@@ -1,14 +1,14 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { ConnectedHeader } from "@/components/connected-header"
-import { PageHeader } from "@/components/page-header"
-import { FilterBar } from "@/components/filter-bar"
+import { ConnectedHeader } from "@/components/layout/connected-header"
+import { PageHeader } from "@/components/layout/page-header"
+import { FilterBar } from "@/components/petition/filter-bar"
 import {
   PetitionList,
   type Petition,
   type PetitionCategory,
-} from "@/components/petition-list"
+} from "@/components/petition/petition-list"
 
 const petitions: Petition[] = [
   {

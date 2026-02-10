@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { ThumbsUp, ThumbsDown, CheckCircle2, Info } from "lucide-react"
-import type { PetitionStatus } from "@/components/petition-detail-header"
+import type { PetitionStatus } from "@/components/petition/petition-detail-header"
 
 interface PetitionVoteProps {
   status: PetitionStatus

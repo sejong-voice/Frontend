@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { MessageSquare, Vote, Pencil, Trash2 } from "lucide-react"
-import type { Petition, PetitionStatus } from "@/components/petition-list"
+import type { Petition, PetitionStatus } from "@/components/petition/petition-list"
 
 const statusStyles: Record<PetitionStatus, string> = {
   진행중: "border-primary/30 bg-accent text-accent-foreground",

@@ -1,7 +1,7 @@
 "use client"
 
-import { useAuth } from "@/components/auth-provider"
-import { SiteHeader } from "@/components/site-header"
+import { useAuth } from "@/components/auth/auth-provider"
+import { SiteHeader } from "@/components/layout/site-header"
 
 /**
  * Thin wrapper that reads auth context and passes user info

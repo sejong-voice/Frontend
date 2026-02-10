@@ -1,5 +1,5 @@
-import { ConnectedHeader as SiteHeader } from "@/components/connected-header"
-import { PetitionForm } from "@/components/petition-form"
+import { ConnectedHeader as SiteHeader } from "@/components/layout/connected-header"
+import { PetitionForm } from "@/components/petition/petition-form"
 
 export default function NewPetitionPage() {
   return (
