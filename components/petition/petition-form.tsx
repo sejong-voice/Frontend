@@ -13,7 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Info } from "lucide-react"
+import { Info, User } from "lucide-react"
+import { useAuth } from "@/components/auth/auth-provider"
 
 const categories = ["학사제도", "학교시설", "학생복지", "기타"] as const
 const councils = [
@@ -31,6 +32,7 @@ const MAX_CONTENT_LENGTH = 2000
 
 export function PetitionForm() {
   const router = useRouter()
+  const { user } = useAuth()
   const [category, setCategory] = useState<string>("")
   const [council, setCouncil] = useState<string>("")
   const [title, setTitle] = useState("")
@@ -50,6 +52,14 @@ export function PetitionForm() {
 
   return (
     <div className="flex flex-col gap-8">
+      {/* Author info */}
+      <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-3">
+        <User className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm text-muted-foreground">{"작성자"}</span>
+        <span className="text-sm font-medium text-foreground">{user?.id}</span>
+        <span className="text-xs text-muted-foreground">{"(게시 시 익명 처리됩니다)"}</span>
+      </div>
+
       {/* Notice banner */}
       <div className="flex items-start gap-3 rounded-lg border border-border bg-muted/50 px-4 py-3.5">
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />

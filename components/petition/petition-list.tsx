@@ -13,7 +13,7 @@ export interface Petition {
   title: string
   comments: number
   votes: number
-  author: string
+  studentId: string
   date: string
 }
 
@@ -44,7 +44,7 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-card">
       {/* Desktop table header */}
-      <div className="hidden border-b border-border bg-secondary/50 px-6 py-3 md:grid md:grid-cols-[100px_80px_1fr_140px_100px_100px]  md:items-center md:gap-4">
+      <div className="hidden border-b border-border bg-secondary/50 px-6 py-3 md:grid md:grid-cols-[100px_80px_1fr_140px_100px]  md:items-center md:gap-4">
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           {"상태"}
         </span>
@@ -56,9 +56,6 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
         </span>
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           {"참여"}
-        </span>
-        <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          {"작성자"}
         </span>
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground text-right">
           {"작성일"}
@@ -77,7 +74,7 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
               )}
             >
               {/* Desktop row */}
-              <div className="hidden px-6 py-4 md:grid md:grid-cols-[100px_80px_1fr_140px_100px_100px] md:items-center md:gap-4">
+              <div className="hidden px-6 py-4 md:grid md:grid-cols-[100px_80px_1fr_140px_100px] md:items-center md:gap-4">
                 <div>
                   <Badge
                     variant="outline"
@@ -105,9 +102,6 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
                     {petition.comments}
                   </span>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {petition.author}
-                </span>
                 <span className="text-right text-xs text-muted-foreground">
                   {petition.date}
                 </span>
@@ -143,11 +137,9 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
                       {petition.comments}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>{petition.author}</span>
-                    <span>{"·"}</span>
-                    <span>{petition.date}</span>
-                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {petition.date}
+                  </span>
                 </div>
               </div>
             </Link>

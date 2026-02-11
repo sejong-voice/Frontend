@@ -17,7 +17,7 @@ const myPetitions: Petition[] = [
     title: "졸업요건 중 영어 인증 기준 완화 요청",
     comments: 24,
     votes: 312,
-    author: "김*현",
+    studentId: "20210001",
     date: "2026.02.01",
   },
   {
@@ -27,7 +27,7 @@ const myPetitions: Petition[] = [
     title: "계절학기 수강 신청 기간 확대 요청",
     comments: 12,
     votes: 198,
-    author: "김*현",
+    studentId: "20210001",
     date: "2026.01.22",
   },
   {
@@ -37,7 +37,7 @@ const myPetitions: Petition[] = [
     title: "기숙사 외박 신청 절차 간소화 요청",
     comments: 3,
     votes: 0,
-    author: "김*현",
+    studentId: "20210001",
     date: "2026.02.05",
   },
   {
@@ -47,7 +47,7 @@ const myPetitions: Petition[] = [
     title: "정보관 PC실 모니터 교체 건의",
     comments: 9,
     votes: 145,
-    author: "김*현",
+    studentId: "20210001",
     date: "2026.01.14",
   },
   {
@@ -57,7 +57,7 @@ const myPetitions: Petition[] = [
     title: "교내 자판기 제품 종류 확대 건의",
     comments: 2,
     votes: 0,
-    author: "김*현",
+    studentId: "20210001",
     date: "2026.01.05",
   },
 ]

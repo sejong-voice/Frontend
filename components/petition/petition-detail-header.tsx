@@ -28,11 +28,16 @@ const referrerMap: Record<string, { href: string; label: string }> = {
   my: { href: "/my-petitions", label: "내 청원" },
 }
 
+function maskStudentId(id: string): string {
+  if (id.length <= 3) return id
+  return id.slice(0, -3) + "***"
+}
+
 interface PetitionDetailHeaderProps {
   title: string
   status: PetitionStatus
   category: string
-  author: string
+  studentId: string
   date: string
   council: string
 }
@@ -41,7 +46,7 @@ export function PetitionDetailHeader({
   title,
   status,
   category,
-  author,
+  studentId,
   date,
   council,
 }: PetitionDetailHeaderProps) {
@@ -76,7 +81,7 @@ export function PetitionDetailHeader({
         <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <User className="h-3.5 w-3.5" />
-            {author}
+            {"익명 (" + maskStudentId(studentId) + ")"}
           </span>
           <span className="flex items-center gap-1.5">
             <Calendar className="h-3.5 w-3.5" />

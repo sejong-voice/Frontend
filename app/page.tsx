@@ -18,7 +18,7 @@ const petitions: Petition[] = [
     title: "졸업요건 중 영어 인증 기준 완화 요청",
     comments: 24,
     votes: 312,
-    author: "김*현",
+    studentId: "20210001",
     date: "2026.02.01",
   },
   {
@@ -28,7 +28,7 @@ const petitions: Petition[] = [
     title: "중앙도서관 24시간 열람실 운영 재개 요청",
     comments: 18,
     votes: 287,
-    author: "이*수",
+    studentId: "20220315",
     date: "2026.01.28",
   },
   {
@@ -38,7 +38,7 @@ const petitions: Petition[] = [
     title: "교내 셔틀버스 배차 간격 단축 건의",
     comments: 31,
     votes: 456,
-    author: "박*진",
+    studentId: "20190782",
     date: "2026.01.25",
   },
   {
@@ -48,7 +48,7 @@ const petitions: Petition[] = [
     title: "계절학기 수강 신청 기간 확대 요청",
     comments: 12,
     votes: 198,
-    author: "최*영",
+    studentId: "20200456",
     date: "2026.01.22",
   },
   {
@@ -58,7 +58,7 @@ const petitions: Petition[] = [
     title: "캠퍼스 내 반려동물 동반 출입 허용 건의",
     comments: 45,
     votes: 89,
-    author: "정*아",
+    studentId: "20230198",
     date: "2026.01.20",
   },
   {
@@ -68,7 +68,7 @@ const petitions: Petition[] = [
     title: "학생회관 카페테리아 메뉴 다양화 요청",
     comments: 8,
     votes: 156,
-    author: "한*우",
+    studentId: "20211034",
     date: "2026.01.18",
   },
   {
@@ -78,7 +78,7 @@ const petitions: Petition[] = [
     title: "장학금 선발 기준 투명성 강화 건의",
     comments: 22,
     votes: 378,
-    author: "윤*서",
+    studentId: "20180523",
     date: "2026.01.15",
   },
   {
@@ -88,7 +88,7 @@ const petitions: Petition[] = [
     title: "복수전공 학점 인정 범위 확대 요청",
     comments: 15,
     votes: 234,
-    author: "강*민",
+    studentId: "20200891",
     date: "2026.01.12",
   },
   {
@@ -98,7 +98,7 @@ const petitions: Petition[] = [
     title: "공학관 강의실 냉난방 시설 개선 요청",
     comments: 27,
     votes: 421,
-    author: "서*호",
+    studentId: "20210667",
     date: "2026.01.10",
   },
   {
@@ -108,7 +108,7 @@ const petitions: Petition[] = [
     title: "학교 공식 앱 UI/UX 개선 건의",
     comments: 19,
     votes: 267,
-    author: "임*빈",
+    studentId: "20190244",
     date: "2026.01.08",
   },
   {
@@ -118,7 +118,7 @@ const petitions: Petition[] = [
     title: "학생회비 사용 내역 분기별 공개 의무화 요청",
     comments: 4,
     votes: 373,
-    author: "한*준",
+    studentId: "20170412",
     date: "2026.01.03",
   },
 ]

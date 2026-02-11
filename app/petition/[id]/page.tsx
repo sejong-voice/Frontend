@@ -21,7 +21,7 @@ interface PetitionData {
   title: string
   status: PetitionStatus
   category: string
-  author: string
+  studentId: string
   date: string
   council: string
   content: string
@@ -44,7 +44,7 @@ const petitionsDB: Record<string, PetitionData> = {
     title: "졸업요건 중 영어 인증 기준 완화 요청",
     status: "진행중",
     category: "학사제도",
-    author: "김도현",
+    studentId: "20210001",
     date: "2026.02.01",
     council: "총학생회",
     content: `안녕하세요. 본 청원은 현행 졸업요건 중 영어 인증 기준에 대한 완화를 요청드리기 위해 작성합니다.
@@ -139,7 +139,7 @@ const petitionsDB: Record<string, PetitionData> = {
     title: "중앙도서관 24시간 열람실 운영 재개 요청",
     status: "진행중",
     category: "학교시설",
-    author: "이수빈",
+    studentId: "20220315",
     date: "2026.01.28",
     council: "총학생회",
     content: `중앙도서관 24시간 열람실 운영 재개를 강력히 요청합니다.
@@ -190,7 +190,7 @@ const petitionsDB: Record<string, PetitionData> = {
     title: "교내 셔틀버스 배차 간격 단축 건의",
     status: "답변완료",
     category: "학생복지",
-    author: "박서진",
+    studentId: "20190782",
     date: "2026.01.25",
     council: "총학생회",
     content: `세종대학교 셔틀버스 이용 학생입니다.
@@ -199,7 +199,7 @@ const petitionsDB: Record<string, PetitionData> = {
 
 개선 요청 사항:
 1. 피크 시간대(08:00~10:00, 12:00~13:30, 17:00~19:00) 배차 간격을 10분 이내로 단축
-2. 실시간 버스 위치 확인 시스템 도입
+2. 실시간 버스 위치 확인 시스템 도���
 3. 배차 간격 관련 정기적인 학생 의견 수렴
 
 많은 학생분들의 동의와 참여를 부탁드립니다.`,
@@ -256,7 +256,7 @@ const petitionsDB: Record<string, PetitionData> = {
     title: "계절학기 수강 신청 기간 확대 요청",
     status: "승인됨",
     category: "학사제도",
-    author: "최다영",
+    studentId: "20200456",
     date: "2026.01.22",
     council: "단과대학 학생회",
     content: `계절학기 수강 신청 기간의 확대를 요청드립니다.
@@ -297,7 +297,7 @@ const petitionsDB: Record<string, PetitionData> = {
     title: "캠퍼스 내 반려동물 동반 출입 허용 건의",
     status: "미승인",
     category: "기타",
-    author: "정수아",
+    studentId: "20230198",
     date: "2026.01.20",
     council: "총학생회",
     content: `캠퍼스 내 반려동물 동반 출입을 허용해주실 것을 건의드립니다.
@@ -348,7 +348,7 @@ const petitionsDB: Record<string, PetitionData> = {
     title: "학생회관 카페테리아 메뉴 다양화 요청",
     status: "진행중",
     category: "학교시설",
-    author: "한지우",
+    studentId: "20211034",
     date: "2026.01.18",
     council: "총학생회",
     content: `학생회관 카페테리아 메뉴의 다양화를 요청드립니다.
@@ -381,7 +381,7 @@ const petitionsDB: Record<string, PetitionData> = {
     title: "장학금 선발 기준 투명성 강화 건의",
     status: "답변완료",
     category: "학생복지",
-    author: "윤지서",
+    studentId: "20180523",
     date: "2026.01.15",
     council: "총학생회",
     content: `장학금 선발 기준의 투명성 강화를 건의드립니다.
@@ -434,7 +434,7 @@ const petitionsDB: Record<string, PetitionData> = {
     title: "복수전공 학점 인정 범위 확대 요청",
     status: "진행중",
     category: "학사제도",
-    author: "강서민",
+    studentId: "20200891",
     date: "2026.01.12",
     council: "단과대학 학생회",
     content: `복수전공 학점 인정 범위의 확대를 요청드립니다.
@@ -475,7 +475,7 @@ const petitionsDB: Record<string, PetitionData> = {
     title: "공학관 강의실 냉난방 시설 개선 요청",
     status: "승인됨",
     category: "학교시설",
-    author: "서준호",
+    studentId: "20210667",
     date: "2026.01.10",
     council: "단과대학 학생회",
     content: `공학관 강의실의 냉난방 시설 개선을 요청드립니다.
@@ -524,7 +524,7 @@ const petitionsDB: Record<string, PetitionData> = {
     title: "학교 공식 앱 UI/UX 개선 건의",
     status: "답변완료",
     category: "기타",
-    author: "임수빈",
+    studentId: "20190244",
     date: "2026.01.08",
     council: "총학생회",
     content: `학교 공식 모바일 앱의 UI/UX 개선을 건의드립니다.
@@ -577,7 +577,7 @@ const petitionsDB: Record<string, PetitionData> = {
     title: "교내 자판기 제품 종류 확대 건의",
     status: "미승인",
     category: "기타",
-    author: "김도현",
+    studentId: "20210001",
     date: "2026.01.05",
     council: "총학생회",
     content: `교내 자판기에서 판매하는 제품 종류의 확대를 건의드립니다.
@@ -610,7 +610,7 @@ const petitionsDB: Record<string, PetitionData> = {
     title: "학생회비 사용 내역 분기별 공개 의무화 요청",
     status: "반려",
     category: "학생복지",
-    author: "한서준",
+    studentId: "20170412",
     date: "2026.01.03",
     council: "총학생회",
     content: `학생회비 사용 내역의 분기별 공개를 의무화해주실 것을 요청합니다.
@@ -674,7 +674,7 @@ const defaultPetition: PetitionData = {
   title: "중앙도서관 24시간 열람실 운영 재개 요청",
   status: "승인됨",
   category: "학교시설",
-  author: "이수빈",
+  studentId: "20220315",
   date: "2026.01.28",
   council: "총학생회",
   content: `중앙도서관 24시간 열람실 운영 재개를 강력히 요청합니다.
@@ -751,7 +751,7 @@ export default function PetitionDetailPage({
             title={petition.title}
             status={petition.status}
             category={petition.category}
-            author={petition.author}
+            studentId={petition.studentId}
             date={petition.date}
             council={petition.council}
           />

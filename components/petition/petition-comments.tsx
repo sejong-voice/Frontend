@@ -49,19 +49,17 @@ function CommentItem({
 }) {
   const [showReportConfirm, setShowReportConfirm] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const initial = comment.author[0] || "?"
-
   return (
     <div className={cn("flex gap-3", isReply && "ml-10 md:ml-12")}>
       <Avatar className="h-8 w-8 shrink-0">
         <AvatarFallback className="bg-secondary text-xs text-muted-foreground">
-          {initial}
+          {"익"}
         </AvatarFallback>
       </Avatar>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-foreground">
-            {comment.author}
+            {"익명"}
           </span>
           <span className="text-xs text-muted-foreground">{comment.date}</span>
         </div>
