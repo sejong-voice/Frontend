@@ -2,7 +2,6 @@ import React from "react"
 import type { Metadata, Viewport } from "next"
 import { Noto_Sans_KR } from "next/font/google"
 import { AuthProvider } from "@/components/auth/auth-provider"
-import { AuthGuard } from "@/components/auth/auth-guard"
 
 import "./globals.css"
 
@@ -29,7 +28,7 @@ export default function RootLayout({
     <html lang="ko">
       <body className="font-sans antialiased">
         <AuthProvider>
-          <AuthGuard>{children}</AuthGuard>
+          {children}
         </AuthProvider>
       </body>
     </html>

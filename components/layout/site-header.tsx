@@ -5,12 +5,15 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { LogOut, User } from "lucide-react"
+import { LogIn, LogOut, User } from "lucide-react"
 
-const navItems = [
+const publicNavItems = [
   { label: "전체 청원", href: "/" },
   { label: "진행중", href: "/in-progress" },
   { label: "답변완료", href: "/answered" },
+]
+
+const authNavItems = [
   { label: "내 청원", href: "/my-petitions" },
 ]
 
@@ -43,7 +46,21 @@ export function SiteHeader({ userName, onLogout }: SiteHeaderProps) {
             className="hidden items-center gap-1 md:flex"
             aria-label="메인 메뉴"
           >
-            {navItems.map((item) => (
+            {publicNavItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  pathname === item.href
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+            {userName && authNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -59,7 +76,7 @@ export function SiteHeader({ userName, onLogout }: SiteHeaderProps) {
             ))}
           </nav>
 
-          {userName && (
+          {userName ? (
             <div className="flex items-center gap-2">
               <span className="hidden items-center gap-1 text-sm text-muted-foreground sm:flex">
                 <User className="h-3.5 w-3.5" />
@@ -75,6 +92,13 @@ export function SiteHeader({ userName, onLogout }: SiteHeaderProps) {
                 <span className="hidden sm:inline">{"로그아웃"}</span>
               </Button>
             </div>
+          ) : (
+            <Button asChild variant="outline" size="sm" className="gap-1.5">
+              <Link href="/login">
+                <LogIn className="h-4 w-4" />
+                <span className="hidden sm:inline">{"로그인"}</span>
+              </Link>
+            </Button>
           )}
         </div>
       </div>

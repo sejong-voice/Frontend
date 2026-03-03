@@ -1,13 +1,15 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { ConnectedHeader as SiteHeader } from "@/components/layout/connected-header"
 import { FilterBar } from "@/components/petition/filter-bar"
 import { MyPetitionList } from "@/components/petition/my-petition-list"
 import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
+import { Plus, Loader2 } from "lucide-react"
 import type { Petition } from "@/components/petition/petition-list"
+import { useAuth } from "@/components/auth/auth-provider"
 
 const myPetitions: Petition[] = [
   {
@@ -63,9 +65,25 @@ const myPetitions: Petition[] = [
 ]
 
 export default function MyPetitionsPage() {
+  const { loading, user } = useAuth()
+  const router = useRouter()
   const [activeCategory, setActiveCategory] = useState("전체")
   const [searchQuery, setSearchQuery] = useState("")
   const [petitions, setPetitions] = useState(myPetitions)
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/login")
+    }
+  }, [loading, user, router])
+
+  if (loading || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
 
   const filteredPetitions = useMemo(() => {
     return petitions.filter((p) => {

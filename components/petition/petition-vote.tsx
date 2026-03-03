@@ -3,7 +3,9 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { ThumbsUp, ThumbsDown, CheckCircle2, Info } from "lucide-react"
+import { ThumbsUp, ThumbsDown, CheckCircle2, Info, LogIn } from "lucide-react"
+import Link from "next/link"
+import { useAuth } from "@/components/auth/auth-provider"
 import type { PetitionStatus } from "@/components/petition/petition-detail-header"
 
 interface PetitionVoteProps {
@@ -19,6 +21,7 @@ export function PetitionVote({
   votesAgainst: initialAgainst,
   threshold,
 }: PetitionVoteProps) {
+  const { user } = useAuth()
   const [votesFor, setVotesFor] = useState(initialFor)
   const [votesAgainst, setVotesAgainst] = useState(initialAgainst)
   const [userVote, setUserVote] = useState<"for" | "against" | null>(null)
@@ -122,40 +125,49 @@ export function PetitionVote({
 
         {/* Vote buttons */}
         {isActive ? (
-          <div className="flex items-center gap-3">
-            <Button
-              onClick={() => handleVote("for")}
-              className={cn(
-                "flex-1 gap-2",
-                userVote === "for"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
-              )}
-              variant={userVote === "for" ? "default" : "outline"}
-            >
-              <ThumbsUp className="h-4 w-4" />
-              {"찬성"}
-              {userVote === "for" && (
-                <span className="text-xs opacity-75">{"(선택됨)"}</span>
-              )}
+          user ? (
+            <div className="flex items-center gap-3">
+              <Button
+                onClick={() => handleVote("for")}
+                className={cn(
+                  "flex-1 gap-2",
+                  userVote === "for"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
+                )}
+                variant={userVote === "for" ? "default" : "outline"}
+              >
+                <ThumbsUp className="h-4 w-4" />
+                {"찬성"}
+                {userVote === "for" && (
+                  <span className="text-xs opacity-75">{"(선택됨)"}</span>
+                )}
+              </Button>
+              <Button
+                onClick={() => handleVote("against")}
+                className={cn(
+                  "flex-1 gap-2",
+                  userVote === "against"
+                    ? "bg-foreground text-background"
+                    : "bg-transparent"
+                )}
+                variant={userVote === "against" ? "default" : "outline"}
+              >
+                <ThumbsDown className="h-4 w-4" />
+                {"반대"}
+                {userVote === "against" && (
+                  <span className="text-xs opacity-75">{"(선택됨)"}</span>
+                )}
+              </Button>
+            </div>
+          ) : (
+            <Button asChild variant="outline" className="w-full gap-2">
+              <Link href="/login">
+                <LogIn className="h-4 w-4" />
+                {"로그인 후 투표에 참여할 수 있습니다"}
+              </Link>
             </Button>
-            <Button
-              onClick={() => handleVote("against")}
-              className={cn(
-                "flex-1 gap-2",
-                userVote === "against"
-                  ? "bg-foreground text-background"
-                  : "bg-transparent"
-              )}
-              variant={userVote === "against" ? "default" : "outline"}
-            >
-              <ThumbsDown className="h-4 w-4" />
-              {"반대"}
-              {userVote === "against" && (
-                <span className="text-xs opacity-75">{"(선택됨)"}</span>
-              )}
-            </Button>
-          </div>
+          )
         ) : (
           <p className="text-center text-sm text-muted-foreground">
             {"투표가 마감되었습니다."}

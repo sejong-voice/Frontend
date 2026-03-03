@@ -14,7 +14,10 @@ import {
   ChevronUp,
   Trash2,
   Reply,
+  LogIn,
 } from "lucide-react"
+import Link from "next/link"
+import { useAuth } from "@/components/auth/auth-provider"
 
 interface ReplyData {
   id: number
@@ -42,10 +45,12 @@ function CommentItem({
   comment,
   isReply = false,
   onReply,
+  isLoggedIn = false,
 }: {
   comment: Comment | ReplyData
   isReply?: boolean
   onReply?: () => void
+  isLoggedIn?: boolean
 }) {
   const [showReportConfirm, setShowReportConfirm] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -66,6 +71,7 @@ function CommentItem({
         <p className="text-sm leading-relaxed text-foreground">
           {comment.content}
         </p>
+        {isLoggedIn && (
         <div className="mt-1 flex items-center gap-3">
           {/* Reply button (only for top-level comments) */}
           {!isReply && onReply && (
@@ -145,6 +151,7 @@ function CommentItem({
             </div>
           )}
         </div>
+        )}
       </div>
     </div>
   )
@@ -180,7 +187,7 @@ function ReplyInput({ onCancel }: { onCancel: () => void }) {
   )
 }
 
-function CommentThread({ comment }: { comment: Comment }) {
+function CommentThread({ comment, isLoggedIn }: { comment: Comment; isLoggedIn: boolean }) {
   const [showReplies, setShowReplies] = useState(false)
   const [showReplyInput, setShowReplyInput] = useState(false)
   const hasReplies = comment.replies.length > 0
@@ -190,6 +197,7 @@ function CommentThread({ comment }: { comment: Comment }) {
       <CommentItem
         comment={comment}
         onReply={() => setShowReplyInput(!showReplyInput)}
+        isLoggedIn={isLoggedIn}
       />
 
       {hasReplies && (
@@ -221,6 +229,7 @@ function CommentThread({ comment }: { comment: Comment }) {
                   key={reply.id}
                   comment={reply as unknown as Comment}
                   isReply
+                  isLoggedIn={isLoggedIn}
                 />
               ))}
             </div>
@@ -239,6 +248,7 @@ export function PetitionComments({
   comments,
   totalCount,
 }: PetitionCommentsProps) {
+  const { user } = useAuth()
   const [newComment, setNewComment] = useState("")
 
   return (
@@ -256,24 +266,35 @@ export function PetitionComments({
         </div>
 
         {/* Comment input */}
-        <div className="rounded-lg border border-border bg-card p-4">
-          <Textarea
-            placeholder="의견을 남겨주세요"
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            className="min-h-[80px] resize-none border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
-          />
-          <div className="mt-3 flex justify-end">
-            <Button
-              size="sm"
-              disabled={!newComment.trim()}
-              className="gap-1.5"
-            >
-              <Send className="h-3.5 w-3.5" />
-              {"등록"}
+        {user ? (
+          <div className="rounded-lg border border-border bg-card p-4">
+            <Textarea
+              placeholder="의견을 남겨주세요"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              className="min-h-[80px] resize-none border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
+            />
+            <div className="mt-3 flex justify-end">
+              <Button
+                size="sm"
+                disabled={!newComment.trim()}
+                className="gap-1.5"
+              >
+                <Send className="h-3.5 w-3.5" />
+                {"등록"}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="rounded-lg border border-dashed border-border bg-muted/30 p-4">
+            <Button asChild variant="outline" className="w-full gap-2">
+              <Link href="/login">
+                <LogIn className="h-4 w-4" />
+                {"로그인 후 댓글을 작성할 수 있습니다"}
+              </Link>
             </Button>
           </div>
-        </div>
+        )}
 
         {/* Comment list */}
         <div className="flex flex-col gap-0">
@@ -285,7 +306,7 @@ export function PetitionComments({
                 index !== comments.length - 1 && "border-b border-border"
               )}
             >
-              <CommentThread comment={comment} />
+              <CommentThread comment={comment} isLoggedIn={!!user} />
             </div>
           ))}
         </div>
