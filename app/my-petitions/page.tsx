@@ -71,20 +71,6 @@ export default function MyPetitionsPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [petitions, setPetitions] = useState(myPetitions)
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.replace("/login")
-    }
-  }, [loading, user, router])
-
-  if (loading || !user) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    )
-  }
-
   const filteredPetitions = useMemo(() => {
     return petitions.filter((p) => {
       const matchesCategory =
@@ -109,6 +95,20 @@ export default function MyPetitionsPage() {
       { label: "전체", count: petitions.length },
     ]
   }, [petitions])
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace("/login")
+    }
+  }, [loading, user, router])
+
+  if (loading || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
 
   function handleEdit(id: number) {
     // Mock: navigate to edit page
