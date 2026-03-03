@@ -199,7 +199,7 @@ const petitionsDB: Record<string, PetitionData> = {
 
 개선 요청 사항:
 1. 피크 시간대(08:00~10:00, 12:00~13:30, 17:00~19:00) 배차 간격을 10분 이내로 단축
-2. 실시간 버스 위치 확인 시스템 도���
+2. 실시간 버스 위치 확인 시��템 도���
 3. 배차 간격 관련 정기적인 학생 의견 수렴
 
 많은 학생분들의 동의와 참여를 부탁드립니다.`,
@@ -625,7 +625,7 @@ const petitionsDB: Record<string, PetitionData> = {
     votesAgainst: 28,
     threshold: 300,
     officialResponse: {
-      content: `안녕하세요, 총학생회입니다.
+      content: `안녕하���요, 총학생회입니다.
 
 해당 청원에 대해 검토한 결과를 안내드립니다.
 
@@ -728,7 +728,7 @@ export default function PetitionDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
-  const { isAdmin } = useAuth()
+  const { user, isAdmin } = useAuth()
   const petition = petitionsDB[id] || defaultPetition
 
   const totalCommentCount = petition.comments.reduce(
@@ -782,7 +782,7 @@ export default function PetitionDetailPage({
 
           <PetitionActions
             status={petition.status}
-            isAuthor={petition.isAuthor}
+            isAuthor={!!user && petition.isAuthor}
             isAdmin={isAdmin}
             totalVotes={totalVotes}
           />
