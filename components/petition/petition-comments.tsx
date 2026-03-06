@@ -248,8 +248,11 @@ export function PetitionComments({
   comments,
   totalCount,
 }: PetitionCommentsProps) {
-  const { user } = useAuth()
+  const { user, isActive: isUserActive, isAdmin, isSuper } = useAuth()
   const [newComment, setNewComment] = useState("")
+
+  // ADMIN/SUPER는 댓글 작성 불가 (학생만 가능)
+  const canWriteComment = user && isUserActive && !isAdmin && !isSuper
 
   return (
     <section aria-label="댓글 영역">
@@ -265,8 +268,8 @@ export function PetitionComments({
           </span>
         </div>
 
-        {/* Comment input */}
-        {user ? (
+        {/* Comment input - only for students, ADMIN/SUPER don't see comment form */}
+        {canWriteComment ? (
           <div className="rounded-lg border border-border bg-card p-4">
             <Textarea
               placeholder="의견을 남겨주세요"
@@ -285,7 +288,13 @@ export function PetitionComments({
               </Button>
             </div>
           </div>
-        ) : (
+        ) : user && !isUserActive && !isAdmin && !isSuper ? (
+          <div className="rounded-lg border border-dashed border-border bg-muted/30 p-4">
+            <p className="text-center text-sm text-muted-foreground">
+              {"계정이 활성 상태가 아니어서 댓글을 작성할 수 없습니다."}
+            </p>
+          </div>
+        ) : !user ? (
           <div className="rounded-lg border border-dashed border-border bg-muted/30 p-4">
             <Button asChild variant="outline" className="w-full gap-2">
               <Link href="/login">
@@ -294,7 +303,7 @@ export function PetitionComments({
               </Link>
             </Button>
           </div>
-        )}
+        ) : null}
 
         {/* Comment list */}
         <div className="flex flex-col gap-0">

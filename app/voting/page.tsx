@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from "react"
 import { ConnectedHeader } from "@/components/layout/connected-header"
-import { PageHeader } from "@/components/layout/page-header"
 import { FilterBar } from "@/components/petition/filter-bar"
 import {
   PetitionList,
@@ -31,16 +30,6 @@ const petitions: Petition[] = [
     council: "총학생회",
   },
   {
-    id: 3,
-    status: "COMPLETED",
-    title: "교내 셔틀버스 배차 간격 단축 건의",
-    comments: 31,
-    votes: 456,
-    studentId: "20190782",
-    date: "2026.01.25",
-    council: "총학생회",
-  },
-  {
     id: 4,
     status: "APPROVED",
     title: "계절학기 수강 신청 기간 확대 요청",
@@ -51,16 +40,6 @@ const petitions: Petition[] = [
     council: "단과대학 학생회",
   },
   {
-    id: 5,
-    status: "PENDING",
-    title: "캠퍼스 내 반려동물 동반 출입 허용 건의",
-    comments: 45,
-    votes: 89,
-    studentId: "20230198",
-    date: "2026.01.20",
-    council: "총학생회",
-  },
-  {
     id: 6,
     status: "VOTING",
     title: "학생회관 카페테리아 메뉴 다양화 요청",
@@ -68,16 +47,6 @@ const petitions: Petition[] = [
     votes: 156,
     studentId: "20211034",
     date: "2026.01.18",
-    council: "총학생회",
-  },
-  {
-    id: 7,
-    status: "COMPLETED",
-    title: "장학금 선발 기준 투명성 강화 건의",
-    comments: 22,
-    votes: 378,
-    studentId: "20180523",
-    date: "2026.01.15",
     council: "총학생회",
   },
   {
@@ -100,29 +69,9 @@ const petitions: Petition[] = [
     date: "2026.01.10",
     council: "단과대학 학생회",
   },
-  {
-    id: 10,
-    status: "COMPLETED",
-    title: "학교 공식 앱 UI/UX 개선 건의",
-    comments: 19,
-    votes: 267,
-    studentId: "20190244",
-    date: "2026.01.08",
-    council: "총학생회",
-  },
-  {
-    id: 14,
-    status: "REJECTED",
-    title: "학생회비 사용 내역 분기별 공개 의무화 요청",
-    comments: 4,
-    votes: 373,
-    studentId: "20170412",
-    date: "2026.01.03",
-    council: "총학생회",
-  },
 ]
 
-export default function Page() {
+export default function VotingPage() {
   const [searchQuery, setSearchQuery] = useState("")
 
   const filteredPetitions = useMemo(() => {
@@ -134,31 +83,24 @@ export default function Page() {
     })
   }, [searchQuery])
 
-  const stats = useMemo(() => {
-    const voting = petitions.filter(
-      (p) => p.status === "VOTING" || p.status === "APPROVED"
-    ).length
-    const completed = petitions.filter(
-      (p) => p.status === "COMPLETED"
-    ).length
-    return [
-      { label: "투표중", count: voting },
-      { label: "완료", count: completed },
-      { label: "전체", count: petitions.length },
-    ]
-  }, [])
-
   return (
     <div className="min-h-screen bg-background">
       <ConnectedHeader />
       <main className="mx-auto max-w-5xl px-6 py-8">
         <div className="flex flex-col gap-8">
-          <PageHeader stats={stats} />
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              {"투표중인 청원"}
+            </h1>
+            <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+              {"현재 투표가 진행 중이거나 승인되어 답변 대기 중인 청원 목록입니다."}
+            </p>
+          </div>
           <FilterBar
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
           />
-          <PetitionList petitions={filteredPetitions} />
+          <PetitionList petitions={filteredPetitions} from="voting" />
         </div>
       </main>
     </div>

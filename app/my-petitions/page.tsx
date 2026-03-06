@@ -14,95 +14,97 @@ import { useAuth } from "@/components/auth/auth-provider"
 const myPetitions: Petition[] = [
   {
     id: 1,
-    status: "진행중",
-    category: "학사제도",
+    status: "VOTING",
     title: "졸업요건 중 영어 인증 기준 완화 요청",
     comments: 24,
     votes: 312,
     studentId: "20210001",
     date: "2026.02.01",
+    council: "총학생회",
   },
   {
     id: 4,
-    status: "승인됨",
-    category: "학사제도",
+    status: "APPROVED",
     title: "계절학기 수강 신청 기간 확대 요청",
     comments: 12,
     votes: 198,
     studentId: "20210001",
     date: "2026.01.22",
+    council: "단과대학 학생회",
   },
   {
     id: 11,
-    status: "진행중",
-    category: "학생복지",
+    status: "VOTING",
     title: "기숙사 외박 신청 절차 간소화 요청",
     comments: 3,
     votes: 0,
     studentId: "20210001",
     date: "2026.02.05",
+    council: "총학생회",
   },
   {
     id: 12,
-    status: "답변완료",
-    category: "학교시설",
+    status: "COMPLETED",
     title: "정보관 PC실 모니터 교체 건의",
     comments: 9,
     votes: 145,
     studentId: "20210001",
     date: "2026.01.14",
+    council: "총학생회",
   },
   {
     id: 13,
-    status: "미승인",
-    category: "기타",
+    status: "PENDING",
     title: "교내 자판기 제품 종류 확대 건의",
     comments: 2,
     votes: 0,
     studentId: "20210001",
     date: "2026.01.05",
+    council: "총학생회",
   },
 ]
 
 export default function MyPetitionsPage() {
-  const { loading, user } = useAuth()
+  const { loading, user, isAdmin, isSuper } = useAuth()
   const router = useRouter()
-  const [activeCategory, setActiveCategory] = useState("전체")
   const [searchQuery, setSearchQuery] = useState("")
   const [petitions, setPetitions] = useState(myPetitions)
 
   const filteredPetitions = useMemo(() => {
     return petitions.filter((p) => {
-      const matchesCategory =
-        activeCategory === "전체" || p.category === activeCategory
       const matchesSearch =
         searchQuery === "" ||
         p.title.toLowerCase().includes(searchQuery.toLowerCase())
-      return matchesCategory && matchesSearch
+      return matchesSearch
     })
-  }, [petitions, activeCategory, searchQuery])
+  }, [petitions, searchQuery])
 
   const stats = useMemo(() => {
-    const inProgress = petitions.filter(
-      (p) => p.status === "진행중" || p.status === "승인됨"
+    const voting = petitions.filter(
+      (p) => p.status === "VOTING" || p.status === "APPROVED"
     ).length
-    const answered = petitions.filter(
-      (p) => p.status === "답변완료"
+    const completed = petitions.filter(
+      (p) => p.status === "COMPLETED"
     ).length
     return [
-      { label: "진행중", count: inProgress },
-      { label: "답변완료", count: answered },
+      { label: "투표중", count: voting },
+      { label: "완료", count: completed },
       { label: "전체", count: petitions.length },
     ]
   }, [petitions])
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.replace("/login")
+    if (!loading) {
+      if (!user) {
+        router.replace("/login")
+      } else if (isAdmin || isSuper) {
+        // ADMIN/SUPER는 내 청원 페이지 접근 불가
+        router.replace("/")
+      }
     }
-  }, [loading, user, router])
+  }, [loading, user, isAdmin, isSuper, router])
 
-  if (loading || !user) {
+  if (loading || !user || isAdmin || isSuper) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -167,8 +169,6 @@ export default function MyPetitionsPage() {
           </div>
 
           <FilterBar
-            activeCategory={activeCategory}
-            onCategoryChange={setActiveCategory}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
           />

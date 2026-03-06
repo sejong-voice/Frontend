@@ -20,10 +20,11 @@ interface PetitionData {
   id: number
   title: string
   status: PetitionStatus
-  category: string
   studentId: string
   date: string
   council: string
+  councilId: number
+  voteEndDate: string
   content: string
   votesFor: number
   votesAgainst: number
@@ -42,11 +43,12 @@ const petitionsDB: Record<string, PetitionData> = {
   "1": {
     id: 1,
     title: "졸업요건 중 영어 인증 기준 완화 요청",
-    status: "진행중",
-    category: "학사제도",
+    status: "VOTING",
     studentId: "20210001",
     date: "2026.02.01",
     council: "총학생회",
+    councilId: 1,
+    voteEndDate: "2026.02.15",
     content: `안녕하세요. 본 청원은 현행 졸업요건 중 영어 인증 기준에 대한 완화를 요청드리기 위해 작성합니다.
 
 현재 세종대학교는 졸업 요건으로 공인 영어 시험(TOEIC, TOEFL, IELTS 등)의 일정 점수 이상을 요구하고 있습니다. 그러나 이 기준이 학과의 특성과 무관하게 일괄 적용되고 있어, 비영어권 전공 학생들에게 불필요한 부담이 되고 있습니다.
@@ -137,11 +139,12 @@ const petitionsDB: Record<string, PetitionData> = {
   "2": {
     id: 2,
     title: "중앙도서관 24시간 열람실 운영 재개 요청",
-    status: "진행중",
-    category: "학교시설",
+    status: "VOTING",
+    voteEndDate: "2026.02.18",
     studentId: "20220315",
     date: "2026.01.28",
     council: "총학생회",
+    councilId: 1,
     content: `중앙도서관 24시간 열람실 운영 재개를 강력히 요청합니다.
 
 코로나19 이후 운영이 중단된 24시간 열람실이 아직까지 재개되지 않고 있습니다. 시험 기간뿐 아니라 일상적으로 늦은 시간까지 학습이 필요한 학생들이 많으며, 교외 독서실이나 카페를 이용하는 데 따른 추가 비용 부담이 큽니다.
@@ -188,18 +191,19 @@ const petitionsDB: Record<string, PetitionData> = {
   "3": {
     id: 3,
     title: "교내 셔틀버스 배차 간격 단축 건의",
-    status: "답변완료",
-    category: "학생복지",
+    status: "COMPLETED",
+    voteEndDate: "2026.02.12",
     studentId: "20190782",
     date: "2026.01.25",
     council: "총학생회",
+    councilId: 1,
     content: `세종대학교 셔틀버스 이용 학생입니다.
 
 현재 셔틀버스의 배차 간격이 약 20~25분으로 운영되고 있어, 수업 전후 대기 시간이 매우 길어 불편을 겪고 있습니다. 특히 출퇴근 시간대와 점심시간에는 탑승하지 못하고 다음 버스를 기다리는 경우가 빈번합니다.
 
 개선 요청 사항:
 1. 피크 시간대(08:00~10:00, 12:00~13:30, 17:00~19:00) 배차 간격을 10분 이내로 단축
-2. 실시간 버스 위치 확인 시��템 도���
+2. 실시간 버스 위치 확인 시���템 도���
 3. 배차 간격 관련 정기적인 학생 의견 수렴
 
 많은 학생분들의 동의와 참여를 부탁드립니다.`,
@@ -254,11 +258,12 @@ const petitionsDB: Record<string, PetitionData> = {
   "4": {
     id: 4,
     title: "계절학기 수강 신청 기간 확대 요청",
-    status: "승인됨",
-    category: "학사제도",
+    status: "APPROVED",
+    voteEndDate: "2026.02.20",
     studentId: "20200456",
     date: "2026.01.22",
     council: "단과대학 학생회",
+    councilId: 2,
     content: `계절학기 수강 신청 기간의 확대를 요청드립니다.
 
 현재 계절학기 수강 신청 기간이 약 3일로 매우 짧아, 수강 계획을 충분히 세우지 못한 채 신청 기간이 마감되는 경우가 빈번합니다. 특히 재수강이 필요한 학생들의 경우 계절학기가 유일한 기회인 만큼, 충분한 고려 시간이 보장되어야 합니다.
@@ -295,11 +300,12 @@ const petitionsDB: Record<string, PetitionData> = {
   "5": {
     id: 5,
     title: "캠퍼스 내 반려동물 동반 출입 허용 건의",
-    status: "미승인",
-    category: "기타",
+    status: "PENDING",
+    voteEndDate: "2026.02.10",
     studentId: "20230198",
     date: "2026.01.20",
     council: "총학생회",
+    councilId: 1,
     content: `캠퍼스 내 반려동물 동반 출입을 허용해주실 것을 건의드립니다.
 
 최근 반려동물을 키우는 학생들이 증가하고 있으며, 해외 유수 대학에서는 이미 캠퍼스 내 반려동물 동반을 허용하고 있습니다. 반려동물과 함께하는 캠퍼스 생활은 학생들의 정서적 안정에 큰 도움이 될 수 있���니다.
@@ -346,11 +352,12 @@ const petitionsDB: Record<string, PetitionData> = {
   "6": {
     id: 6,
     title: "학생회관 카페테리아 메뉴 다양화 요청",
-    status: "진행중",
-    category: "학교시설",
+    status: "VOTING",
+    voteEndDate: "2026.02.18",
     studentId: "20211034",
     date: "2026.01.18",
     council: "총학생회",
+    councilId: 1,
     content: `학생회관 카페테리아 메뉴의 다양화를 요청드립니다.
 
 현재 학생회관 카페테리아에서 판매하는 메뉴가 매우 제한적이며, 특히 채식주의자나 알레르기가 있는 학생들을 위한 메뉴가 거의 없습니다. 매일 비슷한 메뉴 구성으로 인해 많은 학생들이 교외 식당을 이용하고 있어 추가적인 시간과 비용이 발생하고 있습니다.
@@ -379,11 +386,12 @@ const petitionsDB: Record<string, PetitionData> = {
   "7": {
     id: 7,
     title: "장학금 선발 기준 투명성 강화 건의",
-    status: "답변완료",
-    category: "학생복지",
+    status: "COMPLETED",
+    voteEndDate: "2026.02.12",
     studentId: "20180523",
     date: "2026.01.15",
     council: "총학생회",
+    councilId: 1,
     content: `장학금 선발 기준의 투명성 강화를 건의드립니다.
 
 현재 교내 장학금 선발 과정에서 구체적인 선발 기준과 점수 배분 방식이 공개되지 않아, 탈락 시 사유를 알 수 없어 학생들의 불만이 높습니다.
@@ -432,11 +440,12 @@ const petitionsDB: Record<string, PetitionData> = {
   "8": {
     id: 8,
     title: "복수전공 학점 인정 범위 확대 요청",
-    status: "진행중",
-    category: "학사제도",
+    status: "VOTING",
+    voteEndDate: "2026.02.20",
     studentId: "20200891",
     date: "2026.01.12",
     council: "단과대학 학생회",
+    councilId: 2,
     content: `복수전공 학점 인정 범위의 확대를 요청드립니다.
 
 현재 복수전공 이수 시 전공 간 겹치는 교과목의 학점이 중복 인정되지 않아, 실질적으로 졸업에 필요한 총 이수 학점이 크게 늘어나는 문제가 있습니다.
@@ -473,11 +482,12 @@ const petitionsDB: Record<string, PetitionData> = {
   "9": {
     id: 9,
     title: "공학관 강의실 냉난방 시설 개선 요청",
-    status: "승인됨",
-    category: "학교시설",
+    status: "APPROVED",
+    voteEndDate: "2026.02.18",
     studentId: "20210667",
     date: "2026.01.10",
     council: "단과대학 학생회",
+    councilId: 2,
     content: `공학관 강의실의 냉난방 시설 개선을 요청드립니다.
 
 공학관 건물의 노후화로 인해 냉난방 시설이 제대로 작동하지 않는 강의실이 다수 있습니다. 특히 겨울철 난방이 되지 않아 패딩을 입고 수업을 듣는 일이 빈번하며, 여름철에는 에어컨이 고장난 채로 방치되는 경우도 있습니다.
@@ -522,11 +532,12 @@ const petitionsDB: Record<string, PetitionData> = {
   "10": {
     id: 10,
     title: "학교 공식 앱 UI/UX 개선 건의",
-    status: "답변완료",
-    category: "기타",
+    status: "COMPLETED",
+    voteEndDate: "2026.02.10",
     studentId: "20190244",
     date: "2026.01.08",
     council: "총학생회",
+    councilId: 1,
     content: `학교 공식 모바일 앱의 UI/UX 개선을 건의드립니다.
 
 현재 세종대학교 공식 앱은 디자인이 오래되었고, 사용성이 매우 떨어져 대부분의 학생들이 사용을 기피하고 있습니다. 학사 일정 확인, 성적 조회, 수강 신청 등 필수 기능의 접근성이 낮아 학생들이 불편을 겪고 있습니다.
@@ -575,11 +586,12 @@ const petitionsDB: Record<string, PetitionData> = {
   "13": {
     id: 13,
     title: "교내 자판기 제품 종류 확대 건의",
-    status: "미승인",
-    category: "기타",
+    status: "PENDING",
+    voteEndDate: "2026.02.10",
     studentId: "20210001",
     date: "2026.01.05",
     council: "총학생회",
+    councilId: 1,
     content: `교내 자판기에서 판매하는 제품 종류의 확대를 건의드립니다.
 
 현재 교내 자판기에서는 커피와 일부 음료만 판매되고 있어 선택의 폭이 매우 좁습니다. 특히 야간 수업이나 늦은 시간까지 학교에 남아 공부하는 학생들은 편의점까지 가기 어려운 상황에서 자판기에 의존하게 되는데, 현재 제품 구성으로는 부족한 실정입니다.
@@ -608,11 +620,12 @@ const petitionsDB: Record<string, PetitionData> = {
   "14": {
     id: 14,
     title: "학생회비 사용 내역 분기별 공개 의무화 요청",
-    status: "반려",
-    category: "학생복지",
+    status: "REJECTED",
+    voteEndDate: "2026.02.12",
     studentId: "20170412",
     date: "2026.01.03",
     council: "총학생회",
+    councilId: 1,
     content: `학생회비 사용 내역의 분기별 공개를 의무화해주실 것을 요청합니다.
 
 매년 학생회비를 납부하고 있지만, 구체적인 사용 내역이 투명하게 공개되지 않아 학생들의 불신이 커지고 있습니다. 학생회비는 학생들의 자발적 납부로 운영되는 만큼, 사용처에 대한 상세한 정보 공개는 당연한 권리입니다.
@@ -625,7 +638,7 @@ const petitionsDB: Record<string, PetitionData> = {
     votesAgainst: 28,
     threshold: 300,
     officialResponse: {
-      content: `안녕하���요, 총학생회입니다.
+      content: `안녕������요, 총학생회입니다.
 
 해당 청원에 대해 검토한 결과를 안내드립니다.
 
@@ -672,11 +685,12 @@ const petitionsDB: Record<string, PetitionData> = {
 const defaultPetition: PetitionData = {
   id: 0,
   title: "중앙도서관 24시간 열람실 운영 재개 요청",
-  status: "승인됨",
-  category: "학교시설",
+  status: "APPROVED",
+  voteEndDate: "2026.02.18",
   studentId: "20220315",
   date: "2026.01.28",
   council: "총학생회",
+  councilId: 1,
   content: `중앙도서관 24시간 열람실 운영 재개를 강력히 요청합니다.
 
 코로나19 이후 운영이 중단된 24시간 열람실이 아직까지 재개되지 않고 있습니다. 시험 기간뿐 아니라 일상적으로 늦은 시간까지 학습이 필요한 학생들이 많으며, 교외 독서실이나 카페를 이용하는 데 따른 추가 비용 부담이 큽니다.
@@ -740,7 +754,7 @@ export default function PetitionDetailPage({
 
   const showOfficialResponse =
     petition.officialResponse &&
-    (petition.status === "답변완료" || petition.status === "반려")
+    (petition.status === "COMPLETED" || petition.status === "REJECTED")
 
   return (
     <div className="min-h-screen bg-background">
@@ -750,28 +764,22 @@ export default function PetitionDetailPage({
           <PetitionDetailHeader
             title={petition.title}
             status={petition.status}
-            category={petition.category}
             studentId={petition.studentId}
             date={petition.date}
             council={petition.council}
+            voteEndDate={petition.voteEndDate}
           />
 
           <Separator />
 
-          {/* Status banner for non-active petitions */}
-          {petition.status !== "진행중" && (
+          {/* Status banner for non-voting petitions */}
+          {petition.status !== "VOTING" && (
             <PetitionStatusBanner status={petition.status} />
           )}
 
           <PetitionBody content={petition.content} />
 
-          <PetitionVote
-            status={petition.status}
-            votesFor={petition.votesFor}
-            votesAgainst={petition.votesAgainst}
-            threshold={petition.threshold}
-          />
-
+          {/* Official response - shown right after body content */}
           {showOfficialResponse && petition.officialResponse && (
             <PetitionOfficialResponse
               content={petition.officialResponse.content}
@@ -780,10 +788,18 @@ export default function PetitionDetailPage({
             />
           )}
 
+          <PetitionVote
+            status={petition.status}
+            votesFor={petition.votesFor}
+            votesAgainst={petition.votesAgainst}
+            threshold={petition.threshold}
+          />
+
           <PetitionActions
+            petitionId={petition.id}
             status={petition.status}
             isAuthor={!!user && petition.isAuthor}
-            isAdmin={isAdmin}
+            councilId={petition.councilId}
             totalVotes={totalVotes}
           />
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import type { AuthUser } from "@/components/auth/auth-provider"
 
 export async function GET(request: NextRequest) {
   const sid = request.cookies.get("sid")
@@ -9,11 +10,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const user = JSON.parse(decodeURIComponent(sessionData.value)) as {
-      id: string
-      name: string
-      role: string
-    }
+    const user = JSON.parse(decodeURIComponent(sessionData.value)) as AuthUser
     return NextResponse.json(user)
   } catch {
     return NextResponse.json({ error: "Invalid session" }, { status: 401 })

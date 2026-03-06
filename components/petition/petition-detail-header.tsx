@@ -3,28 +3,36 @@
 import { useSearchParams } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
-import { ArrowLeft, Calendar, User, Building2, Folder } from "lucide-react"
+import { ArrowLeft, Calendar, User, Building2, Clock } from "lucide-react"
 import Link from "next/link"
 
 export type PetitionStatus =
-  | "진행중"
-  | "승인됨"
-  | "미승인"
-  | "답변완료"
-  | "반려"
+  | "VOTING"
+  | "APPROVED"
+  | "PENDING"
+  | "COMPLETED"
+  | "REJECTED"
+
+const statusLabels: Record<PetitionStatus, string> = {
+  VOTING: "투표중",
+  APPROVED: "승인됨",
+  PENDING: "대기중",
+  COMPLETED: "완료",
+  REJECTED: "반려",
+}
 
 const statusStyles: Record<PetitionStatus, string> = {
-  진행중: "border-primary/30 bg-accent text-accent-foreground",
-  승인됨: "border-blue-200 bg-blue-50 text-blue-700",
-  답변완료: "border-green-200 bg-green-50 text-green-700",
-  미승인: "border-border bg-secondary text-muted-foreground",
-  반려: "border-orange-200 bg-orange-50 text-orange-700",
+  VOTING: "border-primary/30 bg-accent text-accent-foreground",
+  APPROVED: "border-blue-200 bg-blue-50 text-blue-700",
+  PENDING: "border-yellow-200 bg-yellow-50 text-yellow-700",
+  COMPLETED: "border-green-200 bg-green-50 text-green-700",
+  REJECTED: "border-red-200 bg-red-50 text-red-700",
 }
 
 const referrerMap: Record<string, { href: string; label: string }> = {
   all: { href: "/", label: "전체 청원" },
-  "in-progress": { href: "/in-progress", label: "진행중" },
-  answered: { href: "/answered", label: "답변완료" },
+  voting: { href: "/voting", label: "투표중" },
+  completed: { href: "/completed", label: "완료" },
   my: { href: "/my-petitions", label: "내 청원" },
 }
 
@@ -36,19 +44,19 @@ function maskStudentId(id: string): string {
 interface PetitionDetailHeaderProps {
   title: string
   status: PetitionStatus
-  category: string
   studentId: string
   date: string
   council: string
+  voteEndDate?: string
 }
 
 export function PetitionDetailHeader({
   title,
   status,
-  category,
   studentId,
   date,
   council,
+  voteEndDate,
 }: PetitionDetailHeaderProps) {
   const searchParams = useSearchParams()
   const fromParam = searchParams.get("from")
@@ -70,7 +78,7 @@ export function PetitionDetailHeader({
             variant="outline"
             className={cn("text-xs font-medium", statusStyles[status])}
           >
-            {status}
+            {statusLabels[status]}
           </Badge>
         </div>
 
@@ -91,10 +99,12 @@ export function PetitionDetailHeader({
             <Building2 className="h-3.5 w-3.5" />
             {council}
           </span>
-          <span className="flex items-center gap-1.5">
-            <Folder className="h-3.5 w-3.5" />
-            {category}
-          </span>
+          {voteEndDate && status === "VOTING" && (
+            <span className="flex items-center gap-1.5 text-primary">
+              <Clock className="h-3.5 w-3.5" />
+              {"투표 마감: " + voteEndDate}
+            </span>
+          )}
         </div>
       </div>
     </div>

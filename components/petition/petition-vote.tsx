@@ -21,7 +21,10 @@ export function PetitionVote({
   votesAgainst: initialAgainst,
   threshold,
 }: PetitionVoteProps) {
-  const { user } = useAuth()
+  const { user, isActive: isUserActive, isAdmin, isSuper } = useAuth()
+  
+  // ADMIN/SUPER cannot vote (only STUDENT can)
+  const canVote = user && isUserActive && !isAdmin && !isSuper
   const [votesFor, setVotesFor] = useState(initialFor)
   const [votesAgainst, setVotesAgainst] = useState(initialAgainst)
   const [userVote, setUserVote] = useState<"for" | "against" | null>(null)
@@ -30,8 +33,8 @@ export function PetitionVote({
   const forPercent =
     totalVotes > 0 ? Math.round((votesFor / totalVotes) * 100) : 0
   const againstPercent = totalVotes > 0 ? 100 - forPercent : 0
-  const isActive = status === "진행중"
-  const isApproved = status === "승인됨" || status === "답변완료"
+  const isActive = status === "VOTING"
+  const isApproved = status === "APPROVED" || status === "COMPLETED"
   const meetsThreshold = votesFor >= threshold
 
   function handleVote(type: "for" | "against") {
@@ -125,7 +128,7 @@ export function PetitionVote({
 
         {/* Vote buttons */}
         {isActive ? (
-          user ? (
+          canVote ? (
             <div className="flex items-center gap-3">
               <Button
                 onClick={() => handleVote("for")}
@@ -160,6 +163,12 @@ export function PetitionVote({
                 )}
               </Button>
             </div>
+          ) : user && !isUserActive && !isAdmin && !isSuper ? (
+            <p className="text-center text-sm text-muted-foreground">
+              {"계정이 활성 상태가 아니어서 투표에 참여할 수 없습니다."}
+            </p>
+          ) : user && (isAdmin || isSuper) ? (
+            null // ADMIN/SUPER don't see vote buttons
           ) : (
             <Button asChild variant="outline" className="w-full gap-2">
               <Link href="/login">

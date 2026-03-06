@@ -2,28 +2,50 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { LogIn, LogOut, User } from "lucide-react"
+import { LogIn, LogOut, User, Settings, Shield } from "lucide-react"
+import type { UserRole } from "@/components/auth/auth-provider"
 
+// Public nav items - visible to everyone
 const publicNavItems = [
   { label: "전체 청원", href: "/" },
-  { label: "진행중", href: "/in-progress" },
-  { label: "답변완료", href: "/answered" },
+  { label: "투표중", href: "/voting" },
+  { label: "완료", href: "/completed" },
 ]
 
+// Auth nav items - visible to logged-in users
 const authNavItems = [
   { label: "내 청원", href: "/my-petitions" },
 ]
 
+// Admin nav items - visible to ADMIN role
+const adminNavItems = [
+  { label: "운영 페이지", href: "/operations" },
+]
+
+// Super nav items - visible to SUPER role
+const superNavItems = [
+  { label: "관리자", href: "/admin" },
+]
+
 interface SiteHeaderProps {
   userName?: string | null
+  userRole?: UserRole | null
   onLogout?: () => void
 }
 
-export function SiteHeader({ userName, onLogout }: SiteHeaderProps) {
+export function SiteHeader({ userName, userRole, onLogout }: SiteHeaderProps) {
   const pathname = usePathname()
+  const router = useRouter()
+
+  const handleLogout = async () => {
+    if (onLogout) {
+      await onLogout()
+    }
+    router.push("/")
+  }
 
   return (
     <header className="border-b border-border bg-card">
@@ -60,7 +82,7 @@ export function SiteHeader({ userName, onLogout }: SiteHeaderProps) {
                 {item.label}
               </Link>
             ))}
-            {userName && authNavItems.map((item) => (
+            {userName && userRole === "STUDENT" && authNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -74,6 +96,40 @@ export function SiteHeader({ userName, onLogout }: SiteHeaderProps) {
                 {item.label}
               </Link>
             ))}
+            {userRole === "ADMIN" && adminNavItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  pathname === item.href
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span className="flex items-center gap-1">
+                  <Settings className="h-3.5 w-3.5" />
+                  {item.label}
+                </span>
+              </Link>
+            ))}
+            {userRole === "SUPER" && superNavItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  pathname === item.href
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <span className="flex items-center gap-1">
+                  <Shield className="h-3.5 w-3.5" />
+                  {item.label}
+                </span>
+              </Link>
+            ))}
           </nav>
 
           {userName ? (
@@ -85,7 +141,7 @@ export function SiteHeader({ userName, onLogout }: SiteHeaderProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={onLogout}
+                onClick={handleLogout}
                 className="gap-1.5 text-muted-foreground hover:text-foreground"
               >
                 <LogOut className="h-4 w-4" />

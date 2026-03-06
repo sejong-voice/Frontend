@@ -6,19 +6,33 @@ import {
   useState,
   useCallback,
   useEffect,
+  useMemo,
   type ReactNode,
 } from "react"
 
+// User role and status types
+export type UserRole = "STUDENT" | "ADMIN" | "SUPER"
+export type UserStatus = "ACTIVE" | "SUSPENDED" | "WITHDRAWN"
+
 export interface AuthUser {
-  id: string
+  id: number
+  studentNo: string
   name: string
-  role: "student" | "admin"
+  department: string
+  role: UserRole
+  status: UserStatus
+  managedCouncilIds?: number[] // Only for ADMIN role
 }
 
 interface AuthContextValue {
   loading: boolean
   user: AuthUser | null
+  // Convenience helpers
+  isActive: boolean
   isAdmin: boolean
+  isSuper: boolean
+  canManageCouncil: (councilId: number) => boolean
+  // Actions
   refreshMe: () => Promise<void>
   logout: () => Promise<void>
 }
@@ -61,13 +75,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshMe()
   }, [refreshMe])
 
-  const isAdmin = user?.role === "admin"
+  // Computed permission helpers
+  const isActive = user?.status === "ACTIVE"
+  const isAdmin = user?.role === "ADMIN"
+  const isSuper = user?.role === "SUPER"
 
-  return (
-    <AuthContext.Provider value={{ loading, user, isAdmin, refreshMe, logout }}>
-      {children}
-    </AuthContext.Provider>
+  const canManageCouncil = useCallback(
+    (councilId: number): boolean => {
+      if (!user) return false
+      if (user.role === "SUPER") return true
+      if (user.role === "ADMIN" && user.managedCouncilIds?.includes(councilId)) {
+        return true
+      }
+      return false
+    },
+    [user]
   )
+
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      loading,
+      user,
+      isActive,
+      isAdmin,
+      isSuper,
+      canManageCouncil,
+      refreshMe,
+      logout,
+    }),
+    [loading, user, isActive, isAdmin, isSuper, canManageCouncil, refreshMe, logout]
+  )
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {

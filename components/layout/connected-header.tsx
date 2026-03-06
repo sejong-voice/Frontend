@@ -9,5 +9,11 @@ import { SiteHeader } from "@/components/layout/site-header"
  */
 export function ConnectedHeader() {
   const { user, logout } = useAuth()
-  return <SiteHeader userName={user?.id} onLogout={logout} />
+  return (
+    <SiteHeader
+      userName={user?.studentNo}
+      userRole={user?.role}
+      onLogout={logout}
+    />
+  )
 }

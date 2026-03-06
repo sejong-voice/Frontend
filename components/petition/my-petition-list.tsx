@@ -7,12 +7,20 @@ import { cn } from "@/lib/utils"
 import { MessageSquare, Vote, Pencil, Trash2 } from "lucide-react"
 import type { Petition, PetitionStatus } from "@/components/petition/petition-list"
 
+const statusLabels: Record<PetitionStatus, string> = {
+  VOTING: "투표중",
+  APPROVED: "승인됨",
+  PENDING: "대기중",
+  COMPLETED: "완료",
+  REJECTED: "반려",
+}
+
 const statusStyles: Record<PetitionStatus, string> = {
-  진행중: "border-primary/30 bg-accent text-accent-foreground",
-  승인됨: "border-blue-200 bg-blue-50 text-blue-700",
-  답변완료: "border-green-200 bg-green-50 text-green-700",
-  미승인: "border-border bg-secondary text-muted-foreground",
-  반려: "border-orange-200 bg-orange-50 text-orange-700",
+  VOTING: "border-primary/30 bg-accent text-accent-foreground",
+  APPROVED: "border-blue-200 bg-blue-50 text-blue-700",
+  PENDING: "border-yellow-200 bg-yellow-50 text-yellow-700",
+  COMPLETED: "border-green-200 bg-green-50 text-green-700",
+  REJECTED: "border-red-200 bg-red-50 text-red-700",
 }
 
 interface MyPetitionListProps {
@@ -39,15 +47,15 @@ export function MyPetitionList({
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-card">
       {/* Desktop table header */}
-      <div className="hidden border-b border-border bg-secondary/50 px-6 py-3 md:grid md:grid-cols-[100px_80px_1fr_120px_100px_90px] md:items-center md:gap-4">
+      <div className="hidden border-b border-border bg-secondary/50 px-6 py-3 md:grid md:grid-cols-[100px_1fr_100px_120px_100px_90px] md:items-center md:gap-4">
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           {"상태"}
         </span>
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          {"분류"}
+          {"제목"}
         </span>
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          {"제목"}
+          {"담당"}
         </span>
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           {"참여"}
@@ -74,7 +82,7 @@ export function MyPetitionList({
                 )}
               >
                 {/* Desktop row */}
-                <div className="hidden md:grid md:grid-cols-[100px_80px_1fr_120px_100px_90px] md:items-center md:gap-4 px-6 py-4">
+                <div className="hidden md:grid md:grid-cols-[100px_1fr_100px_120px_100px_90px] md:items-center md:gap-4 px-6 py-4">
                   <div>
                     <Badge
                       variant="outline"
@@ -83,18 +91,18 @@ export function MyPetitionList({
                         statusStyles[petition.status]
                       )}
                     >
-                      {petition.status}
+                      {statusLabels[petition.status]}
                     </Badge>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {petition.category}
-                  </span>
                   <Link
                     href={`/petition/${petition.id}?from=my`}
                     className="truncate text-sm font-medium text-foreground hover:underline"
                   >
                     {petition.title}
                   </Link>
+                  <span className="text-xs text-muted-foreground">
+                    {petition.council}
+                  </span>
                   <div className="flex items-center gap-3">
                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Vote className="h-3.5 w-3.5" />
@@ -164,10 +172,10 @@ export function MyPetitionList({
                           statusStyles[petition.status]
                         )}
                       >
-                        {petition.status}
+                        {statusLabels[petition.status]}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
-                        {petition.category}
+                        {petition.council}
                       </span>
                     </div>
                     <div className="flex items-center gap-0.5">

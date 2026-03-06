@@ -3,26 +3,33 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { MessageSquare, Vote } from "lucide-react"
 
-export type PetitionStatus = "진행중" | "승인됨" | "답변완료" | "미승인" | "반려"
-export type PetitionCategory = "학사제도" | "학교시설" | "학생복지" | "기타"
+export type PetitionStatus = "VOTING" | "APPROVED" | "PENDING" | "COMPLETED" | "REJECTED"
 
 export interface Petition {
   id: number
   status: PetitionStatus
-  category: PetitionCategory
   title: string
   comments: number
   votes: number
   studentId: string
   date: string
+  council: string
+}
+
+const statusLabels: Record<PetitionStatus, string> = {
+  VOTING: "투표중",
+  APPROVED: "승인됨",
+  PENDING: "대기중",
+  COMPLETED: "완료",
+  REJECTED: "반려",
 }
 
 const statusStyles: Record<PetitionStatus, string> = {
-  진행중: "border-primary/30 bg-accent text-accent-foreground",
-  승인됨: "border-blue-200 bg-blue-50 text-blue-700",
-  답변완료: "border-green-200 bg-green-50 text-green-700",
-  미승인: "border-border bg-secondary text-muted-foreground",
-  반려: "border-orange-200 bg-orange-50 text-orange-700",
+  VOTING: "border-primary/30 bg-accent text-accent-foreground",
+  APPROVED: "border-blue-200 bg-blue-50 text-blue-700",
+  PENDING: "border-yellow-200 bg-yellow-50 text-yellow-700",
+  COMPLETED: "border-green-200 bg-green-50 text-green-700",
+  REJECTED: "border-red-200 bg-red-50 text-red-700",
 }
 
 interface PetitionListProps {
@@ -44,15 +51,15 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
   return (
     <div className="overflow-hidden rounded-lg border border-border bg-card">
       {/* Desktop table header */}
-      <div className="hidden border-b border-border bg-secondary/50 px-6 py-3 md:grid md:grid-cols-[100px_80px_1fr_140px_100px]  md:items-center md:gap-4">
+      <div className="hidden border-b border-border bg-secondary/50 px-6 py-3 md:grid md:grid-cols-[100px_1fr_120px_140px_100px]  md:items-center md:gap-4">
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           {"상태"}
         </span>
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          {"분류"}
+          {"제목"}
         </span>
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-          {"제목"}
+          {"담당"}
         </span>
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           {"참여"}
@@ -74,7 +81,7 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
               )}
             >
               {/* Desktop row */}
-              <div className="hidden px-6 py-4 md:grid md:grid-cols-[100px_80px_1fr_140px_100px] md:items-center md:gap-4">
+              <div className="hidden px-6 py-4 md:grid md:grid-cols-[100px_1fr_120px_140px_100px] md:items-center md:gap-4">
                 <div>
                   <Badge
                     variant="outline"
@@ -83,14 +90,14 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
                       statusStyles[petition.status]
                     )}
                   >
-                    {petition.status}
+                    {statusLabels[petition.status]}
                   </Badge>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {petition.category}
-                </span>
                 <span className="truncate text-sm font-medium text-foreground">
                   {petition.title}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {petition.council}
                 </span>
                 <div className="flex items-center gap-3">
                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -117,10 +124,10 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
                       statusStyles[petition.status]
                     )}
                   >
-                    {petition.status}
+                    {statusLabels[petition.status]}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
-                    {petition.category}
+                    {petition.council}
                   </span>
                 </div>
                 <span className="truncate text-sm font-medium text-foreground">
