@@ -1,56 +1,44 @@
-"use client"
+"use client";
 
-import React from "react"
-
-import { useState } from "react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Loader2 } from "lucide-react"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/components/auth/auth-provider"
+import React, { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/auth/auth-provider";
 
 export function LoginForm() {
-  const { refreshMe } = useAuth()
-  const router = useRouter()
-  const [studentId, setStudentId] = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const { login } = useAuth();
+  const router = useRouter();
+
+  const [studentNo, setStudentNo] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError("")
+    e.preventDefault();
+    setError("");
 
-    if (!studentId.trim() || !password.trim()) {
-      setError("학번과 비밀번호를 모두 입력해주세요.")
-      return
+    if (!studentNo.trim() || !password.trim()) {
+      setError("학번과 비밀번호를 모두 입력해주세요.");
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ studentId, password }),
-      })
+      const result = await login(studentNo, password);
 
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.error || "로그인에 실패했습니다.")
-        setIsLoading(false)
-        return
+      if (result.success) {
+        router.push("/");
+      } else {
+        setError(result.message || "로그인에 실패했습니다.");
       }
-
-      // Cookie is set by the server; refresh auth state
-      await refreshMe()
-      router.push("/")
-    } catch {
-      setError("서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.")
+    } catch (err) {
+      setError("서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
@@ -58,19 +46,19 @@ export function LoginForm() {
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
       <div className="flex flex-col gap-2">
         <label
-          htmlFor="student-id"
+          htmlFor="student-no"
           className="text-sm font-medium text-foreground"
         >
-          {"학번"}
+          학번
         </label>
         <Input
-          id="student-id"
+          id="student-no"
           type="text"
           placeholder="학번을 입력하세요"
-          value={studentId}
+          value={studentNo}
           onChange={(e) => {
-            setStudentId(e.target.value)
-            if (error) setError("")
+            setStudentNo(e.target.value);
+            if (error) setError("");
           }}
           autoComplete="username"
           className="h-11"
@@ -81,9 +69,10 @@ export function LoginForm() {
       <div className="flex flex-col gap-2">
         <label
           htmlFor="password"
+          title="비밀번호"
           className="text-sm font-medium text-foreground"
         >
-          {"비밀번호"}
+          비밀번호
         </label>
         <Input
           id="password"
@@ -91,8 +80,8 @@ export function LoginForm() {
           placeholder="비밀번호를 입력하세요"
           value={password}
           onChange={(e) => {
-            setPassword(e.target.value)
-            if (error) setError("")
+            setPassword(e.target.value);
+            if (error) setError("");
           }}
           autoComplete="current-password"
           className="h-11"
@@ -107,8 +96,8 @@ export function LoginForm() {
       >
         {isLoading ? (
           <>
-            <Loader2 className="animate-spin" aria-hidden="true" />
-            {"로그인 중..."}
+            <Loader2 className="animate-spin mr-2" aria-hidden="true" />
+            로그인 중...
           </>
         ) : (
           "로그인"
@@ -120,10 +109,6 @@ export function LoginForm() {
           {error}
         </p>
       )}
-
-      <p className="text-center text-xs text-muted-foreground">
-        {"테스트 계정: 20210001 / 1234 (학생) | admin / admin (관리자)"}
-      </p>
     </form>
-  )
+  );
 }
