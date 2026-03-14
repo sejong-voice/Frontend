@@ -47,8 +47,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setUser(null);
       }
-    } catch (error) {
-      console.error("프로필 로드 실패:", error);
+    } catch (error: any) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.log("인증되지 않은 사용자이거나 세션이 만료되었습니다.");
+      } else {
+        console.error("프로필 로드 실패:", error);
+      }
       setUser(null);
     } finally {
       setLoading(false);
@@ -60,15 +64,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (studentNo: string, password: string) => {
       try {
         // 로그인 요청
-        await api.post("/api/v1/auth/login", {
+        const res = await api.post("/api/v1/auth/login", {
           studentNo,
           password,
         });
+
+        console.log("로그인 성공:", res.data);
+
+        // 백엔드 응답 구조에 따라 토큰 추출 (accessToken, token, jwt 등)
+        const token = res.data.accessToken || res.data.token || res.data.jwt;
+        if (token) {
+          localStorage.setItem("accessToken", token);
+        }
 
         await refreshMe();
 
         return { success: true };
       } catch (error: any) {
+        console.error("로그인 실패 상세:", error.response?.data || error.message);
         const message =
           error.response?.data?.message ||
           error.response?.data?.error ||
@@ -85,6 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.warn("서버 로그아웃 요청 실패:", error);
     }
+    localStorage.removeItem("accessToken");
     setUser(null);
     window.location.href = "/login";
   }, []);
