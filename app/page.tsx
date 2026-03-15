@@ -1,156 +1,73 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { ConnectedHeader } from "@/components/layout/connected-header"
 import { PageHeader } from "@/components/layout/page-header"
 import { FilterBar } from "@/components/petition/filter-bar"
 import {
   PetitionList,
   type Petition,
-  type PetitionCategory,
 } from "@/components/petition/petition-list"
-
-const petitions: Petition[] = [
-  {
-    id: 1,
-    status: "진행중",
-    category: "학사제도",
-    title: "졸업요건 중 영어 인증 기준 완화 요청",
-    comments: 24,
-    votes: 312,
-    studentId: "20210001",
-    date: "2026.02.01",
-  },
-  {
-    id: 2,
-    status: "진행중",
-    category: "학교시설",
-    title: "중앙도서관 24시간 열람실 운영 재개 요청",
-    comments: 18,
-    votes: 287,
-    studentId: "20220315",
-    date: "2026.01.28",
-  },
-  {
-    id: 3,
-    status: "답변완료",
-    category: "학생복지",
-    title: "교내 셔틀버스 배차 간격 단축 건의",
-    comments: 31,
-    votes: 456,
-    studentId: "20190782",
-    date: "2026.01.25",
-  },
-  {
-    id: 4,
-    status: "승인됨",
-    category: "학사제도",
-    title: "계절학기 수강 신청 기간 확대 요청",
-    comments: 12,
-    votes: 198,
-    studentId: "20200456",
-    date: "2026.01.22",
-  },
-  {
-    id: 5,
-    status: "미승인",
-    category: "기타",
-    title: "캠퍼스 내 반려동물 동반 출입 허용 건의",
-    comments: 45,
-    votes: 89,
-    studentId: "20230198",
-    date: "2026.01.20",
-  },
-  {
-    id: 6,
-    status: "진행중",
-    category: "학교시설",
-    title: "학생회관 카페테리아 메뉴 다양화 요청",
-    comments: 8,
-    votes: 156,
-    studentId: "20211034",
-    date: "2026.01.18",
-  },
-  {
-    id: 7,
-    status: "답변완료",
-    category: "학생복지",
-    title: "장학금 선발 기준 투명성 강화 건의",
-    comments: 22,
-    votes: 378,
-    studentId: "20180523",
-    date: "2026.01.15",
-  },
-  {
-    id: 8,
-    status: "진행중",
-    category: "학사제도",
-    title: "복수전공 학점 인정 범위 확대 요청",
-    comments: 15,
-    votes: 234,
-    studentId: "20200891",
-    date: "2026.01.12",
-  },
-  {
-    id: 9,
-    status: "승인됨",
-    category: "학교시설",
-    title: "공학관 강의실 냉난방 시설 개선 요청",
-    comments: 27,
-    votes: 421,
-    studentId: "20210667",
-    date: "2026.01.10",
-  },
-  {
-    id: 10,
-    status: "답변완료",
-    category: "기타",
-    title: "학교 공식 앱 UI/UX 개선 건의",
-    comments: 19,
-    votes: 267,
-    studentId: "20190244",
-    date: "2026.01.08",
-  },
-  {
-    id: 14,
-    status: "반려",
-    category: "학생복지",
-    title: "학생회비 사용 내역 분기별 공개 의무화 요청",
-    comments: 4,
-    votes: 373,
-    studentId: "20170412",
-    date: "2026.01.03",
-  },
-]
+import { postService } from "@/app/api/posts"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination"
+import { Loader2 } from "lucide-react"
 
 export default function Page() {
-  const [activeCategory, setActiveCategory] = useState("전체")
+  const [activeStatus, setActiveStatus] = useState("ALL")
+  const [activeCouncilId, setActiveCouncilId] = useState("ALL")
   const [searchQuery, setSearchQuery] = useState("")
+  const [page, setPage] = useState(0)
+  const [data, setData] = useState<{
+    content: Petition[]
+    totalPages: number
+    totalElements: number
+    number: number
+  } | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
-  const filteredPetitions = useMemo(() => {
-    return petitions.filter((p) => {
-      const matchesCategory =
-        activeCategory === "전체" || p.category === activeCategory
-      const matchesSearch =
-        searchQuery === "" ||
-        p.title.toLowerCase().includes(searchQuery.toLowerCase())
-      return matchesCategory && matchesSearch
-    })
-  }, [activeCategory, searchQuery])
+  const fetchPetitions = async () => {
+    setIsLoading(true)
+    try {
+      const res = await postService.getPosts({
+        page,
+        size: 10,
+        keyword: searchQuery || undefined,
+        status: activeStatus === "ALL" ? undefined : activeStatus,
+        councilId: activeCouncilId === "ALL" ? undefined : activeCouncilId,
+        sort: "createdAt,DESC"
+      })
+      setData(res.data)
+    } catch (error) {
+      console.error("청원 목록 로드 실패:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchPetitions()
+  }, [page, searchQuery, activeStatus, activeCouncilId])
 
   const stats = useMemo(() => {
-    const inProgress = petitions.filter(
-      (p) => p.status === "진행중" || p.status === "승인됨"
-    ).length
-    const answered = petitions.filter(
-      (p) => p.status === "답변완료"
-    ).length
+    const total = data?.totalElements || 0
     return [
-      { label: "진행중", count: inProgress },
-      { label: "답변완료", count: answered },
-      { label: "전체", count: petitions.length },
+      { label: "전체", count: total },
     ]
-  }, [])
+  }, [data])
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 0 && newPage < (data?.totalPages || 0)) {
+      setPage(newPage)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -159,12 +76,92 @@ export default function Page() {
         <div className="flex flex-col gap-8">
           <PageHeader stats={stats} />
           <FilterBar
-            activeCategory={activeCategory}
-            onCategoryChange={setActiveCategory}
+            activeStatus={activeStatus}
+            onStatusChange={(s) => {
+              setActiveStatus(s)
+              setPage(0)
+            }}
+            activeCouncilId={activeCouncilId}
+            onCouncilChange={(id) => {
+              setActiveCouncilId(id)
+              setPage(0)
+            }}
             searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
+            onSearchChange={(q) => {
+              setSearchQuery(q)
+              setPage(0) // 검색 시 첫 페이지로
+            }}
           />
-          <PetitionList petitions={filteredPetitions} />
+
+          {isLoading ? (
+            <div className="flex h-64 items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <>
+              <PetitionList petitions={data?.content || []} />
+              
+              {data && data.totalPages > 1 && (
+                <Pagination className="mt-8">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        href="#" 
+                        onClick={(e) => {
+                          e.preventDefault()
+                          handlePageChange(page - 1)
+                        }}
+                        className={page === 0 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                    
+                    {[...Array(data.totalPages)].map((_, i) => {
+                      // 페이지가 너무 많을 경우를 대비해 현재 페이지 주변만 표시하는 로직 (간략화)
+                      if (
+                        data.totalPages <= 7 ||
+                        i === 0 ||
+                        i === data.totalPages - 1 ||
+                        (i >= page - 1 && i <= page + 1)
+                      ) {
+                        return (
+                          <PaginationItem key={i}>
+                            <PaginationLink
+                              href="#"
+                              isActive={page === i}
+                              onClick={(e) => {
+                                e.preventDefault()
+                                handlePageChange(i)
+                              }}
+                              className="cursor-pointer"
+                            >
+                              {i + 1}
+                            </PaginationLink>
+                          </PaginationItem>
+                        )
+                      } else if (
+                        (i === 1 && page > 2) ||
+                        (i === data.totalPages - 2 && page < data.totalPages - 3)
+                      ) {
+                        return <PaginationItem key={i}><PaginationEllipsis /></PaginationItem>
+                      }
+                      return null
+                    })}
+
+                    <PaginationItem>
+                      <PaginationNext 
+                        href="#" 
+                        onClick={(e) => {
+                          e.preventDefault()
+                          handlePageChange(page + 1)
+                        }}
+                        className={page === data.totalPages - 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
+            </>
+          )}
         </div>
       </main>
     </div>

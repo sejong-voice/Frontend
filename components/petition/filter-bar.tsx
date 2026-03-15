@@ -5,51 +5,96 @@ import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
 
-const categories = ["전체", "학사제도", "학교시설", "학생복지", "기타"]
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+
+const statuses = [
+  { label: "전체", value: "ALL" },
+  { label: "진행중", value: "VOTING" },
+  { label: "승인됨", value: "APPROVED" },
+  { label: "검토중", value: "PENDING" },
+  { label: "답변완료", value: "COMPLETED" },
+  { label: "반려", value: "REJECTED" },
+]
+
+const councils = [
+  { label: "전체 학생회", value: "ALL" },
+  { label: "총학생회", value: "general" },
+  { label: "공과대학 학생회", value: "engineering" },
+  { label: "인문대학 학생회", value: "liberal-arts" },
+]
 
 interface FilterBarProps {
-  activeCategory: string
-  onCategoryChange: (category: string) => void
+  activeStatus: string
+  onStatusChange: (status: string) => void
+  activeCouncilId: string
+  onCouncilChange: (id: string) => void
   searchQuery: string
   onSearchChange: (query: string) => void
 }
 
 export function FilterBar({
-  activeCategory,
-  onCategoryChange,
+  activeStatus,
+  onStatusChange,
+  activeCouncilId,
+  onCouncilChange,
   searchQuery,
   onSearchChange,
 }: FilterBarProps) {
   return (
-    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-      <div className="flex items-center gap-1.5" role="tablist" aria-label="카테고리 필터">
-        {categories.map((category) => (
-          <button
-            key={category}
-            role="tab"
-            aria-selected={activeCategory === category}
-            onClick={() => onCategoryChange(category)}
-            className={cn(
-              "rounded-md px-3.5 py-2 text-sm font-medium transition-colors",
-              activeCategory === category
-                ? "bg-foreground text-background"
-                : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
-            )}
-          >
-            {category}
-          </button>
-        ))}
+    <div className="flex flex-col gap-4 border-b border-border pb-6">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="상태 필터">
+          {statuses.map((status) => (
+            <button
+              key={status.value}
+              role="tab"
+              aria-selected={activeStatus === status.value}
+              onClick={() => onStatusChange(status.value)}
+              className={cn(
+                "rounded-md px-3.5 py-2 text-sm font-medium transition-colors",
+                activeStatus === status.value
+                  ? "bg-foreground text-background"
+                  : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+              )}
+            >
+              {status.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="relative w-full md:w-72">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="청원 검색…"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="pl-9"
+            aria-label="청원 검색"
+          />
+        </div>
       </div>
-      <div className="relative w-full md:w-72">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          type="search"
-          placeholder="청원 검색…"
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-9"
-          aria-label="청원 검색"
-        />
+
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-medium text-muted-foreground">{"학생회 필터:"}</span>
+        <Select value={activeCouncilId} onValueChange={onCouncilChange}>
+          <SelectTrigger className="w-full md:w-48 h-9 text-sm">
+            <SelectValue placeholder="학생회 선택" />
+          </SelectTrigger>
+          <SelectContent>
+            {councils.map((c) => (
+              <SelectItem key={c.value} value={c.value}>
+                {c.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
     </div>
   )

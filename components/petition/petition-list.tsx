@@ -3,26 +3,32 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { MessageSquare, Vote } from "lucide-react"
 
-export type PetitionStatus = "진행중" | "승인됨" | "답변완료" | "미승인" | "반려"
-export type PetitionCategory = "학사제도" | "학교시설" | "학생복지" | "기타"
+export type PetitionStatus = "VOTING" | "APPROVED" | "PENDING" | "COMPLETED" | "REJECTED" | "DELETED"
 
 export interface Petition {
-  id: number
-  status: PetitionStatus
-  category: PetitionCategory
+  id: string
+  userId: string
+  userStudentNo: string
+  councilId: string
+  councilName: string
   title: string
-  comments: number
-  votes: number
-  studentId: string
-  date: string
+  content: string
+  status: PetitionStatus
+  postVotingDuration: string
+  createdAt: string
+  votingEndAt: string
+  // Optional/Computed fields if needed for UI compatibility
+  comments?: number
+  votes?: number
 }
 
-const statusStyles: Record<PetitionStatus, string> = {
-  진행중: "border-primary/30 bg-accent text-accent-foreground",
-  승인됨: "border-blue-200 bg-blue-50 text-blue-700",
-  답변완료: "border-green-200 bg-green-50 text-green-700",
-  미승인: "border-border bg-secondary text-muted-foreground",
-  반려: "border-orange-200 bg-orange-50 text-orange-700",
+const statusMap: Record<PetitionStatus, { label: string; style: string }> = {
+  VOTING: { label: "진행중", style: "border-primary/30 bg-accent text-accent-foreground" },
+  APPROVED: { label: "승인됨", style: "border-blue-200 bg-blue-50 text-blue-700" },
+  COMPLETED: { label: "답변완료", style: "border-green-200 bg-green-50 text-green-700" },
+  PENDING: { label: "검토중", style: "border-border bg-secondary text-muted-foreground" },
+  REJECTED: { label: "반려", style: "border-orange-200 bg-orange-50 text-orange-700" },
+  DELETED: { label: "삭제됨", style: "border-red-200 bg-red-50 text-red-700" },
 }
 
 interface PetitionListProps {
@@ -80,14 +86,14 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
                     variant="outline"
                     className={cn(
                       "text-xs font-medium",
-                      statusStyles[petition.status]
+                      statusMap[petition.status]?.style
                     )}
                   >
-                    {petition.status}
+                    {statusMap[petition.status]?.label || petition.status}
                   </Badge>
                 </div>
                 <span className="text-xs text-muted-foreground">
-                  {petition.category}
+                  {petition.councilName || "기타"}
                 </span>
                 <span className="truncate text-sm font-medium text-foreground">
                   {petition.title}
@@ -95,15 +101,15 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
                 <div className="flex items-center gap-3">
                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
                     <Vote className="h-3.5 w-3.5" />
-                    {petition.votes}
+                    {petition.votes || 0}
                   </span>
                   <span className="flex items-center gap-1 text-xs text-muted-foreground">
                     <MessageSquare className="h-3.5 w-3.5" />
-                    {petition.comments}
+                    {petition.comments || 0}
                   </span>
                 </div>
                 <span className="text-right text-xs text-muted-foreground">
-                  {petition.date}
+                  {petition.createdAt ? new Date(petition.createdAt).toLocaleDateString() : "-"}
                 </span>
               </div>
 
@@ -114,13 +120,13 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
                     variant="outline"
                     className={cn(
                       "text-xs font-medium",
-                      statusStyles[petition.status]
+                      statusMap[petition.status]?.style
                     )}
                   >
-                    {petition.status}
+                    {statusMap[petition.status]?.label || petition.status}
                   </Badge>
                   <span className="text-xs text-muted-foreground">
-                    {petition.category}
+                    {petition.councilName || "기타"}
                   </span>
                 </div>
                 <span className="truncate text-sm font-medium text-foreground">
@@ -130,15 +136,15 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
                   <div className="flex items-center gap-3">
                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Vote className="h-3.5 w-3.5" />
-                      {petition.votes}
+                      {petition.votes || 0}
                     </span>
                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
                       <MessageSquare className="h-3.5 w-3.5" />
-                      {petition.comments}
+                      {petition.comments || 0}
                     </span>
                   </div>
                   <span className="text-xs text-muted-foreground">
-                    {petition.date}
+                    {petition.createdAt ? new Date(petition.createdAt).toLocaleDateString() : "-"}
                   </span>
                 </div>
               </div>

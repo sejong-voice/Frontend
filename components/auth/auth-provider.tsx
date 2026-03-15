@@ -8,7 +8,7 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import { api } from "../../app/api/axios";
+import { authService } from "../../app/api/auth";
 
 export interface AuthUser {
   id: string;
@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // 1. 실제 프로필 정보 가져오기
   const refreshMe = useCallback(async () => {
     try {
-      const res = await api.get("/api/v1/auth/profile");
+      const res = await authService.getProfile();
 
       if (res.status === 200) {
         setUser(res.data);
@@ -64,15 +64,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (studentNo: string, password: string) => {
       try {
         // 로그인 요청
-        const res = await api.post("/api/v1/auth/login", {
-          studentNo,
-          password,
-        });
+        const res = await authService.login(studentNo, password);
 
         console.log("로그인 성공:", res.data);
 
-        // 백엔드 응답 구조에 따라 토큰 추출 (accessToken, token, jwt 등)
-        const token = res.data.accessToken || res.data.token || res.data.jwt;
+        // 백엔드 응답 구조에 따라 토큰 추출
+        const token = (res.data as any).accessToken || (res.data as any).token || (res.data as any).jwt;
         if (token) {
           localStorage.setItem("accessToken", token);
         }
@@ -94,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      await api.post("/api/v1/auth/logout");
+      await authService.logout();
     } catch (error) {
       console.warn("서버 로그아웃 요청 실패:", error);
     }
