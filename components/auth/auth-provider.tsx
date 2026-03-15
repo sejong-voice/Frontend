@@ -8,7 +8,7 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
-import { api } from "../../app/api/axios";
+import { authService } from "../../app/api/auth";
 
 export interface AuthUser {
   id: string;
@@ -40,15 +40,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // 1. 실제 프로필 정보 가져오기
   const refreshMe = useCallback(async () => {
     try {
-      const res = await api.get("/api/v1/auth/profile");
+      const res = await authService.getProfile();
 
       if (res.status === 200) {
         setUser(res.data);
       } else {
         setUser(null);
       }
-    } catch (error) {
-      console.error("프로필 로드 실패:", error);
+    } catch (error: any) {
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.log("인증되지 않은 사용자이거나 세션이 만료되었습니다.");
+      } else {
+        console.error("프로필 로드 실패:", error);
+      }
       setUser(null);
     } finally {
       setLoading(false);
@@ -60,15 +64,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (studentNo: string, password: string) => {
       try {
         // 로그인 요청
-        await api.post("/api/v1/auth/login", {
-          studentNo,
-          password,
-        });
+        const res = await authService.login(studentNo, password);
+
+        console.log("로그인 성공:", res.data);
+
+        // 백엔드 응답 구조에 따라 토큰 추출
+        const token = (res.data as any).accessToken || (res.data as any).token || (res.data as any).jwt;
+        if (token) {
+          localStorage.setItem("accessToken", token);
+        }
 
         await refreshMe();
 
         return { success: true };
       } catch (error: any) {
+        console.error("로그인 실패 상세:", error.response?.data || error.message);
         const message =
           error.response?.data?.message ||
           error.response?.data?.error ||
@@ -81,10 +91,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      await api.post("/api/v1/auth/logout");
+      await authService.logout();
     } catch (error) {
       console.warn("서버 로그아웃 요청 실패:", error);
     }
+    localStorage.removeItem("accessToken");
     setUser(null);
     window.location.href = "/login";
   }, []);
