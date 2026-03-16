@@ -9,8 +9,6 @@ import { LogIn, LogOut, User } from "lucide-react"
 
 const publicNavItems = [
   { label: "전체 청원", href: "/" },
-  { label: "진행중", href: "/in-progress" },
-  { label: "답변완료", href: "/answered" },
 ]
 
 const authNavItems = [

@@ -22,13 +22,6 @@ const statuses = [
   { label: "반려", value: "REJECTED" },
 ]
 
-const councils = [
-  { label: "전체 학생회", value: "ALL" },
-  { label: "총학생회", value: "general" },
-  { label: "공과대학 학생회", value: "engineering" },
-  { label: "인문대학 학생회", value: "liberal-arts" },
-]
-
 interface FilterBarProps {
   activeStatus: string
   onStatusChange: (status: string) => void
@@ -36,6 +29,7 @@ interface FilterBarProps {
   onCouncilChange: (id: string) => void
   searchQuery: string
   onSearchChange: (query: string) => void
+  councils: { id: string; name: string }[]
 }
 
 export function FilterBar({
@@ -45,6 +39,7 @@ export function FilterBar({
   onCouncilChange,
   searchQuery,
   onSearchChange,
+  councils,
 }: FilterBarProps) {
   return (
     <div className="flex flex-col gap-4 border-b border-border pb-6">
@@ -88,9 +83,10 @@ export function FilterBar({
             <SelectValue placeholder="학생회 선택" />
           </SelectTrigger>
           <SelectContent>
-            {councils.map((c) => (
-              <SelectItem key={c.value} value={c.value}>
-                {c.label}
+            <SelectItem value="ALL">{"전체 학생회"}</SelectItem>
+            {councils?.map((c) => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.name}
               </SelectItem>
             ))}
           </SelectContent>

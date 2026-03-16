@@ -10,97 +10,85 @@ import { Button } from "@/components/ui/button"
 import { Plus, Loader2 } from "lucide-react"
 import type { Petition } from "@/components/petition/petition-list"
 import { useAuth } from "@/components/auth/auth-provider"
+import { toast } from "sonner"
 
-const myPetitions: Petition[] = [
-  {
-    id: 1,
-    status: "진행중",
-    category: "학사제도",
-    title: "졸업요건 중 영어 인증 기준 완화 요청",
-    comments: 24,
-    votes: 312,
-    studentId: "20210001",
-    date: "2026.02.01",
-  },
-  {
-    id: 4,
-    status: "승인됨",
-    category: "학사제도",
-    title: "계절학기 수강 신청 기간 확대 요청",
-    comments: 12,
-    votes: 198,
-    studentId: "20210001",
-    date: "2026.01.22",
-  },
-  {
-    id: 11,
-    status: "진행중",
-    category: "학생복지",
-    title: "기숙사 외박 신청 절차 간소화 요청",
-    comments: 3,
-    votes: 0,
-    studentId: "20210001",
-    date: "2026.02.05",
-  },
-  {
-    id: 12,
-    status: "답변완료",
-    category: "학교시설",
-    title: "정보관 PC실 모니터 교체 건의",
-    comments: 9,
-    votes: 145,
-    studentId: "20210001",
-    date: "2026.01.14",
-  },
-  {
-    id: 13,
-    status: "미승인",
-    category: "기타",
-    title: "교내 자판기 제품 종류 확대 건의",
-    comments: 2,
-    votes: 0,
-    studentId: "20210001",
-    date: "2026.01.05",
-  },
-]
+import { postService } from "@/app/api/posts"
+import { councilService, Council } from "@/app/api/councils"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination"
 
 export default function MyPetitionsPage() {
   const { loading, user } = useAuth()
   const router = useRouter()
-  const [activeCategory, setActiveCategory] = useState("전체")
+  const [activeStatus, setActiveStatus] = useState("ALL")
+  const [activeCouncilId, setActiveCouncilId] = useState("ALL")
   const [searchQuery, setSearchQuery] = useState("")
-  const [petitions, setPetitions] = useState(myPetitions)
+  const [page, setPage] = useState(0)
+  const [councils, setCouncils] = useState<Council[]>([])
+  const [data, setData] = useState<{
+    content: Petition[]
+    totalPages: number
+    totalElements: number
+    number: number
+  } | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
-  const filteredPetitions = useMemo(() => {
-    return petitions.filter((p) => {
-      const matchesCategory =
-        activeCategory === "전체" || p.category === activeCategory
-      const matchesSearch =
-        searchQuery === "" ||
-        p.title.toLowerCase().includes(searchQuery.toLowerCase())
-      return matchesCategory && matchesSearch
-    })
-  }, [petitions, activeCategory, searchQuery])
+  const fetchInitialData = async () => {
+    try {
+      const res = await councilService.getCouncils()
+      setCouncils(res.data)
+    } catch (error) {
+      console.error("학생회 목록 로드 실패:", error)
+    }
+  }
 
-  const stats = useMemo(() => {
-    const inProgress = petitions.filter(
-      (p) => p.status === "진행중" || p.status === "승인됨"
-    ).length
-    const answered = petitions.filter(
-      (p) => p.status === "답변완료"
-    ).length
-    return [
-      { label: "진행중", count: inProgress },
-      { label: "답변완료", count: answered },
-      { label: "전체", count: petitions.length },
-    ]
-  }, [petitions])
+  const fetchMyPetitions = async () => {
+    setIsLoading(true)
+    try {
+      const res = await postService.getPosts({
+        page,
+        size: 10,
+        keyword: searchQuery || undefined,
+        status: activeStatus === "ALL" ? undefined : activeStatus,
+        councilId: activeCouncilId === "ALL" ? undefined : activeCouncilId,
+        mine: true, // 내 청원만 보기
+        sort: "createdAt,DESC"
+      })
+      setData(res.data)
+    } catch (error) {
+      console.error("내 청원 로드 실패:", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (!loading && !user) {
       router.replace("/login")
+    } else if (user) {
+      fetchInitialData()
     }
   }, [loading, user, router])
+
+  useEffect(() => {
+    if (user) {
+      fetchMyPetitions()
+    }
+  }, [page, searchQuery, activeStatus, activeCouncilId, user])
+
+  const stats = useMemo(() => {
+    const total = data?.totalElements || 0
+    return [
+      { label: "전체 내 청원", count: total },
+    ]
+  }, [data])
 
   if (loading || !user) {
     return (
@@ -110,16 +98,26 @@ export default function MyPetitionsPage() {
     )
   }
 
-  function handleEdit(id: number) {
-    // Mock: navigate to edit page
-    alert(`청원 #${id} 수정 페이지로 이동합니다.`)
+  function handleEdit(id: string) {
+    router.push(`/petition/${id}/edit`)
   }
 
-  function handleDelete(id: number) {
-    const target = petitions.find((p) => p.id === id)
-    if (!target || target.votes > 0) return
+  async function handleDelete(id: string) {
     if (confirm("정말 이 청원을 삭제하시겠습니까?")) {
-      setPetitions((prev) => prev.filter((p) => p.id !== id))
+      try {
+        await postService.deletePost(id)
+        toast.success("청원이 성공적으로 삭제되었습니다.")
+        fetchMyPetitions()
+      } catch (error: any) {
+        console.error("삭제 실패:", error)
+        toast.error(error.response?.data?.message || "삭제 권한이 없거나 이미 투표가 진행되어 삭제할 수 없습니다.")
+      }
+    }
+  }
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 0 && newPage < (data?.totalPages || 0)) {
+      setPage(newPage)
     }
   }
 
@@ -167,17 +165,81 @@ export default function MyPetitionsPage() {
           </div>
 
           <FilterBar
-            activeCategory={activeCategory}
-            onCategoryChange={setActiveCategory}
+            activeStatus={activeStatus}
+            onStatusChange={(s) => {
+              setActiveStatus(s)
+              setPage(0)
+            }}
+            activeCouncilId={activeCouncilId}
+            onCouncilChange={(id) => {
+              setActiveCouncilId(id)
+              setPage(0)
+            }}
             searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
+            onSearchChange={(q) => {
+              setSearchQuery(q)
+              setPage(0)
+            }}
+            councils={councils}
           />
 
-          <MyPetitionList
-            petitions={filteredPetitions}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
+          {isLoading ? (
+            <div className="flex h-64 items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <>
+              <MyPetitionList
+                petitions={data?.content || []}
+                onEdit={handleEdit as any}
+                onDelete={handleDelete as any}
+              />
+              
+              {data && data.totalPages > 1 && (
+                <Pagination className="mt-8">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        href="#" 
+                        onClick={(e) => {
+                          e.preventDefault()
+                          handlePageChange(page - 1)
+                        }}
+                        className={page === 0 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                    
+                    {[...Array(data.totalPages)].map((_, i) => (
+                      <PaginationItem key={i}>
+                        <PaginationLink
+                          href="#"
+                          isActive={page === i}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            handlePageChange(i)
+                          }}
+                          className="cursor-pointer"
+                        >
+                          {i + 1}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+
+                    <PaginationItem>
+                      <PaginationNext 
+                        href="#" 
+                        onClick={(e) => {
+                          e.preventDefault()
+                          handlePageChange(page + 1)
+                        }}
+                        className={page === data.totalPages - 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
+            </>
+          )}
         </div>
       </main>
     </div>

@@ -9,6 +9,7 @@ import {
   type Petition,
 } from "@/components/petition/petition-list"
 import { postService } from "@/app/api/posts"
+import { councilService, Council } from "@/app/api/councils"
 import {
   Pagination,
   PaginationContent,
@@ -25,6 +26,7 @@ export default function Page() {
   const [activeCouncilId, setActiveCouncilId] = useState("ALL")
   const [searchQuery, setSearchQuery] = useState("")
   const [page, setPage] = useState(0)
+  const [councils, setCouncils] = useState<Council[]>([])
   const [data, setData] = useState<{
     content: Petition[]
     totalPages: number
@@ -32,6 +34,15 @@ export default function Page() {
     number: number
   } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+
+  const fetchInitialData = async () => {
+    try {
+      const res = await councilService.getCouncils()
+      setCouncils(res.data)
+    } catch (error) {
+      console.error("학생회 목록 로드 실패:", error)
+    }
+  }
 
   const fetchPetitions = async () => {
     setIsLoading(true)
@@ -51,6 +62,10 @@ export default function Page() {
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    fetchInitialData()
+  }, [])
 
   useEffect(() => {
     fetchPetitions()
@@ -91,6 +106,7 @@ export default function Page() {
               setSearchQuery(q)
               setPage(0) // 검색 시 첫 페이지로
             }}
+            councils={councils}
           />
 
           {isLoading ? (
