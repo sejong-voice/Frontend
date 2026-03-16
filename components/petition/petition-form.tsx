@@ -13,19 +13,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Info, User } from "lucide-react"
+import { Info, User, Loader2 } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
+import { postService } from "@/app/api/posts"
+import { councilService, Council } from "@/app/api/councils"
+import { toast } from "sonner"
 
 const categories = ["학사제도", "학교시설", "학생복지", "기타"] as const
-const councils = [
-  { value: "department", label: "학과 학생회" },
-  { value: "college", label: "단과대 학생회" },
-  { value: "general", label: "총학생회" },
-] as const
 const votePeriods = [
-  { value: "1w", label: "1주" },
-  { value: "2w", label: "2주" },
-  { value: "1m", label: "1달" },
+  { value: "ONE_WEEK", label: "1주" },
+  { value: "TWO_WEEKS", label: "2주" },
+  { value: "FOUR_WEEKS", label: "4주" },
 ] as const
 
 const MAX_CONTENT_LENGTH = 2000
@@ -35,15 +33,40 @@ export function PetitionForm() {
   const { user } = useAuth()
   const [category, setCategory] = useState<string>("")
   const [council, setCouncil] = useState<string>("")
+  const [councils, setCouncils] = useState<Council[]>([])
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
-  const [votePeriod, setVotePeriod] = useState("1w")
+  const [votePeriod, setVotePeriod] = useState<"ONE_WEEK" | "TWO_WEEKS" | "FOUR_WEEKS">("ONE_WEEK")
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const contentLength = content.length
 
-  function handleSubmit() {
-    alert("청원이 등록되었습니다.")
-    router.push("/my-petitions")
+  useState(() => {
+    councilService.getCouncils().then(res => setCouncils(res.data)).catch(console.error)
+  })
+
+  async function handleSubmit() {
+    if (!title.trim() || !content.trim() || !council) {
+      toast.error("모든 필드를 입력해 주세요.")
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await postService.createPost({
+        title,
+        content,
+        councilId: council,
+        postVotingDuration: votePeriod,
+      })
+      toast.success("청원이 등록되었습니다.")
+      router.push("/my-petitions")
+    } catch (error: any) {
+      console.error("청원 등록 실패:", error)
+      toast.error(error.response?.data?.message || "청원 등록에 실패했습니다.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   function handleCancel() {
@@ -109,11 +132,15 @@ export function PetitionForm() {
               <SelectValue placeholder="학생회를 선택하세요" />
             </SelectTrigger>
             <SelectContent>
-              {councils.map((c) => (
-                <SelectItem key={c.value} value={c.value}>
-                  {c.label}
-                </SelectItem>
-              ))}
+              {councils.length === 0 ? (
+                <SelectItem value="loading" disabled>{"학생회 목록 로딩 중..."}</SelectItem>
+              ) : (
+                councils.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>
+                    {c.name}
+                  </SelectItem>
+                ))
+              )}
             </SelectContent>
           </Select>
         </div>
@@ -201,11 +228,27 @@ export function PetitionForm() {
 
       {/* Actions */}
       <div className="flex items-center justify-end gap-3 border-t border-border pt-6">
-        <Button type="button" variant="outline" onClick={handleCancel}>
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={handleCancel}
+          disabled={isSubmitting}
+        >
           {"취소"}
         </Button>
-        <Button type="button" onClick={handleSubmit}>
-          {"등록하기"}
+        <Button 
+          type="button" 
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {"등록 중..."}
+            </>
+          ) : (
+            "등록하기"
+          )}
         </Button>
       </div>
     </div>

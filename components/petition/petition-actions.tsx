@@ -31,7 +31,7 @@ export function PetitionActions({
 
   const showAuthorActions = isAuthor
   const showAdminActions = isAdmin && status === "승인됨"
-  const canDelete = isAuthor && totalVotes === 0
+  const canDelete = isAuthor
 
   if (!showAuthorActions && !showAdminActions) return null
 
@@ -57,22 +57,11 @@ export function PetitionActions({
           <Button
             variant="outline"
             size="sm"
-            disabled={!canDelete}
-            className="gap-1.5 bg-transparent text-destructive hover:bg-destructive hover:text-destructive-foreground disabled:text-muted-foreground disabled:opacity-50"
-            title={
-              !canDelete
-                ? "투표 참여자가 있는 청원은 삭제할 수 없습니다."
-                : undefined
-            }
+            className="gap-1.5 bg-transparent text-destructive hover:bg-destructive hover:text-destructive-foreground"
           >
             <Trash2 className="h-3.5 w-3.5" />
             {"삭제"}
           </Button>
-          {!canDelete && (
-            <span className="text-xs text-muted-foreground">
-              {"투표 참여자가 있어 삭제할 수 없습니다."}
-            </span>
-          )}
         </section>
       )}
 

@@ -7,18 +7,19 @@ import { cn } from "@/lib/utils"
 import { MessageSquare, Vote, Pencil, Trash2 } from "lucide-react"
 import type { Petition, PetitionStatus } from "@/components/petition/petition-list"
 
-const statusStyles: Record<PetitionStatus, string> = {
-  진행중: "border-primary/30 bg-accent text-accent-foreground",
-  승인됨: "border-blue-200 bg-blue-50 text-blue-700",
-  답변완료: "border-green-200 bg-green-50 text-green-700",
-  미승인: "border-border bg-secondary text-muted-foreground",
-  반려: "border-orange-200 bg-orange-50 text-orange-700",
+const statusStyles: Record<PetitionStatus, { label: string; style: string }> = {
+  VOTING: { label: "진행중", style: "border-primary/30 bg-accent text-accent-foreground" },
+  APPROVED: { label: "승인됨", style: "border-blue-200 bg-blue-50 text-blue-700" },
+  COMPLETED: { label: "답변완료", style: "border-green-200 bg-green-50 text-green-700" },
+  PENDING: { label: "승인대기", style: "border-border bg-secondary text-muted-foreground" },
+  REJECTED: { label: "반려", style: "border-orange-200 bg-orange-50 text-orange-700" },
+  DELETED: { label: "삭제됨", style: "border-red-200 bg-red-50 text-red-700" },
 }
 
 interface MyPetitionListProps {
   petitions: Petition[]
-  onEdit?: (id: number) => void
-  onDelete?: (id: number) => void
+  onEdit?: (id: string) => void
+  onDelete?: (id: string) => void
 }
 
 export function MyPetitionList({
@@ -63,7 +64,6 @@ export function MyPetitionList({
       {/* Petition rows */}
       <ul role="list">
         {petitions.map((petition, index) => {
-          const canDelete = petition.votes === 0
 
           return (
             <li key={petition.id}>
@@ -80,14 +80,14 @@ export function MyPetitionList({
                       variant="outline"
                       className={cn(
                         "text-xs font-medium",
-                        statusStyles[petition.status]
+                        statusStyles[petition.status]?.style
                       )}
                     >
-                      {petition.status}
+                      {statusStyles[petition.status]?.label || petition.status}
                     </Badge>
                   </div>
                   <span className="text-xs text-muted-foreground">
-                    {petition.category}
+                    {petition.councilName || "기타"}
                   </span>
                   <Link
                     href={`/petition/${petition.id}?from=my`}
@@ -106,7 +106,7 @@ export function MyPetitionList({
                     </span>
                   </div>
                   <span className="text-xs text-muted-foreground">
-                    {petition.date}
+                    {petition.createdAt ? new Date(petition.createdAt).toLocaleDateString() : "-"}
                   </span>
                   <div className="flex items-center justify-end gap-1">
                     <Button
@@ -126,26 +126,13 @@ export function MyPetitionList({
                       variant="ghost"
                       size="sm"
                       className={cn(
-                        "h-7 px-2 text-xs",
-                        canDelete
-                          ? "text-destructive/70 hover:text-destructive hover:bg-destructive/10"
-                          : "text-muted-foreground/40 cursor-not-allowed"
+                        "h-7 px-2 text-xs text-destructive/70 hover:text-destructive hover:bg-destructive/10"
                       )}
-                      disabled={!canDelete}
                       onClick={(e) => {
                         e.preventDefault()
-                        if (canDelete) onDelete?.(petition.id)
+                        onDelete?.(petition.id)
                       }}
-                      aria-label={
-                        canDelete
-                          ? `${petition.title} 삭제`
-                          : `${petition.title} 삭제 불가 - 투표 참여자 존재`
-                      }
-                      title={
-                        !canDelete
-                          ? "투표 참여자가 있어 삭제할 수 없습니다"
-                          : undefined
-                      }
+                      aria-label={`${petition.title} 삭제`}
                     >
                       <Trash2 className="mr-1 h-3 w-3" />
                       {"삭제"}
@@ -161,13 +148,13 @@ export function MyPetitionList({
                         variant="outline"
                         className={cn(
                           "text-xs font-medium",
-                          statusStyles[petition.status]
+                          statusStyles[petition.status]?.style
                         )}
                       >
-                        {petition.status}
+                        {statusStyles[petition.status]?.label || petition.status}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
-                        {petition.category}
+                        {petition.councilName || "기타"}
                       </span>
                     </div>
                     <div className="flex items-center gap-0.5">
@@ -187,26 +174,13 @@ export function MyPetitionList({
                         variant="ghost"
                         size="sm"
                         className={cn(
-                          "h-7 px-2 text-xs",
-                          canDelete
-                            ? "text-destructive/70 hover:text-destructive hover:bg-destructive/10"
-                            : "text-muted-foreground/40 cursor-not-allowed"
+                        "h-7 px-2 text-xs text-destructive/70 hover:text-destructive hover:bg-destructive/10"
                         )}
-                        disabled={!canDelete}
                         onClick={(e) => {
                           e.preventDefault()
-                          if (canDelete) onDelete?.(petition.id)
+                          onDelete?.(petition.id)
                         }}
-                        aria-label={
-                          canDelete
-                            ? `${petition.title} 삭제`
-                            : `${petition.title} 삭제 불가`
-                        }
-                        title={
-                          !canDelete
-                            ? "투표 참여자가 있어 삭제할 수 없습니다"
-                            : undefined
-                        }
+                        aria-label={`${petition.title} 삭제`}
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>
@@ -230,7 +204,7 @@ export function MyPetitionList({
                       </span>
                     </div>
                     <span className="text-xs text-muted-foreground">
-                      {petition.date}
+                      {petition.createdAt ? new Date(petition.createdAt).toLocaleDateString() : "-"}
                     </span>
                   </div>
                 </div>
