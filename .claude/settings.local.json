@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find c:Usersche73DesktopFrontendapp -type f -name *.ts*)",
+      "Bash(find c:Usersche73DesktopFrontendcomponents -type f -name *.ts*)",
+      "Bash(find c:Usersche73DesktopFrontendlib -type f -name *.ts*)"
+    ]
+  }
+}

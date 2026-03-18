@@ -23,11 +23,13 @@ export interface PaginatedResponse<T> {
   empty: boolean;
 }
 
+export type PostVotingDuration = "ONE_WEEK" | "TWO_WEEK" | "FOUR_WEEK";
+
 export interface CreatePostData {
   title: string;
   content: string;
   councilId: string;
-  postVotingDuration: "ONE_WEEK" | "TWO_WEEKS" | "FOUR_WEEKS";
+  postVotingDuration: PostVotingDuration;
 }
 
 export interface UpdatePostData {
