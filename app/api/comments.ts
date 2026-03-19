@@ -2,11 +2,11 @@ import { api } from "./axios";
 
 export interface CommentResponse {
   id: string;
-  userId: string;
   userName: string;
   content: string;
   status: "ACTIVE" | "DELETED" | "BLINDED";
-  children: CommentResponse[];
+  canDelete: boolean;
+  children?: CommentResponse[];
   createdAt: string;
 }
 

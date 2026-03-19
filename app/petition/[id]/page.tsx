@@ -86,30 +86,24 @@ function formatDate(value: string) {
     .replace(/\.$/, "")
 }
 
-function isMine(commentUserId: string, currentUserId?: string) {
-  return !!currentUserId && commentUserId === currentUserId
-}
-
-function mapReply(reply: CommentResponse, currentUserId?: string): ReplyData {
+function mapReply(reply: CommentResponse): ReplyData {
   return {
     id: reply.id,
     author: ANONYMOUS_LABEL,
     content: reply.content,
     date: formatDate(reply.createdAt),
-    isMine: isMine(reply.userId, currentUserId),
+    canDelete: reply.canDelete,
   }
 }
 
-function mapComment(comment: CommentResponse, currentUserId?: string): Comment {
+function mapComment(comment: CommentResponse): Comment {
   return {
     id: comment.id,
     author: ANONYMOUS_LABEL,
     content: comment.content,
     date: formatDate(comment.createdAt),
-    isMine: isMine(comment.userId, currentUserId),
-    replies: (comment.children || []).map((reply) =>
-      mapReply(reply, currentUserId)
-    ),
+    canDelete: comment.canDelete,
+    replies: (comment.children || []).map(mapReply),
   }
 }
 
@@ -128,10 +122,8 @@ export default function PetitionDetailPage({ params }: PageProps) {
 
   const fetchComments = useCallback(async () => {
     const result = await commentService.getCommentsByPost(id)
-    setComments(
-      result.data.map((comment) => mapComment(comment, user?.id))
-    )
-  }, [id, user?.id])
+    setComments(result.data.map(mapComment))
+  }, [id])
 
   const fetchVoteSummary = useCallback(async () => {
     const result = await postService.getVoteSummary(id)
@@ -218,11 +210,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
         }
 
         if (commentsResult.status === "fulfilled") {
-          setComments(
-            commentsResult.value.data.map((comment) =>
-              mapComment(comment, user?.id)
-            )
-          )
+          setComments(commentsResult.value.data.map(mapComment))
         } else {
           console.error("댓글 목록 조회 실패:", commentsResult.reason)
         }
@@ -244,7 +232,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
     return () => {
       isMounted = false
     }
-  }, [id, user?.id])
+  }, [id])
 
   if (isLoading) {
     return (

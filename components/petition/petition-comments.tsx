@@ -24,7 +24,7 @@ export interface ReplyData {
   author: string
   content: string
   date: string
-  isMine: boolean
+  canDelete: boolean
 }
 
 export interface Comment {
@@ -32,7 +32,7 @@ export interface Comment {
   author: string
   content: string
   date: string
-  isMine: boolean
+  canDelete: boolean
   replies: ReplyData[]
 }
 
@@ -121,7 +121,7 @@ function CommentItem({
               </button>
             )}
 
-            {comment.isMine && !showDeleteConfirm && (
+            {comment.canDelete && !showDeleteConfirm && (
               <button
                 onClick={() => setShowDeleteConfirm(true)}
                 className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-destructive"
@@ -156,7 +156,7 @@ function CommentItem({
               </div>
             )}
 
-            {!comment.isMine && !showReportConfirm && (
+            {!comment.canDelete && !showReportConfirm && (
               <button
                 onClick={() => setShowReportConfirm(true)}
                 className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-destructive"
