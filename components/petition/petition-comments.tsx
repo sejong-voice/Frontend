@@ -53,6 +53,7 @@ function CommentItem({
   showActions = false,
   onDelete,
   onReport,
+  disableReplyAction = false,
 }: {
   comment: Comment | ReplyData
   isReply?: boolean
@@ -60,6 +61,7 @@ function CommentItem({
   showActions?: boolean
   onDelete?: (commentId: string) => Promise<void>
   onReport?: (commentId: string) => Promise<void>
+  disableReplyAction?: boolean
 }) {
   const [showReportConfirm, setShowReportConfirm] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -120,6 +122,7 @@ function CommentItem({
             {!isReply && onReply && (
               <button
                 onClick={onReply}
+                disabled={disableReplyAction}
                 className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
                 type="button"
               >
@@ -215,9 +218,11 @@ function CommentItem({
 function ReplyInput({
   onCancel,
   onSubmit,
+  onSubmittingChange,
 }: {
   onCancel: () => void
   onSubmit?: (content: string) => Promise<void>
+  onSubmittingChange?: (isSubmitting: boolean) => void
 }) {
   const [text, setText] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -227,6 +232,7 @@ function ReplyInput({
     if (!text.trim() || !onSubmit) return
 
     setIsSubmitting(true)
+    onSubmittingChange?.(true)
     setSubmitError(null)
     try {
       await onSubmit(text.trim())
@@ -236,6 +242,7 @@ function ReplyInput({
       setSubmitError("답글 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.")
     } finally {
       setIsSubmitting(false)
+      onSubmittingChange?.(false)
     }
   }
 
@@ -245,11 +252,18 @@ function ReplyInput({
         placeholder="답글을 입력해주세요."
         value={text}
         onChange={(e) => setText(e.target.value)}
+        disabled={isSubmitting}
         className="min-h-[60px] resize-none border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
         autoFocus
       />
       <div className="flex items-center justify-end gap-2">
-        <Button variant="ghost" size="sm" onClick={onCancel} className="text-xs">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={onCancel}
+          disabled={isSubmitting}
+          className="text-xs"
+        >
           취소
         </Button>
         <Button
@@ -284,16 +298,21 @@ function CommentThread({
 }) {
   const [showReplies, setShowReplies] = useState(false)
   const [showReplyInput, setShowReplyInput] = useState(false)
+  const [isSubmittingReply, setIsSubmittingReply] = useState(false)
   const hasReplies = comment.replies.length > 0
 
   return (
     <div className="flex flex-col gap-4">
       <CommentItem
         comment={comment}
-        onReply={() => setShowReplyInput((prev) => !prev)}
+        onReply={() => {
+          if (isSubmittingReply) return
+          setShowReplyInput((prev) => !prev)
+        }}
         showActions={showActions}
         onDelete={onDeleteComment}
         onReport={onReportComment}
+        disableReplyAction={isSubmittingReply}
       />
 
       {hasReplies && (
@@ -336,7 +355,11 @@ function CommentThread({
 
       {showReplyInput && showActions && (
         <ReplyInput
-          onCancel={() => setShowReplyInput(false)}
+          onCancel={() => {
+            if (isSubmittingReply) return
+            setShowReplyInput(false)
+          }}
+          onSubmittingChange={setIsSubmittingReply}
           onSubmit={
             onCreateReply
               ? async (content) => {
@@ -398,6 +421,7 @@ export function PetitionComments({
                   placeholder="댓글을 남겨보세요."
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
+                  disabled={isSubmitting}
                   className="min-h-[80px] resize-none border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0"
                 />
                 <div className="mt-3 flex justify-end">
