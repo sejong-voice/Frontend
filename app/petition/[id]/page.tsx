@@ -185,7 +185,11 @@ export default function PetitionDetailPage({ params }: PageProps) {
   const handleVote = useCallback(
     async (choice: VoteChoice) => {
       await postService.castVote(id, { choice })
-      await fetchVoteSummary()
+      try {
+        await fetchVoteSummary()
+      } catch (error) {
+        console.error("투표 결과 갱신 실패:", error)
+      }
     },
     [fetchVoteSummary, id]
   )
