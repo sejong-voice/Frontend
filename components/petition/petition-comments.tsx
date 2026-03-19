@@ -66,14 +66,18 @@ function CommentItem({
   const [isDeleting, setIsDeleting] = useState(false)
   const [isReporting, setIsReporting] = useState(false)
   const [reportFeedback, setReportFeedback] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   async function handleDelete() {
     if (!onDelete || isDeleting) return
 
     setIsDeleting(true)
+    setActionError(null)
     try {
       await onDelete(comment.id)
       setShowDeleteConfirm(false)
+    } catch {
+      setActionError("댓글 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.")
     } finally {
       setIsDeleting(false)
     }
@@ -83,10 +87,13 @@ function CommentItem({
     if (!onReport || isReporting) return
 
     setIsReporting(true)
+    setActionError(null)
     try {
       await onReport(comment.id)
       setShowReportConfirm(false)
       setReportFeedback("신고가 접수되었습니다.")
+    } catch {
+      setActionError("댓글 신고에 실패했습니다. 잠시 후 다시 시도해 주세요.")
     } finally {
       setIsReporting(false)
     }
@@ -196,6 +203,10 @@ function CommentItem({
         {reportFeedback && (
           <p className="mt-1 text-xs text-green-700">{reportFeedback}</p>
         )}
+
+        {actionError && (
+          <p className="mt-1 text-xs text-destructive">{actionError}</p>
+        )}
       </div>
     </div>
   )
@@ -210,15 +221,19 @@ function ReplyInput({
 }) {
   const [text, setText] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   async function handleSubmit() {
     if (!text.trim() || !onSubmit) return
 
     setIsSubmitting(true)
+    setSubmitError(null)
     try {
       await onSubmit(text.trim())
       setText("")
       onCancel()
+    } catch {
+      setSubmitError("답글 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.")
     } finally {
       setIsSubmitting(false)
     }
@@ -247,6 +262,9 @@ function ReplyInput({
           {isSubmitting ? "등록 중..." : "답글 등록"}
         </Button>
       </div>
+      {submitError && (
+        <p className="text-xs text-destructive">{submitError}</p>
+      )}
     </div>
   )
 }
@@ -345,15 +363,19 @@ export function PetitionComments({
   const { user } = useAuth()
   const [newComment, setNewComment] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const showActions = !readOnly && !!user
 
   async function handleCreateComment() {
     if (!newComment.trim() || !onCreateComment) return
 
     setIsSubmitting(true)
+    setSubmitError(null)
     try {
       await onCreateComment(newComment.trim())
       setNewComment("")
+    } catch {
+      setSubmitError("댓글 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.")
     } finally {
       setIsSubmitting(false)
     }
@@ -389,6 +411,9 @@ export function PetitionComments({
                     {isSubmitting ? "등록 중..." : "등록"}
                   </Button>
                 </div>
+                {submitError && (
+                  <p className="mt-3 text-xs text-destructive">{submitError}</p>
+                )}
               </div>
             ) : (
               <div className="rounded-lg border border-dashed border-border bg-muted/30 p-4">
