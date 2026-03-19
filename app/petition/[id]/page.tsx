@@ -137,7 +137,11 @@ export default function PetitionDetailPage({ params }: PageProps) {
         parentId: null,
         content,
       })
-      await fetchComments()
+      try {
+        await fetchComments()
+      } catch (error) {
+        console.error("댓글 등록 후 목록 갱신 실패:", error)
+      }
     },
     [fetchComments, id]
   )
@@ -149,7 +153,11 @@ export default function PetitionDetailPage({ params }: PageProps) {
         parentId,
         content,
       })
-      await fetchComments()
+      try {
+        await fetchComments()
+      } catch (error) {
+        console.error("대댓글 등록 후 목록 갱신 실패:", error)
+      }
     },
     [fetchComments, id]
   )
@@ -157,7 +165,11 @@ export default function PetitionDetailPage({ params }: PageProps) {
   const handleDeleteComment = useCallback(
     async (commentId: string) => {
       await commentService.deleteComment(commentId)
-      await fetchComments()
+      try {
+        await fetchComments()
+      } catch (error) {
+        console.error("댓글 삭제 후 목록 갱신 실패:", error)
+      }
     },
     [fetchComments]
   )
