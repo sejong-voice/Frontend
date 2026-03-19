@@ -61,15 +61,19 @@ export function PetitionDetailHeader({
   const [showReportConfirm, setShowReportConfirm] = useState(false)
   const [isReporting, setIsReporting] = useState(false)
   const [reportFeedback, setReportFeedback] = useState<string | null>(null)
+  const [reportError, setReportError] = useState<string | null>(null)
 
   async function handleReport() {
     if (!onReport || isReporting) return
 
     setIsReporting(true)
+    setReportError(null)
     try {
       await onReport()
       setShowReportConfirm(false)
       setReportFeedback("신고가 접수되었습니다.")
+    } catch {
+      setReportError("게시글 신고에 실패했습니다. 잠시 후 다시 시도해 주세요.")
     } finally {
       setIsReporting(false)
     }
@@ -130,6 +134,10 @@ export function PetitionDetailHeader({
 
         {reportFeedback && (
           <p className="text-xs text-green-700">{reportFeedback}</p>
+        )}
+
+        {reportError && (
+          <p className="text-xs text-destructive">{reportError}</p>
         )}
 
         <h1 className="text-balance text-2xl font-bold tracking-tight text-foreground">
