@@ -23,16 +23,43 @@ export interface PaginatedResponse<T> {
   empty: boolean;
 }
 
+export type PostVotingDuration = "ONE_WEEK" | "TWO_WEEK" | "FOUR_WEEK";
+
 export interface CreatePostData {
   title: string;
   content: string;
   councilId: string;
-  postVotingDuration: "ONE_WEEK" | "TWO_WEEKS" | "FOUR_WEEKS";
+  postVotingDuration: PostVotingDuration;
 }
 
 export interface UpdatePostData {
   title: string;
   content: string;
+}
+
+export interface VoteSummaryResponse {
+  agreeCount: number;
+  disagreeCount: number;
+  totalCount: number;
+}
+
+export type VoteChoice = "AGREE" | "DISAGREE";
+
+export interface VoteRequest {
+  choice: VoteChoice;
+}
+
+export type PostReportReason =
+  | "SPAM"
+  | "ABUSE"
+  | "HATE"
+  | "PRIVACY"
+  | "DUPLICATE"
+  | "OTHER";
+
+export interface PostReportData {
+  reason: PostReportReason;
+  description?: string;
 }
 
 export const postService = {
@@ -42,6 +69,18 @@ export const postService = {
 
   getPost: async (id: string) => {
     return api.get<Petition>(`/api/v1/posts/${id}`);
+  },
+
+  getVoteSummary: async (id: string) => {
+    return api.get<VoteSummaryResponse>(`/api/v1/posts/${id}/votes/summary`);
+  },
+
+  castVote: async (id: string, data: VoteRequest) => {
+    return api.put(`/api/v1/posts/${id}/votes`, data);
+  },
+
+  reportPost: async (id: string, data: PostReportData) => {
+    return api.post<string>(`/api/v1/reports/posts/${id}`, data);
   },
 
   createPost: async (data: CreatePostData) => {
