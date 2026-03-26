@@ -46,6 +46,16 @@ const POST_REPORT_REASON_OPTIONS: { value: PostReportReason; label: string }[] =
   { value: "OTHER", label: "기타" },
 ]
 
+function getReportErrorMessage(error: unknown, fallback: string): string {
+  const message = (
+    error as {
+      response?: { data?: { message?: string } }
+    }
+  )?.response?.data?.message
+
+  return typeof message === "string" && message.trim() ? message : fallback
+}
+
 function maskStudentId(id: string): string {
   if (id.length <= 3) return id
   return id.slice(0, -3) + "***"
@@ -96,8 +106,13 @@ export function PetitionDetailHeader({
       await onReport(selectedReason)
       setShowReportConfirm(false)
       setReportFeedback("신고가 접수되었습니다.")
-    } catch {
-      setReportError("게시글 신고에 실패했습니다. 잠시 후 다시 시도해 주세요.")
+    } catch (error) {
+      setReportError(
+        getReportErrorMessage(
+          error,
+          "게시글 신고에 실패했습니다. 잠시 후 다시 시도해 주세요."
+        )
+      )
     } finally {
       setIsReporting(false)
     }
