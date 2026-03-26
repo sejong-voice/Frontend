@@ -23,10 +23,10 @@ export interface Petition {
 }
 
 const statusMap: Record<PetitionStatus, { label: string; style: string }> = {
-  VOTING: { label: "진행중", style: "border-primary/30 bg-accent text-accent-foreground" },
-  APPROVED: { label: "승인됨", style: "border-blue-200 bg-blue-50 text-blue-700" },
-  COMPLETED: { label: "답변완료", style: "border-green-200 bg-green-50 text-green-700" },
-  PENDING: { label: "검토중", style: "border-border bg-secondary text-muted-foreground" },
+  VOTING: { label: "투표중", style: "border-primary/30 bg-accent text-accent-foreground" },
+  APPROVED: { label: "검토중", style: "border-blue-200 bg-blue-50 text-blue-700" },
+  COMPLETED: { label: "처리완료", style: "border-green-200 bg-green-50 text-green-700" },
+  PENDING: { label: "부결", style: "border-border bg-secondary text-muted-foreground" },
   REJECTED: { label: "반려", style: "border-orange-200 bg-orange-50 text-orange-700" },
   DELETED: { label: "삭제됨", style: "border-red-200 bg-red-50 text-red-700" },
 }
@@ -72,9 +72,7 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
       <ul role="list">
           {petitions.map((petition, index) => {
             const statusKey = petition.status?.toUpperCase() as PetitionStatus
-            const isExpired = petition.votingEndAt && new Date(petition.votingEndAt) < new Date()
-            const effectiveStatus = (statusKey === "VOTING" && isExpired) ? "PENDING" : statusKey
-            const statusInfo = statusMap[effectiveStatus] || { label: petition.status, style: "" }
+            const statusInfo = statusMap[statusKey] || { label: petition.status, style: "" }
 
             return (
               <li key={petition.id}>

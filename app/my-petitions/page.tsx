@@ -58,8 +58,7 @@ export default function MyPetitionsPage() {
         keyword: searchQuery || undefined,
         status: activeStatus === "ALL" ? undefined : activeStatus,
         councilId: activeCouncilId === "ALL" ? undefined : activeCouncilId,
-        mine: isAdmin ? undefined : true,
-        assignedToMe: isAdmin ? true : undefined,
+        mine: true,
         sort: "createdAt,DESC"
       })
       setData(res.data)
@@ -183,6 +182,7 @@ export default function MyPetitionsPage() {
             }}
             councils={councils}
             hideCouncilFilter={isAdmin}
+            hideStatusFilter={isAdmin}
           />
 
           {isLoading ? (
@@ -195,6 +195,7 @@ export default function MyPetitionsPage() {
                 petitions={data?.content || []}
                 onEdit={handleEdit as any}
                 onDelete={handleDelete as any}
+                isAdmin={isAdmin}
               />
               
               {data && data.totalPages > 1 && (

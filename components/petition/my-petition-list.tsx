@@ -8,10 +8,10 @@ import { MessageSquare, Vote, Pencil, Trash2 } from "lucide-react"
 import type { Petition, PetitionStatus } from "@/components/petition/petition-list"
 
 const statusStyles: Record<PetitionStatus, { label: string; style: string }> = {
-  VOTING: { label: "진행중", style: "border-primary/30 bg-accent text-accent-foreground" },
-  APPROVED: { label: "승인됨", style: "border-blue-200 bg-blue-50 text-blue-700" },
-  COMPLETED: { label: "답변완료", style: "border-green-200 bg-green-50 text-green-700" },
-  PENDING: { label: "승인대기", style: "border-border bg-secondary text-muted-foreground" },
+  VOTING: { label: "투표중", style: "border-primary/30 bg-accent text-accent-foreground" },
+  APPROVED: { label: "검토중", style: "border-blue-200 bg-blue-50 text-blue-700" },
+  COMPLETED: { label: "처리완료", style: "border-green-200 bg-green-50 text-green-700" },
+  PENDING: { label: "부결", style: "border-border bg-secondary text-muted-foreground" },
   REJECTED: { label: "반려", style: "border-orange-200 bg-orange-50 text-orange-700" },
   DELETED: { label: "삭제됨", style: "border-red-200 bg-red-50 text-red-700" },
 }
@@ -20,18 +20,20 @@ interface MyPetitionListProps {
   petitions: Petition[]
   onEdit?: (id: string) => void
   onDelete?: (id: string) => void
+  isAdmin?: boolean
 }
 
 export function MyPetitionList({
   petitions,
   onEdit,
   onDelete,
+  isAdmin,
 }: MyPetitionListProps) {
   if (petitions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-card py-20">
         <p className="text-sm text-muted-foreground">
-          {"작성한 청원이 없습니다."}
+          {isAdmin ? "작성한 입장문이 없습니다." : "작성한 청원이 없습니다."}
         </p>
       </div>
     )
@@ -65,9 +67,7 @@ export function MyPetitionList({
       <ul role="list">
         {petitions.map((petition, index) => {
           const statusKey = petition.status?.toUpperCase() as PetitionStatus
-          const isExpired = petition.votingEndAt && new Date(petition.votingEndAt) < new Date()
-          const effectiveStatus = (statusKey === "VOTING" && isExpired) ? "PENDING" : statusKey
-          const statusInfo = statusStyles[effectiveStatus] || { label: petition.status, style: "" }
+          const statusInfo = statusStyles[statusKey] || { label: petition.status, style: "" }
 
           return (
             <li key={petition.id}>

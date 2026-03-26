@@ -97,6 +97,6 @@ export const postService = {
   },
 
   submitPostResult: async (id: string, data: PostResultData) => {
-    return api.post(`/api/v1/posts/${id}/result`, data);
+    return api.put(`/api/v1/posts/${id}/result`, data);
   },
 };
