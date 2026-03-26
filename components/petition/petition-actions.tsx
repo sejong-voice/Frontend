@@ -21,7 +21,7 @@ interface PetitionActionsProps {
   petitionId: string
   status: PetitionStatus
   isAuthor: boolean
-  isAdmin: boolean
+  canManageAsAdmin: boolean
   totalVotes: number
 }
 
@@ -29,7 +29,7 @@ export function PetitionActions({
   petitionId,
   status,
   isAuthor,
-  isAdmin,
+  canManageAsAdmin,
   totalVotes,
 }: PetitionActionsProps) {
   const [showResponseForm, setShowResponseForm] = useState(false)
@@ -57,7 +57,7 @@ export function PetitionActions({
   }
 
   const showAuthorActions = isAuthor
-  const showAdminActions = isAdmin && status === "APPROVED"
+  const showAdminActions = canManageAsAdmin && status === "APPROVED"
   const canDelete = isAuthor
 
   if (!showAuthorActions && !showAdminActions) return null
