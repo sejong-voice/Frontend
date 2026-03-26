@@ -22,15 +22,8 @@ import {
 } from "@/components/petition/petition-detail-header"
 import { PetitionStatusBanner } from "@/components/petition/petition-status-banner"
 import { PetitionVote } from "@/components/petition/petition-vote"
+import { PetitionActions } from "@/components/petition/petition-actions"
 import { Separator } from "@/components/ui/separator"
-
-type ApiPostStatus =
-  | "VOTING"
-  | "APPROVED"
-  | "PENDING"
-  | "COMPLETED"
-  | "REJECTED"
-  | "DELETED"
 
 interface PetitionDetailResponse {
   id: string
@@ -40,7 +33,7 @@ interface PetitionDetailResponse {
   councilName: string
   title: string
   content: string
-  status: ApiPostStatus
+  status: PetitionStatus
   postVotingDuration: string
   createdAt: string
   votingEndAt: string
@@ -51,23 +44,6 @@ interface PageProps {
 }
 
 const ANONYMOUS_LABEL = "익명"
-
-function mapStatus(status: ApiPostStatus): PetitionStatus {
-  switch (status) {
-    case "VOTING":
-      return "진행중"
-    case "APPROVED":
-      return "승인됨"
-    case "PENDING":
-      return "미승인"
-    case "COMPLETED":
-      return "답변완료"
-    case "REJECTED":
-    case "DELETED":
-    default:
-      return "반려"
-  }
-}
 
 function formatDate(value: string) {
   const date = new Date(value)
@@ -113,7 +89,7 @@ function getTotalCommentCount(comments: Comment[]) {
 
 export default function PetitionDetailPage({ params }: PageProps) {
   const { id } = use(params)
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
   const [petition, setPetition] = useState<PetitionDetailResponse | null>(null)
   const [voteSummary, setVoteSummary] = useState<VoteSummaryResponse | null>(null)
   const [comments, setComments] = useState<Comment[]>([])
@@ -273,9 +249,9 @@ export default function PetitionDetailPage({ params }: PageProps) {
     )
   }
 
-  const mappedStatus = mapStatus(petition.status)
   const totalCommentCount = getTotalCommentCount(comments)
   const canReportPost = !!user && petition.userId !== user.id
+  const isAuthor = !!user && petition.userId === user.id
 
   return (
     <div className="min-h-screen bg-background">
@@ -284,7 +260,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
         <div className="flex flex-col gap-6">
           <PetitionDetailHeader
             title={petition.title}
-            status={mappedStatus}
+            status={petition.status}
             category="미분류"
             studentId={petition.userStudentNo}
             date={formatDate(petition.createdAt)}
@@ -313,9 +289,9 @@ export default function PetitionDetailPage({ params }: PageProps) {
           <PetitionActions
             petitionId={id}
             status={petition.status}
-            isAuthor={!!user && petition.isAuthor}
+            isAuthor={isAuthor}
             isAdmin={isAdmin}
-            totalVotes={totalVotes}
+            totalVotes={voteSummary?.totalCount || 0}
           />
 
           <Separator />
