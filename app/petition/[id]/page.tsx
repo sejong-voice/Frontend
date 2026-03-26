@@ -290,6 +290,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
             <PetitionVote
               {...voteSummary}
               isActive={petition.status === "VOTING"}
+              votingEndAt={petition.votingEndAt}
               onVote={handleVote}
             />
           )}
