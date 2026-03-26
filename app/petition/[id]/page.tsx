@@ -295,8 +295,9 @@ export default function PetitionDetailPage({ params }: PageProps) {
 
           <Separator />
 
-          {mappedStatus !== "진행중" && (
-            <PetitionStatusBanner status={mappedStatus} />
+          {/* Status banner for non-active petitions */}
+          {petition.status !== "VOTING" && (
+            <PetitionStatusBanner status={petition.status} />
           )}
 
           <PetitionBody content={petition.content} />
@@ -308,6 +309,14 @@ export default function PetitionDetailPage({ params }: PageProps) {
               onVote={handleVote}
             />
           )}
+
+          <PetitionActions
+            petitionId={id}
+            status={petition.status}
+            isAuthor={!!user && petition.isAuthor}
+            isAdmin={isAdmin}
+            totalVotes={totalVotes}
+          />
 
           <Separator />
 

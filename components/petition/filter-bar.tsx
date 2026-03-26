@@ -30,6 +30,7 @@ interface FilterBarProps {
   searchQuery: string
   onSearchChange: (query: string) => void
   councils: { id: string; name: string }[]
+  hideCouncilFilter?: boolean
 }
 
 export function FilterBar({
@@ -40,6 +41,7 @@ export function FilterBar({
   searchQuery,
   onSearchChange,
   councils,
+  hideCouncilFilter = false,
 }: FilterBarProps) {
   return (
     <div className="flex flex-col gap-4 border-b border-border pb-6">
@@ -76,22 +78,24 @@ export function FilterBar({
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-muted-foreground">{"학생회 필터:"}</span>
-        <Select value={activeCouncilId} onValueChange={onCouncilChange}>
-          <SelectTrigger className="w-full md:w-48 h-9 text-sm">
-            <SelectValue placeholder="학생회 선택" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">{"전체 학생회"}</SelectItem>
-            {councils?.map((c) => (
-              <SelectItem key={c.id} value={c.id}>
-                {c.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      {!hideCouncilFilter && (
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-muted-foreground">{"학생회 필터:"}</span>
+          <Select value={activeCouncilId} onValueChange={onCouncilChange}>
+            <SelectTrigger className="w-full md:w-48 h-9 text-sm">
+              <SelectValue placeholder="학생회 선택" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">{"전체 학생회"}</SelectItem>
+              {councils?.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
     </div>
   )
 }

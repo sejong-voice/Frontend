@@ -8,7 +8,7 @@ import { useAuth } from "@/components/auth/auth-provider"
 import { Loader2 } from "lucide-react"
 
 export default function NewPetitionPage() {
-  const { loading, user } = useAuth()
+  const { loading, user, isAdmin } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
@@ -33,10 +33,10 @@ export default function NewPetitionPage() {
           {/* Page header */}
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              {"청원 작성"}
+              {isAdmin ? "입장문 작성" : "청원 작성"}
             </h1>
             <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-              {"작성된 청원은 O/X 투표를 통해 공론화됩니다."}
+              {isAdmin ? "학생회의 공식 입장을 작성하여 공지할 수 있습니다." : "작성된 청원은 O/X 투표를 통해 공론화됩니다."}
             </p>
           </div>
 

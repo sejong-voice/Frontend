@@ -29,9 +29,13 @@ export function PetitionVote({
     message: string
   } | null>(null)
 
-  const agreePercent =
-    totalCount > 0 ? Math.round((agreeCount / totalCount) * 100) : 0
-  const disagreePercent = totalCount > 0 ? 100 - agreePercent : 0
+  const totalVotes = votesFor + votesAgainst
+  const forPercent =
+    totalVotes > 0 ? Math.round((votesFor / totalVotes) * 100) : 0
+  const againstPercent = totalVotes > 0 ? 100 - forPercent : 0
+  const isActive = status === "VOTING"
+  const isApproved = status === "APPROVED" || status === "COMPLETED"
+  const meetsThreshold = votesFor >= threshold
 
   async function handleVote(choice: VoteChoice) {
     if (!user || !isActive || !onVote || isSubmitting) return

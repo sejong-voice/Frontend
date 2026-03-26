@@ -20,8 +20,10 @@ import {
   PaginationEllipsis,
 } from "@/components/ui/pagination"
 import { Loader2 } from "lucide-react"
+import { useAuth } from "@/components/auth/auth-provider"
 
 export default function Page() {
+  const { isAdmin } = useAuth()
   const [activeStatus, setActiveStatus] = useState("ALL")
   const [activeCouncilId, setActiveCouncilId] = useState("ALL")
   const [searchQuery, setSearchQuery] = useState("")
@@ -107,6 +109,7 @@ export default function Page() {
               setPage(0) // 검색 시 첫 페이지로
             }}
             councils={councils}
+            hideCouncilFilter={isAdmin}
           />
 
           {isLoading ? (

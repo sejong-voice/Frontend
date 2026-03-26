@@ -26,7 +26,7 @@ interface AuthContextValue {
   login: (
     studentNo: string,
     password: string,
-  ) => Promise<{ success: boolean; message?: string }>;
+  ) => Promise<{ success: boolean; message?: string; role?: string }>;
   refreshMe: () => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshMe = useCallback(async () => {
     try {
       const res = await authService.getProfile();
-
+      console.log(res);
       if (res.status === 200) {
         setUser(res.data);
       } else {
@@ -75,8 +75,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         await refreshMe();
-
-        return { success: true };
+        // Return profile data to check role after login
+        const resProfile = await authService.getProfile();
+        return { success: true, role: resProfile.data.role };
       } catch (error: any) {
         console.error("로그인 실패 상세:", error.response?.data || error.message);
         const message =

@@ -23,26 +23,19 @@ const config: Partial<
     }
   >
 > = {
-  승인됨: {
+  APPROVED: {
     icon: CheckCircle2,
     message: "투표 조건을 충족하여 승인되었습니다. 학생회의 답변을 기다리고 있습니다.",
     bg: "bg-blue-50 border-blue-200",
     text: "text-blue-800",
   },
-  미승인: {
-    icon: XCircle,
-    message:
-      "투표 기간 종료 후 승인 조건에 도달하지 못하여 승인되지 않았습니다.",
-    bg: "bg-secondary border-border",
-    text: "text-muted-foreground",
-  },
-  답변완료: {
+  COMPLETED: {
     icon: MessageSquareText,
     message: "학생회의 공식 답변이 등록되었습니다. 아래에서 확인하세요.",
     bg: "bg-green-50 border-green-200",
     text: "text-green-800",
   },
-  반려: {
+  REJECTED: {
     icon: AlertCircle,
     message:
       "학생회의 검토 결과 본 청원은 반려되었습니다. 아래에서 사유를 확인하세요.",

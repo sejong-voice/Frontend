@@ -9,6 +9,7 @@ export interface GetPostsParams {
   status?: string;
   councilId?: string;
   mine?: boolean;
+  assignedToMe?: boolean;
 }
 
 export interface PaginatedResponse<T> {
@@ -93,5 +94,9 @@ export const postService = {
 
   deletePost: async (id: string) => {
     return api.delete(`/api/v1/posts/${id}`);
+  },
+
+  submitPostResult: async (id: string, data: PostResultData) => {
+    return api.post(`/api/v1/posts/${id}/result`, data);
   },
 };
