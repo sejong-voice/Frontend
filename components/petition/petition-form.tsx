@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select"
 import { Info, User, Loader2 } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
-import { postService } from "@/app/api/posts"
+import { postService, type PostVotingDuration } from "@/app/api/posts"
 import { councilService, Council } from "@/app/api/councils"
 import { toast } from "sonner"
 import { useEffect } from "react"
@@ -24,9 +24,9 @@ import { Petition } from "@/components/petition/petition-list"
 const categories = ["학사제도", "학교시설", "학생복지", "기타"] as const
 const votePeriods = [
   { value: "ONE_WEEK", label: "1주" },
-  { value: "TWO_WEEKS", label: "2주" },
-  { value: "FOUR_WEEKS", label: "4주" },
-] as const
+  { value: "TWO_WEEK", label: "2주" },
+  { value: "FOUR_WEEK", label: "4주" },
+] as const satisfies ReadonlyArray<{ value: PostVotingDuration; label: string }>
 
 const MAX_CONTENT_LENGTH = 2000
 
@@ -38,7 +38,7 @@ export function PetitionForm() {
   const [councils, setCouncils] = useState<Council[]>([])
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
-  const [votePeriod, setVotePeriod] = useState<"ONE_WEEK" | "TWO_WEEKS" | "FOUR_WEEKS">("ONE_WEEK")
+  const [votePeriod, setVotePeriod] = useState<PostVotingDuration>("ONE_WEEK")
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   // Admin fields
