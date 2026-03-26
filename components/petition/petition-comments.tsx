@@ -55,6 +55,16 @@ const COMMENT_REPORT_REASON_OPTIONS: {
   { value: "OTHER", label: "기타" },
 ]
 
+function getActionErrorMessage(error: unknown, fallback: string): string {
+  const message = (
+    error as {
+      response?: { data?: { message?: string } }
+    }
+  )?.response?.data?.message
+
+  return typeof message === "string" && message.trim() ? message : fallback
+}
+
 interface PetitionCommentsProps {
   comments: Comment[]
   totalCount: number
@@ -105,8 +115,13 @@ function CommentItem({
     try {
       await onDelete(comment.id)
       setShowDeleteConfirm(false)
-    } catch {
-      setActionError("댓글 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.")
+    } catch (error) {
+      setActionError(
+        getActionErrorMessage(
+          error,
+          "댓글 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요."
+        )
+      )
     } finally {
       setIsDeleting(false)
     }
@@ -127,8 +142,13 @@ function CommentItem({
       await onReport(comment.id, selectedReportReason)
       setShowReportConfirm(false)
       setReportFeedback("신고가 접수되었습니다.")
-    } catch {
-      setActionError("댓글 신고에 실패했습니다. 잠시 후 다시 시도해 주세요.")
+    } catch (error) {
+      setActionError(
+        getActionErrorMessage(
+          error,
+          "댓글 신고에 실패했습니다. 잠시 후 다시 시도해 주세요."
+        )
+      )
     } finally {
       setIsReporting(false)
     }
