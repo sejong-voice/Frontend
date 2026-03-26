@@ -2,9 +2,14 @@
 
 import { use, useCallback, useEffect, useState } from "react"
 import { Loader2 } from "lucide-react"
-import { commentService, type CommentResponse } from "@/app/api/comments"
+import {
+  commentService,
+  type CommentReportReason,
+  type CommentResponse,
+} from "@/app/api/comments"
 import {
   postService,
+  type PostReportReason,
   type VoteChoice,
   type VoteSummaryResponse,
 } from "@/app/api/posts"
@@ -150,12 +155,15 @@ export default function PetitionDetailPage({ params }: PageProps) {
     [fetchComments]
   )
 
-  const handleReportComment = useCallback(async (commentId: string) => {
-    await commentService.reportComment(commentId, { reason: "OTHER" })
-  }, [])
+  const handleReportComment = useCallback(
+    async (commentId: string, reason: CommentReportReason) => {
+      await commentService.reportComment(commentId, { reason })
+    },
+    []
+  )
 
-  const handleReportPost = useCallback(async () => {
-    await postService.reportPost(id, { reason: "OTHER" })
+  const handleReportPost = useCallback(async (reason: PostReportReason) => {
+    await postService.reportPost(id, { reason })
   }, [id])
 
   const handleVote = useCallback(

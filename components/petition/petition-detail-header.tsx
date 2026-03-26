@@ -2,10 +2,18 @@
 
 import { useState } from "react"
 import { useSearchParams } from "next/navigation"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
-import { ArrowLeft, Calendar, User, Building2, Flag, Folder } from "lucide-react"
 import Link from "next/link"
+import type { PostReportReason } from "@/app/api/posts"
+import { Badge } from "@/components/ui/badge"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { cn } from "@/lib/utils"
+import { ArrowLeft, Building2, Calendar, Flag, Folder, User } from "lucide-react"
 
 export type PetitionStatus = 
   | "VOTING" 
@@ -40,6 +48,15 @@ const referrerMap: Record<string, { href: string; label: string }> = {
   my: { href: "/my-petitions", label: "내 청원" },
 }
 
+const POST_REPORT_REASON_OPTIONS: { value: PostReportReason; label: string }[] = [
+  { value: "SPAM", label: "스팸/광고" },
+  { value: "ABUSE", label: "욕설/비방" },
+  { value: "HATE", label: "혐오/차별" },
+  { value: "PRIVACY", label: "개인정보 노출" },
+  { value: "DUPLICATE", label: "중복 청원" },
+  { value: "OTHER", label: "기타" },
+]
+
 function maskStudentId(id: string): string {
   if (id.length <= 3) return id
   return id.slice(0, -3) + "***"
@@ -54,7 +71,7 @@ interface PetitionDetailHeaderProps {
   date: string
   council: string
   showReportAction?: boolean
-  onReport?: () => Promise<void>
+  onReport?: (reason: PostReportReason) => Promise<void>
 }
 
 export function PetitionDetailHeader({
@@ -72,9 +89,16 @@ export function PetitionDetailHeader({
   const fromParam = searchParams.get("from")
   const back = (fromParam && referrerMap[fromParam]) || referrerMap.all
   const [showReportConfirm, setShowReportConfirm] = useState(false)
+  const [selectedReason, setSelectedReason] = useState<PostReportReason>("SPAM")
   const [isReporting, setIsReporting] = useState(false)
   const [reportFeedback, setReportFeedback] = useState<string | null>(null)
   const [reportError, setReportError] = useState<string | null>(null)
+
+  function openReportConfirm() {
+    setShowReportConfirm(true)
+    setReportFeedback(null)
+    setReportError(null)
+  }
 
   async function handleReport() {
     if (!onReport || isReporting) return
@@ -82,7 +106,7 @@ export function PetitionDetailHeader({
     setIsReporting(true)
     setReportError(null)
     try {
-      await onReport()
+      await onReport(selectedReason)
       setShowReportConfirm(false)
       setReportFeedback("신고가 접수되었습니다.")
     } catch {
@@ -113,7 +137,7 @@ export function PetitionDetailHeader({
 
           {showReportAction && !showReportConfirm && (
             <button
-              onClick={() => setShowReportConfirm(true)}
+              onClick={openReportConfirm}
               className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-destructive"
               type="button"
             >
@@ -124,24 +148,42 @@ export function PetitionDetailHeader({
         </div>
 
         {showReportConfirm && (
-          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            <span>이 게시글을 신고하시겠습니까?</span>
-            <button
-              onClick={handleReport}
+          <div className="flex max-w-sm flex-col gap-2 rounded-md border border-border bg-card p-3 text-xs text-muted-foreground">
+            <span>신고 사유를 선택해 주세요.</span>
+            <Select
+              value={selectedReason}
+              onValueChange={(value) => setSelectedReason(value as PostReportReason)}
               disabled={isReporting}
-              className="font-medium text-destructive disabled:opacity-60"
-              type="button"
             >
-              {isReporting ? "처리중.." : "확인"}
-            </button>
-            <button
-              onClick={() => setShowReportConfirm(false)}
-              disabled={isReporting}
-              className="disabled:opacity-60"
-              type="button"
-            >
-              취소
-            </button>
+              <SelectTrigger className="h-9 text-sm">
+                <SelectValue placeholder="신고 사유 선택" />
+              </SelectTrigger>
+              <SelectContent>
+                {POST_REPORT_REASON_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={handleReport}
+                disabled={isReporting}
+                className="font-medium text-destructive disabled:opacity-60"
+                type="button"
+              >
+                {isReporting ? "처리 중..." : "확인"}
+              </button>
+              <button
+                onClick={() => setShowReportConfirm(false)}
+                disabled={isReporting}
+                className="disabled:opacity-60"
+                type="button"
+              >
+                취소
+              </button>
+            </div>
           </div>
         )}
 
