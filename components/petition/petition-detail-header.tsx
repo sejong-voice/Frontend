@@ -24,10 +24,10 @@ export type PetitionStatus =
   | "DELETED"
 
 export const statusLabelMap: Record<PetitionStatus, string> = {
-  VOTING: "진행중",
-  APPROVED: "승인됨",
-  PENDING: "검토중",
-  COMPLETED: "답변완료",
+  VOTING: "투표중",
+  APPROVED: "검토중",
+  PENDING: "부결",
+  COMPLETED: "처리완료",
   REJECTED: "반려",
   DELETED: "삭제됨",
 }
