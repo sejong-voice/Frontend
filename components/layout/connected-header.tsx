@@ -8,6 +8,6 @@ import { SiteHeader } from "@/components/layout/site-header"
  * to SiteHeader via props. SiteHeader itself has no auth dependency.
  */
 export function ConnectedHeader() {
-  const { user, logout } = useAuth()
-  return <SiteHeader userName={user?.name} onLogout={logout} />
+  const { user, logout, isAdmin } = useAuth()
+  return <SiteHeader userName={user?.name} onLogout={logout} isAdmin={isAdmin} />
 }

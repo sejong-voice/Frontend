@@ -64,6 +64,10 @@ export function MyPetitionList({
       {/* Petition rows */}
       <ul role="list">
         {petitions.map((petition, index) => {
+          const statusKey = petition.status?.toUpperCase() as PetitionStatus
+          const isExpired = petition.votingEndAt && new Date(petition.votingEndAt) < new Date()
+          const effectiveStatus = (statusKey === "VOTING" && isExpired) ? "PENDING" : statusKey
+          const statusInfo = statusStyles[effectiveStatus] || { label: petition.status, style: "" }
 
           return (
             <li key={petition.id}>
@@ -80,10 +84,10 @@ export function MyPetitionList({
                       variant="outline"
                       className={cn(
                         "text-xs font-medium",
-                        statusStyles[petition.status]?.style
+                        statusInfo.style
                       )}
                     >
-                      {statusStyles[petition.status]?.label || petition.status}
+                      {statusInfo.label}
                     </Badge>
                   </div>
                   <span className="text-xs text-muted-foreground">
@@ -148,10 +152,10 @@ export function MyPetitionList({
                         variant="outline"
                         className={cn(
                           "text-xs font-medium",
-                          statusStyles[petition.status]?.style
+                          statusInfo.style
                         )}
                       >
-                        {statusStyles[petition.status]?.label || petition.status}
+                        {statusInfo.label}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
                         {petition.councilName || "기타"}

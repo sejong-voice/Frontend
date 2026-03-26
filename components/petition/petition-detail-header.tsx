@@ -6,19 +6,30 @@ import { cn } from "@/lib/utils"
 import { ArrowLeft, Calendar, User, Building2, Folder } from "lucide-react"
 import Link from "next/link"
 
-export type PetitionStatus =
-  | "진행중"
-  | "승인됨"
-  | "미승인"
-  | "답변완료"
-  | "반려"
+export type PetitionStatus = 
+  | "VOTING" 
+  | "APPROVED" 
+  | "PENDING" 
+  | "COMPLETED" 
+  | "REJECTED" 
+  | "DELETED"
+
+export const statusLabelMap: Record<PetitionStatus, string> = {
+  VOTING: "진행중",
+  APPROVED: "승인됨",
+  PENDING: "검토중",
+  COMPLETED: "답변완료",
+  REJECTED: "반려",
+  DELETED: "삭제됨",
+}
 
 const statusStyles: Record<PetitionStatus, string> = {
-  진행중: "border-primary/30 bg-accent text-accent-foreground",
-  승인됨: "border-blue-200 bg-blue-50 text-blue-700",
-  답변완료: "border-green-200 bg-green-50 text-green-700",
-  미승인: "border-border bg-secondary text-muted-foreground",
-  반려: "border-orange-200 bg-orange-50 text-orange-700",
+  VOTING: "border-primary/30 bg-accent text-accent-foreground",
+  APPROVED: "border-blue-200 bg-blue-50 text-blue-700",
+  COMPLETED: "border-green-200 bg-green-50 text-green-700",
+  PENDING: "border-border bg-secondary text-muted-foreground",
+  REJECTED: "border-orange-200 bg-orange-50 text-orange-700",
+  DELETED: "border-red-200 bg-red-50 text-red-700",
 }
 
 const referrerMap: Record<string, { href: string; label: string }> = {
@@ -38,6 +49,7 @@ interface PetitionDetailHeaderProps {
   status: PetitionStatus
   category: string
   studentId: string
+  userName?: string
   date: string
   council: string
 }
@@ -47,6 +59,7 @@ export function PetitionDetailHeader({
   status,
   category,
   studentId,
+  userName,
   date,
   council,
 }: PetitionDetailHeaderProps) {
@@ -70,7 +83,7 @@ export function PetitionDetailHeader({
             variant="outline"
             className={cn("text-xs font-medium", statusStyles[status])}
           >
-            {status}
+            {statusLabelMap[status] || status}
           </Badge>
         </div>
 
@@ -81,7 +94,7 @@ export function PetitionDetailHeader({
         <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-muted-foreground">
           <span className="flex items-center gap-1.5">
             <User className="h-3.5 w-3.5" />
-            {"익명 (" + maskStudentId(studentId) + ")"}
+            {userName || maskStudentId(studentId)}
           </span>
           <span className="flex items-center gap-1.5">
             <Calendar className="h-3.5 w-3.5" />

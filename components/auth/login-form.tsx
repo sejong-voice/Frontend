@@ -31,7 +31,11 @@ export function LoginForm() {
       const result = await login(studentNo, password);
 
       if (result.success) {
-        router.push("/");
+        if (result.role === "ADMIN") {
+          router.push("/admin/petitions");
+        } else {
+          router.push("/");
+        }
       } else {
         setError(result.message || "로그인에 실패했습니다.");
       }

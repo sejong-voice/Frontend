@@ -30,8 +30,8 @@ export function PetitionVote({
   const forPercent =
     totalVotes > 0 ? Math.round((votesFor / totalVotes) * 100) : 0
   const againstPercent = totalVotes > 0 ? 100 - forPercent : 0
-  const isActive = status === "진행중"
-  const isApproved = status === "승인됨" || status === "답변완료"
+  const isActive = status === "VOTING"
+  const isApproved = status === "APPROVED" || status === "COMPLETED"
   const meetsThreshold = votesFor >= threshold
 
   function handleVote(type: "for" | "against") {

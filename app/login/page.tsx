@@ -13,7 +13,11 @@ export default function LoginPage() {
   // Already logged in — redirect to home
   useEffect(() => {
     if (!loading && user) {
-      router.replace("/");
+      if (user.role === "ADMIN") {
+        router.replace("/admin/petitions");
+      } else {
+        router.replace("/");
+      }
     }
   }, [loading, user, router]);
 

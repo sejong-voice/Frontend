@@ -15,12 +15,17 @@ const authNavItems = [
   { label: "내 청원", href: "/my-petitions" },
 ]
 
+const adminNavItems = [
+  { label: "청원 관리", href: "/admin/petitions" },
+]
+
 interface SiteHeaderProps {
   userName?: string | null
   onLogout?: () => void
+  isAdmin?: boolean
 }
 
-export function SiteHeader({ userName, onLogout }: SiteHeaderProps) {
+export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
   const pathname = usePathname()
 
   return (
@@ -67,6 +72,20 @@ export function SiteHeader({ userName, onLogout }: SiteHeaderProps) {
                   pathname === item.href
                     ? "bg-accent text-accent-foreground"
                     : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {item.label === "내 청원" && isAdmin ? "입장문" : item.label}
+              </Link>
+            ))}
+            {isAdmin && adminNavItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "rounded-md px-3 py-2 text-sm font-medium transition-colors border-2 border-primary/20 bg-primary/5",
+                  pathname === item.href
+                    ? "bg-primary text-primary-foreground"
+                    : "text-primary hover:bg-primary/10"
                 )}
               >
                 {item.label}

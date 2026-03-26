@@ -9,6 +9,7 @@ export interface GetPostsParams {
   status?: string;
   councilId?: string;
   mine?: boolean;
+  assignedToMe?: boolean;
 }
 
 export interface PaginatedResponse<T> {
@@ -26,13 +27,18 @@ export interface PaginatedResponse<T> {
 export interface CreatePostData {
   title: string;
   content: string;
-  councilId: string;
+  councilId?: string;
   postVotingDuration: "ONE_WEEK" | "TWO_WEEKS" | "FOUR_WEEKS";
 }
 
 export interface UpdatePostData {
   title: string;
   content: string;
+}
+
+export interface PostResultData {
+  status: "COMPLETED" | "REJECTED";
+  resultContent: string;
 }
 
 export const postService = {
@@ -54,5 +60,9 @@ export const postService = {
 
   deletePost: async (id: string) => {
     return api.delete(`/api/v1/posts/${id}`);
+  },
+
+  submitPostResult: async (id: string, data: PostResultData) => {
+    return api.post(`/api/v1/posts/${id}/result`, data);
   },
 };

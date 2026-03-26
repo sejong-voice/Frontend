@@ -22,6 +22,7 @@ interface PetitionData {
   status: PetitionStatus
   category: string
   studentId: string
+  userName: string
   date: string
   council: string
   content: string
@@ -41,10 +42,11 @@ interface PetitionData {
 const petitionsDB: Record<string, PetitionData> = {
   "1": {
     id: 1,
-    title: "졸업요건 중 영어 인증 기준 완화 요청",
-    status: "진행중",
+    title: "졸업요건 영어 인증 기준 완화 요청",
+    status: "VOTING",
     category: "학사제도",
     studentId: "20210001",
+    userName: "김도현",
     date: "2026.02.01",
     council: "총학생회",
     content: `안녕하세요. 본 청원은 현행 졸업요건 중 영어 인증 기준에 대한 완화를 요청드리기 위해 작성합니다.
@@ -136,10 +138,11 @@ const petitionsDB: Record<string, PetitionData> = {
   },
   "2": {
     id: 2,
-    title: "중앙도서관 24시간 열람실 운영 재개 요청",
-    status: "진행중",
+    title: "중앙도서관 24시간 열람실 운영 재개",
+    status: "VOTING",
     category: "학교시설",
     studentId: "20220315",
+    userName: "이민재",
     date: "2026.01.28",
     council: "총학생회",
     content: `중앙도서관 24시간 열람실 운영 재개를 강력히 요청합니다.
@@ -188,9 +191,10 @@ const petitionsDB: Record<string, PetitionData> = {
   "3": {
     id: 3,
     title: "교내 셔틀버스 배차 간격 단축 건의",
-    status: "답변완료",
+    status: "COMPLETED",
     category: "학생복지",
     studentId: "20190782",
+    userName: "박서윤",
     date: "2026.01.25",
     council: "총학생회",
     content: `세종대학교 셔틀버스 이용 학생입니다.
@@ -199,7 +203,7 @@ const petitionsDB: Record<string, PetitionData> = {
 
 개선 요청 사항:
 1. 피크 시간대(08:00~10:00, 12:00~13:30, 17:00~19:00) 배차 간격을 10분 이내로 단축
-2. 실시간 버스 위치 확인 시��템 도���
+2. 실시간 버스 위치 확인 시템 도
 3. 배차 간격 관련 정기적인 학생 의견 수렴
 
 많은 학생분들의 동의와 참여를 부탁드립니다.`,
@@ -253,10 +257,11 @@ const petitionsDB: Record<string, PetitionData> = {
   },
   "4": {
     id: 4,
-    title: "계절학기 수강 신청 기간 확대 요청",
-    status: "승인됨",
+    title: "계정학기 수강 신청 기간 확대 요청",
+    status: "APPROVED",
     category: "학사제도",
     studentId: "20200456",
+    userName: "최우식",
     date: "2026.01.22",
     council: "단과대학 학생회",
     content: `계절학기 수강 신청 기간의 확대를 요청드립니다.
@@ -294,15 +299,16 @@ const petitionsDB: Record<string, PetitionData> = {
   },
   "5": {
     id: 5,
-    title: "캠퍼스 내 반려동물 동반 출입 허용 건의",
-    status: "미승인",
+    title: "캠퍼스 내 반려동물 출입 규정 완화",
+    status: "PENDING",
     category: "기타",
     studentId: "20230198",
+    userName: "정수아",
     date: "2026.01.20",
     council: "총학생회",
     content: `캠퍼스 내 반려동물 동반 출입을 허용해주실 것을 건의드립니다.
 
-최근 반려동물을 키우는 학생들이 증가하고 있으며, 해외 유수 대학에서는 이미 캠퍼스 내 반려동물 동반을 허용하고 있습니다. 반려동물과 함께하는 캠퍼스 생활은 학생들의 정서적 안정에 큰 도움이 될 수 있���니다.
+최근 반려동물을 키우는 학생들이 증가하고 있으며, 해외 유수 대학에서는 이미 캠퍼스 내 반려동물 동반을 허용하고 있습니다. 반려동물과 함께하는 캠퍼스 생활은 학생들의 정서적 안정에 큰 도움이 될 수 있니다.
 
 건의 사항:
 1. 캠퍼스 야외 공간(잔디광장, 산책로 등)에서의 반려동물 동반 허용
@@ -345,10 +351,11 @@ const petitionsDB: Record<string, PetitionData> = {
   },
   "6": {
     id: 6,
-    title: "학생회관 카페테리아 메뉴 다양화 요청",
-    status: "진행중",
+    title: "학생회관 식당 메뉴 개편 요청",
+    status: "VOTING",
     category: "학교시설",
     studentId: "20211034",
+    userName: "한채영",
     date: "2026.01.18",
     council: "총학생회",
     content: `학생회관 카페테리아 메뉴의 다양화를 요청드립니다.
@@ -378,10 +385,11 @@ const petitionsDB: Record<string, PetitionData> = {
   },
   "7": {
     id: 7,
-    title: "장학금 선발 기준 투명성 강화 건의",
-    status: "답변완료",
+    title: "교내 장학금 선발 기준 투명성 강화",
+    status: "COMPLETED",
     category: "학생복지",
     studentId: "20180523",
+    userName: "배하은",
     date: "2026.01.15",
     council: "총학생회",
     content: `장학금 선발 기준의 투명성 강화를 건의드립니다.
@@ -431,10 +439,11 @@ const petitionsDB: Record<string, PetitionData> = {
   },
   "8": {
     id: 8,
-    title: "복수전공 학점 인정 범위 확대 요청",
-    status: "진행중",
+    title: "복수전공 학점 인정 범위 확대",
+    status: "VOTING",
     category: "학사제도",
     studentId: "20200891",
+    userName: "이도현",
     date: "2026.01.12",
     council: "단과대학 학생회",
     content: `복수전공 학점 인정 범위의 확대를 요청드립니다.
@@ -472,10 +481,11 @@ const petitionsDB: Record<string, PetitionData> = {
   },
   "9": {
     id: 9,
-    title: "공학관 강의실 냉난방 시설 개선 요청",
-    status: "승인됨",
+    title: "공학관 노후 강의실 시설 개선 요청",
+    status: "APPROVED",
     category: "학교시설",
     studentId: "20210667",
+    userName: "양채원",
     date: "2026.01.10",
     council: "단과대학 학생회",
     content: `공학관 강의실의 냉난방 시설 개선을 요청드립니다.
@@ -521,10 +531,11 @@ const petitionsDB: Record<string, PetitionData> = {
   },
   "10": {
     id: 10,
-    title: "학교 공식 앱 UI/UX 개선 건의",
-    status: "답변완료",
+    title: "학교 공식 앱 알림 서비스 개선",
+    status: "COMPLETED",
     category: "기타",
     studentId: "20190244",
+    userName: "김하영",
     date: "2026.01.08",
     council: "총학생회",
     content: `학교 공식 모바일 앱의 UI/UX 개선을 건의드립니다.
@@ -573,11 +584,12 @@ const petitionsDB: Record<string, PetitionData> = {
     isAdmin: false,
   },
   "13": {
-    id: 13,
-    title: "교내 자판기 제품 종류 확대 건의",
-    status: "미승인",
+    id: 11,
+    title: "교내 자판기 품목 다양화 건의",
+    status: "PENDING",
     category: "기타",
     studentId: "20210001",
+    userName: "김도현",
     date: "2026.01.05",
     council: "총학생회",
     content: `교내 자판기에서 판매하는 제품 종류의 확대를 건의드립니다.
@@ -606,11 +618,12 @@ const petitionsDB: Record<string, PetitionData> = {
     isAdmin: false,
   },
   "14": {
-    id: 14,
-    title: "학생회비 사용 내역 분기별 공개 의무화 요청",
-    status: "반려",
+    id: 12,
+    title: "학생회비 사용 내역 투명 공개 요청",
+    status: "REJECTED",
     category: "학생복지",
     studentId: "20170412",
+    userName: "오채림",
     date: "2026.01.03",
     council: "총학생회",
     content: `학생회비 사용 내역의 분기별 공개를 의무화해주실 것을 요청합니다.
@@ -625,7 +638,7 @@ const petitionsDB: Record<string, PetitionData> = {
     votesAgainst: 28,
     threshold: 300,
     officialResponse: {
-      content: `안녕하���요, 총학생회입니다.
+      content: `안녕하요, 총학생회입니다.
 
 해당 청원에 대해 검토한 결과를 안내드립니다.
 
@@ -670,11 +683,12 @@ const petitionsDB: Record<string, PetitionData> = {
 
 // Default fallback: admin view of an approved petition
 const defaultPetition: PetitionData = {
-  id: 0,
-  title: "중앙도서관 24시간 열람실 운영 재개 요청",
-  status: "승인됨",
+  id: 2,
+  title: "중앙도서관 24시간 열람실 운영 재개",
+  status: "APPROVED",
   category: "학교시설",
   studentId: "20220315",
+  userName: "이민재",
   date: "2026.01.28",
   council: "총학생회",
   content: `중앙도서관 24시간 열람실 운영 재개를 강력히 요청합니다.
@@ -740,7 +754,7 @@ export default function PetitionDetailPage({
 
   const showOfficialResponse =
     petition.officialResponse &&
-    (petition.status === "답변완료" || petition.status === "반려")
+    (petition.status === "COMPLETED" || petition.status === "REJECTED")
 
   return (
     <div className="min-h-screen bg-background">
@@ -752,6 +766,7 @@ export default function PetitionDetailPage({
             status={petition.status}
             category={petition.category}
             studentId={petition.studentId}
+            userName={petition.userName}
             date={petition.date}
             council={petition.council}
           />
@@ -759,7 +774,7 @@ export default function PetitionDetailPage({
           <Separator />
 
           {/* Status banner for non-active petitions */}
-          {petition.status !== "진행중" && (
+          {petition.status !== "VOTING" && (
             <PetitionStatusBanner status={petition.status} />
           )}
 
@@ -781,6 +796,7 @@ export default function PetitionDetailPage({
           )}
 
           <PetitionActions
+            petitionId={id}
             status={petition.status}
             isAuthor={!!user && petition.isAuthor}
             isAdmin={isAdmin}
