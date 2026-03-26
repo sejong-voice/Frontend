@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 
 interface PetitionVoteProps extends VoteSummaryResponse {
   isActive: boolean
+  votingEndAt?: string
   onVote?: (choice: VoteChoice) => Promise<void>
 }
 
@@ -18,6 +19,7 @@ export function PetitionVote({
   disagreeCount,
   totalCount,
   isActive,
+  votingEndAt,
   onVote,
 }: PetitionVoteProps) {
   const { user } = useAuth()
@@ -32,6 +34,16 @@ export function PetitionVote({
   const agreePercent =
     totalCount > 0 ? Math.round((agreeCount / totalCount) * 100) : 0
   const disagreePercent = totalCount > 0 ? 100 - agreePercent : 0
+  const votingEndDate = votingEndAt
+    ? new Intl.DateTimeFormat("ko-KR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+        .format(new Date(votingEndAt))
+        .replace(/\s/g, "")
+        .replace(/\.$/, "")
+    : null
 
   async function handleVote(choice: VoteChoice) {
     if (!user || !isActive || !onVote || isSubmitting) return
@@ -74,6 +86,12 @@ export function PetitionVote({
             참여
           </span>
         </div>
+
+        {votingEndDate && (
+          <p className="text-sm text-muted-foreground">
+            투표 마감: {votingEndDate}
+          </p>
+        )}
 
         <div className="flex flex-col gap-2.5">
           <div className="flex items-center justify-between text-sm">
