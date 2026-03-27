@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import type { CommentReportReason } from "@/app/api/comments"
 import {
   ChevronDown,
   ChevronUp,
@@ -16,6 +17,13 @@ import {
 import { useAuth } from "@/components/auth/auth-provider"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 
@@ -36,6 +44,27 @@ export interface Comment {
   replies: ReplyData[]
 }
 
+const COMMENT_REPORT_REASON_OPTIONS: {
+  value: CommentReportReason
+  label: string
+}[] = [
+  { value: "SPAM", label: "스팸/광고" },
+  { value: "ABUSE", label: "욕설/비방" },
+  { value: "HATE", label: "혐오/차별" },
+  { value: "PRIVACY", label: "개인정보 노출" },
+  { value: "OTHER", label: "기타" },
+]
+
+function getActionErrorMessage(error: unknown, fallback: string): string {
+  const message = (
+    error as {
+      response?: { data?: { message?: string } }
+    }
+  )?.response?.data?.message
+
+  return typeof message === "string" && message.trim() ? message : fallback
+}
+
 interface PetitionCommentsProps {
   comments: Comment[]
   totalCount: number
@@ -43,7 +72,10 @@ interface PetitionCommentsProps {
   onCreateComment?: (content: string) => Promise<void>
   onCreateReply?: (parentId: string, content: string) => Promise<void>
   onDeleteComment?: (commentId: string) => Promise<void>
-  onReportComment?: (commentId: string) => Promise<void>
+  onReportComment?: (
+    commentId: string,
+    reason: CommentReportReason
+  ) => Promise<void>
 }
 
 function CommentItem({
@@ -60,7 +92,10 @@ function CommentItem({
   onReply?: () => void
   showActions?: boolean
   onDelete?: (commentId: string) => Promise<void>
-  onReport?: (commentId: string) => Promise<void>
+  onReport?: (
+    commentId: string,
+    reason: CommentReportReason
+  ) => Promise<void>
   disableReplyAction?: boolean
 }) {
   const [showReportConfirm, setShowReportConfirm] = useState(false)
@@ -69,6 +104,8 @@ function CommentItem({
   const [isReporting, setIsReporting] = useState(false)
   const [reportFeedback, setReportFeedback] = useState<string | null>(null)
   const [actionError, setActionError] = useState<string | null>(null)
+  const [selectedReportReason, setSelectedReportReason] =
+    useState<CommentReportReason>("SPAM")
 
   async function handleDelete() {
     if (!onDelete || isDeleting) return
@@ -78,11 +115,22 @@ function CommentItem({
     try {
       await onDelete(comment.id)
       setShowDeleteConfirm(false)
-    } catch {
-      setActionError("댓글 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요.")
+    } catch (error) {
+      setActionError(
+        getActionErrorMessage(
+          error,
+          "댓글 삭제에 실패했습니다. 잠시 후 다시 시도해 주세요."
+        )
+      )
     } finally {
       setIsDeleting(false)
     }
+  }
+
+  function openReportConfirm() {
+    setShowReportConfirm(true)
+    setReportFeedback(null)
+    setActionError(null)
   }
 
   async function handleReport() {
@@ -91,11 +139,16 @@ function CommentItem({
     setIsReporting(true)
     setActionError(null)
     try {
-      await onReport(comment.id)
+      await onReport(comment.id, selectedReportReason)
       setShowReportConfirm(false)
       setReportFeedback("신고가 접수되었습니다.")
-    } catch {
-      setActionError("댓글 신고에 실패했습니다. 잠시 후 다시 시도해 주세요.")
+    } catch (error) {
+      setActionError(
+        getActionErrorMessage(
+          error,
+          "댓글 신고에 실패했습니다. 잠시 후 다시 시도해 주세요."
+        )
+      )
     } finally {
       setIsReporting(false)
     }
@@ -123,7 +176,7 @@ function CommentItem({
               <button
                 onClick={onReply}
                 disabled={disableReplyAction}
-                className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+                className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-foreground disabled:opacity-60"
                 type="button"
               >
                 <Reply className="h-3 w-3" />
@@ -145,7 +198,7 @@ function CommentItem({
             {showDeleteConfirm && (
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">
-                  삭제하시겠습니까?
+                  댓글을 삭제하시겠습니까?
                 </span>
                 <button
                   onClick={handleDelete}
@@ -153,7 +206,7 @@ function CommentItem({
                   className="text-xs font-medium text-destructive disabled:opacity-60"
                   type="button"
                 >
-                  {isDeleting ? "처리중..." : "확인"}
+                  {isDeleting ? "처리 중..." : "확인"}
                 </button>
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
@@ -168,7 +221,7 @@ function CommentItem({
 
             {!comment.canDelete && !showReportConfirm && (
               <button
-                onClick={() => setShowReportConfirm(true)}
+                onClick={openReportConfirm}
                 className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-destructive"
                 type="button"
               >
@@ -178,26 +231,46 @@ function CommentItem({
             )}
 
             {showReportConfirm && (
-              <div className="flex items-center gap-2">
+              <div className="flex min-w-[220px] flex-col gap-2 rounded-md border border-border bg-card p-3">
                 <span className="text-xs text-muted-foreground">
-                  이 댓글을 신고하시겠습니까?
+                  신고 사유를 선택해 주세요.
                 </span>
-                <button
-                  onClick={handleReport}
+                <Select
+                  value={selectedReportReason}
+                  onValueChange={(value) =>
+                    setSelectedReportReason(value as CommentReportReason)
+                  }
                   disabled={isReporting}
-                  className="text-xs font-medium text-destructive disabled:opacity-60"
-                  type="button"
                 >
-                  {isReporting ? "처리중..." : "확인"}
-                </button>
-                <button
-                  onClick={() => setShowReportConfirm(false)}
-                  disabled={isReporting}
-                  className="text-xs text-muted-foreground disabled:opacity-60"
-                  type="button"
-                >
-                  취소
-                </button>
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="신고 사유 선택" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {COMMENT_REPORT_REASON_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleReport}
+                    disabled={isReporting}
+                    className="text-xs font-medium text-destructive disabled:opacity-60"
+                    type="button"
+                  >
+                    {isReporting ? "처리 중..." : "확인"}
+                  </button>
+                  <button
+                    onClick={() => setShowReportConfirm(false)}
+                    disabled={isReporting}
+                    className="text-xs text-muted-foreground disabled:opacity-60"
+                    type="button"
+                  >
+                    취소
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -249,7 +322,7 @@ function ReplyInput({
   return (
     <div className="ml-10 flex flex-col gap-2 rounded-md border border-border bg-secondary/50 p-3 md:ml-12">
       <Textarea
-        placeholder="답글을 입력해주세요."
+        placeholder="답글을 입력해 주세요."
         value={text}
         onChange={(e) => setText(e.target.value)}
         disabled={isSubmitting}
@@ -294,7 +367,10 @@ function CommentThread({
   showActions: boolean
   onCreateReply?: (parentId: string, content: string) => Promise<void>
   onDeleteComment?: (commentId: string) => Promise<void>
-  onReportComment?: (commentId: string) => Promise<void>
+  onReportComment?: (
+    commentId: string,
+    reason: CommentReportReason
+  ) => Promise<void>
 }) {
   const [showReplies, setShowReplies] = useState(false)
   const [showReplyInput, setShowReplyInput] = useState(false)

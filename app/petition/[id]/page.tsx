@@ -2,9 +2,14 @@
 
 import { use, useCallback, useEffect, useState } from "react"
 import { Loader2 } from "lucide-react"
-import { commentService, type CommentResponse } from "@/app/api/comments"
+import {
+  commentService,
+  type CommentReportReason,
+  type CommentResponse,
+} from "@/app/api/comments"
 import {
   postService,
+  type PostReportReason,
   type VoteChoice,
   type VoteSummaryResponse,
 } from "@/app/api/posts"
@@ -20,6 +25,7 @@ import {
   PetitionDetailHeader,
   type PetitionStatus,
 } from "@/components/petition/petition-detail-header"
+import { PetitionOfficialResponse } from "@/components/petition/petition-official-response"
 import { PetitionStatusBanner } from "@/components/petition/petition-status-banner"
 import { PetitionVote } from "@/components/petition/petition-vote"
 import { PetitionActions } from "@/components/petition/petition-actions"
@@ -94,6 +100,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
   const [petition, setPetition] = useState<PetitionDetailResponse | null>(null)
   const [voteSummary, setVoteSummary] = useState<VoteSummaryResponse | null>(null)
   const [comments, setComments] = useState<Comment[]>([])
+  const [canManageAsAdmin, setCanManageAsAdmin] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState("")
 
@@ -105,7 +112,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
   const fetchVoteSummary = useCallback(async () => {
     const result = await postService.getVoteSummary(id)
     setVoteSummary(result.data)
-  }, [id])
+  }, [id, isAdmin])
 
   const handleCreateComment = useCallback(
     async (content: string) => {
@@ -197,13 +204,15 @@ export default function PetitionDetailPage({ params }: PageProps) {
       setError("")
       setVoteSummary(null)
       setComments([])
+      setCanManageAsAdmin(false)
 
       try {
-        const [postResult, voteSummaryResult, commentsResult] =
+        const [postResult, voteSummaryResult, commentsResult, assignedPetitionsResult] =
           await Promise.allSettled([
             postService.getPost(id),
             postService.getVoteSummary(id),
             commentService.getCommentsByPost(id),
+            isAdmin ? postService.getPosts({ assignedToMe: true }) : Promise.resolve(null),
           ])
 
         if (!isMounted) return
@@ -224,6 +233,15 @@ export default function PetitionDetailPage({ params }: PageProps) {
           setComments(commentsResult.value.data.map(mapComment))
         } else {
           console.error("댓글 목록 조회 실패:", commentsResult.reason)
+        }
+        if (isAdmin) {
+          if (assignedPetitionsResult.status === "fulfilled") {
+            setCanManageAsAdmin(
+              assignedPetitionsResult.value?.data.content.some((post) => post.id === id) ?? false
+            )
+          } else {
+            console.error("할당 청원 조회 실패:", assignedPetitionsResult.reason)
+          }
         }
       } catch (err) {
         console.error("게시글 상세 조회 실패:", err)
@@ -272,6 +290,12 @@ export default function PetitionDetailPage({ params }: PageProps) {
   const totalCommentCount = getTotalCommentCount(comments)
   const canReportPost = !!user && petition.userId !== user.id
   const isAuthor = !!user && petition.userId === user.id
+  const officialResponseContent =
+    petition.status === "COMPLETED"
+      ? "학생회의 공식 입장문이 등록되었습니다."
+      : petition.status === "REJECTED"
+        ? "학생회의 반려 의견이 등록되었습니다."
+        : null
 
   return (
     <div className="min-h-screen bg-background">
@@ -302,6 +326,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
             <PetitionVote
               {...voteSummary}
               isActive={petition.status === "VOTING"}
+              votingEndAt={petition.votingEndAt}
               onVote={handleVote}
             />
           )}
@@ -310,9 +335,17 @@ export default function PetitionDetailPage({ params }: PageProps) {
             petitionId={id}
             status={petition.status}
             isAuthor={isAuthor}
-            isAdmin={isAdmin}
+            canManageAsAdmin={canManageAsAdmin}
             totalVotes={voteSummary?.totalCount || 0}
           />
+
+          {officialResponseContent && (
+            <PetitionOfficialResponse
+              content={officialResponseContent}
+              respondent={petition.councilName}
+              date="-"
+            />
+          )}
 
           <Separator />
 
