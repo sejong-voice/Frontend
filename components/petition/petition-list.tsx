@@ -18,8 +18,8 @@ export interface Petition {
   createdAt: string
   votingEndAt: string
   // Optional/Computed fields if needed for UI compatibility
-  comments?: number
-  votes?: number
+  commentCount: number
+  voteCount: number
 }
 
 const statusMap: Record<PetitionStatus, { label: string; style: string }> = {
@@ -70,86 +70,86 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
 
       {/* Petition rows */}
       <ul role="list">
-          {petitions.map((petition, index) => {
-            const statusKey = petition.status?.toUpperCase() as PetitionStatus
-            const statusInfo = statusMap[statusKey] || { label: petition.status, style: "" }
+        {petitions.map((petition, index) => {
+          const statusKey = petition.status?.toUpperCase() as PetitionStatus
+          const statusInfo = statusMap[statusKey] || { label: petition.status, style: "" }
 
-            return (
-              <li key={petition.id}>
-                <Link
-                  href={`/petition/${petition.id}?from=${from}`}
-                  className={cn(
-                    "block transition-colors hover:bg-muted/50",
-                    index !== petitions.length - 1 && "border-b border-border"
-                  )}
-                >
-                  {/* Desktop row */}
-                  <div className="hidden px-6 py-4 md:grid md:grid-cols-[100px_80px_1fr_140px_100px] md:items-center md:gap-4">
-                    <div>
-                      <Badge
-                        variant="outline"
-                        className={cn("text-xs font-medium", statusInfo.style)}
-                      >
-                        {statusInfo.label}
-                      </Badge>
-                    </div>
+          return (
+            <li key={petition.id}>
+              <Link
+                href={`/petition/${petition.id}?from=${from}`}
+                className={cn(
+                  "block transition-colors hover:bg-muted/50",
+                  index !== petitions.length - 1 && "border-b border-border"
+                )}
+              >
+                {/* Desktop row */}
+                <div className="hidden px-6 py-4 md:grid md:grid-cols-[100px_80px_1fr_140px_100px] md:items-center md:gap-4">
+                  <div>
+                    <Badge
+                      variant="outline"
+                      className={cn("text-xs font-medium", statusInfo.style)}
+                    >
+                      {statusInfo.label}
+                    </Badge>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {petition.councilName || "기타"}
+                  </span>
+                  <span className="truncate text-sm font-medium text-foreground">
+                    {petition.title}
+                  </span>
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Vote className="h-3.5 w-3.5" />
+                      {petition.voteCount || 0}
+                    </span>
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <MessageSquare className="h-3.5 w-3.5" />
+                      {petition.commentCount || 0}
+                    </span>
+                  </div>
+                  <span className="text-right text-xs text-muted-foreground">
+                    {petition.createdAt ? new Date(petition.createdAt).toLocaleDateString() : "-"}
+                  </span>
+                </div>
+
+                {/* Mobile row */}
+                <div className="flex flex-col gap-2 px-5 py-4 md:hidden">
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant="outline"
+                      className={cn("text-xs font-medium", statusInfo.style)}
+                    >
+                      {statusInfo.label}
+                    </Badge>
                     <span className="text-xs text-muted-foreground">
                       {petition.councilName || "기타"}
                     </span>
-                    <span className="truncate text-sm font-medium text-foreground">
-                      {petition.title}
-                    </span>
+                  </div>
+                  <span className="truncate text-sm font-medium text-foreground">
+                    {petition.title}
+                  </span>
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Vote className="h-3.5 w-3.5" />
-                        {petition.votes || 0}
+                        {petition.voteCount || 0}
                       </span>
                       <span className="flex items-center gap-1 text-xs text-muted-foreground">
                         <MessageSquare className="h-3.5 w-3.5" />
-                        {petition.comments || 0}
+                        {petition.commentCount || 0}
                       </span>
                     </div>
-                    <span className="text-right text-xs text-muted-foreground">
+                    <span className="text-xs text-muted-foreground">
                       {petition.createdAt ? new Date(petition.createdAt).toLocaleDateString() : "-"}
                     </span>
                   </div>
-
-                  {/* Mobile row */}
-                  <div className="flex flex-col gap-2 px-5 py-4 md:hidden">
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        variant="outline"
-                        className={cn("text-xs font-medium", statusInfo.style)}
-                      >
-                        {statusInfo.label}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {petition.councilName || "기타"}
-                      </span>
-                    </div>
-                    <span className="truncate text-sm font-medium text-foreground">
-                      {petition.title}
-                    </span>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Vote className="h-3.5 w-3.5" />
-                          {petition.votes || 0}
-                        </span>
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <MessageSquare className="h-3.5 w-3.5" />
-                          {petition.comments || 0}
-                        </span>
-                      </div>
-                      <span className="text-xs text-muted-foreground">
-                        {petition.createdAt ? new Date(petition.createdAt).toLocaleDateString() : "-"}
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              </li>
-            )
-          })}
+                </div>
+              </Link>
+            </li>
+          )
+        })}
       </ul>
     </div>
   )
