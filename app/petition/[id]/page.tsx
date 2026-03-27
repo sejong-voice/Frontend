@@ -25,6 +25,7 @@ import {
   PetitionDetailHeader,
   type PetitionStatus,
 } from "@/components/petition/petition-detail-header"
+import { PetitionOfficialResponse } from "@/components/petition/petition-official-response"
 import { PetitionStatusBanner } from "@/components/petition/petition-status-banner"
 import { PetitionVote } from "@/components/petition/petition-vote"
 import { PetitionActions } from "@/components/petition/petition-actions"
@@ -272,6 +273,12 @@ export default function PetitionDetailPage({ params }: PageProps) {
   const totalCommentCount = getTotalCommentCount(comments)
   const canReportPost = !!user && petition.userId !== user.id
   const isAuthor = !!user && petition.userId === user.id
+  const officialResponseContent =
+    petition.status === "COMPLETED"
+      ? "학생회의 공식 입장문이 등록되었습니다."
+      : petition.status === "REJECTED"
+        ? "학생회의 반려 의견이 등록되었습니다."
+        : null
 
   return (
     <div className="min-h-screen bg-background">
@@ -314,6 +321,14 @@ export default function PetitionDetailPage({ params }: PageProps) {
             canManageAsAdmin={canManageAsAdmin}
             totalVotes={voteSummary?.totalCount || 0}
           />
+
+          {officialResponseContent && (
+            <PetitionOfficialResponse
+              content={officialResponseContent}
+              respondent={petition.councilName}
+              date="-"
+            />
+          )}
 
           <Separator />
 
