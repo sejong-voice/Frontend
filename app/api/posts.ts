@@ -63,6 +63,11 @@ export interface PostReportData {
   description?: string;
 }
 
+export interface PostResultData {
+  status: "VOTING" | "COMPLETED" | "REJECTED";
+  resultContent: string;
+}
+
 export const postService = {
   getPosts: async (params: GetPostsParams) => {
     return api.get<PaginatedResponse<Petition>>("/api/v1/posts", { params });

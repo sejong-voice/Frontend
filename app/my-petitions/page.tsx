@@ -86,9 +86,9 @@ export default function MyPetitionsPage() {
   const stats = useMemo(() => {
     const total = data?.totalElements || 0
     return [
-      { label: isAdmin ? "전체 내 입장문" : "전체 내 청원", count: total },
+      { label: "전체 내 청원", count: total },
     ]
-  }, [data, isAdmin])
+  }, [data])
 
   if (loading || !user) {
     return (
@@ -131,10 +131,10 @@ export default function MyPetitionsPage() {
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:flex-1">
               <div>
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                  {isAdmin ? "내 입장문" : "내 청원"}
+                  {"내 청원"}
                 </h1>
                 <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-                  {isAdmin ? "내가 작성한 입장문의 현황을 확인하고 관리할 수 있습니다." : "내가 작성한 청원의 현황을 확인하고 관리할 수 있습니다."}
+                  {"내가 작성한 청원의 현황을 확인하고 관리할 수 있습니다."}
                 </p>
               </div>
               <div className="flex items-center gap-4">
@@ -159,7 +159,7 @@ export default function MyPetitionsPage() {
             <Button asChild className="shrink-0">
               <Link href="/petition/new">
                 <Plus className="mr-1.5 h-4 w-4" />
-                {isAdmin ? "입장문 작성" : "청원 작성"}
+                {"청원 작성"}
               </Link>
             </Button>
           </div>
