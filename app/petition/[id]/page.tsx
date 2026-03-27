@@ -24,6 +24,7 @@ import { PetitionStatusBanner } from "@/components/petition/petition-status-bann
 import { PetitionVote } from "@/components/petition/petition-vote"
 import { PetitionActions } from "@/components/petition/petition-actions"
 import { Separator } from "@/components/ui/separator"
+import { toast } from "sonner"
 
 interface PetitionDetailResponse {
   id: string
@@ -108,15 +109,17 @@ export default function PetitionDetailPage({ params }: PageProps) {
 
   const handleCreateComment = useCallback(
     async (content: string) => {
-      await commentService.createComment({
-        postId: id,
-        parentId: null,
-        content,
-      })
       try {
+        await commentService.createComment({
+          postId: id,
+          parentId: null,
+          content,
+        })
+        toast.success("댓글이 등록되었습니다.")
         await fetchComments()
-      } catch (error) {
-        console.error("댓글 등록 후 목록 갱신 실패:", error)
+      } catch (error: any) {
+        console.error("댓글 등록 실패:", error)
+        toast.error(error.response?.data?.message || "댓글 등록에 실패했습니다.")
       }
     },
     [fetchComments, id]
@@ -124,15 +127,17 @@ export default function PetitionDetailPage({ params }: PageProps) {
 
   const handleCreateReply = useCallback(
     async (parentId: string, content: string) => {
-      await commentService.createComment({
-        postId: id,
-        parentId,
-        content,
-      })
       try {
+        await commentService.createComment({
+          postId: id,
+          parentId,
+          content,
+        })
+        toast.success("답글이 등록되었습니다.")
         await fetchComments()
-      } catch (error) {
-        console.error("대댓글 등록 후 목록 갱신 실패:", error)
+      } catch (error: any) {
+        console.error("답글 등록 실패:", error)
+        toast.error(error.response?.data?.message || "답글 등록에 실패했습니다.")
       }
     },
     [fetchComments, id]
@@ -140,31 +145,45 @@ export default function PetitionDetailPage({ params }: PageProps) {
 
   const handleDeleteComment = useCallback(
     async (commentId: string) => {
-      await commentService.deleteComment(commentId)
       try {
+        await commentService.deleteComment(commentId)
+        toast.success("댓글이 삭제되었습니다.")
         await fetchComments()
-      } catch (error) {
-        console.error("댓글 삭제 후 목록 갱신 실패:", error)
+      } catch (error: any) {
+        console.error("댓글 삭제 실패:", error)
+        toast.error(error.response?.data?.message || "댓글 삭제에 실패했습니다.")
       }
     },
     [fetchComments]
   )
 
   const handleReportComment = useCallback(async (commentId: string) => {
-    await commentService.reportComment(commentId, { reason: "OTHER" })
+    try {
+      await commentService.reportComment(commentId, { reason: "OTHER" })
+      toast.success("신고가 접수되었습니다.")
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "신고 처리에 실패했습니다.")
+    }
   }, [])
 
   const handleReportPost = useCallback(async () => {
-    await postService.reportPost(id, { reason: "OTHER" })
+    try {
+      await postService.reportPost(id, { reason: "OTHER" })
+      toast.success("신고가 접수되었습니다.")
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "신고 처리에 실패했습니다.")
+    }
   }, [id])
 
   const handleVote = useCallback(
     async (choice: VoteChoice) => {
-      await postService.castVote(id, { choice })
       try {
+        await postService.castVote(id, { choice })
+        toast.success(choice === "AGREE" ? "동의하셨습니다." : "비동의하셨습니다.")
         await fetchVoteSummary()
-      } catch (error) {
-        console.error("투표 결과 갱신 실패:", error)
+      } catch (error: any) {
+        console.error("투표 실패:", error)
+        toast.error(error.response?.data?.message || "투표 처리에 실패했습니다.")
       }
     },
     [fetchVoteSummary, id]
@@ -212,6 +231,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
         if (!isMounted) return
         setPetition(null)
         setError("게시글 정보를 불러오지 못했습니다.")
+        toast.error("게시글 정보를 불러오지 못했습니다.")
       } finally {
         if (isMounted) {
           setIsLoading(false)

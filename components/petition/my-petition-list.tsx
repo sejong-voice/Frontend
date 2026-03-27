@@ -102,11 +102,11 @@ export function MyPetitionList({
                   <div className="flex items-center gap-3">
                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
                       <Vote className="h-3.5 w-3.5" />
-                      {petition.votes}
+                      {petition.voteCount}
                     </span>
                     <span className="flex items-center gap-1 text-xs text-muted-foreground">
                       <MessageSquare className="h-3.5 w-3.5" />
-                      {petition.comments}
+                      {petition.commentCount}
                     </span>
                   </div>
                   <span className="text-xs text-muted-foreground">
@@ -178,7 +178,7 @@ export function MyPetitionList({
                         variant="ghost"
                         size="sm"
                         className={cn(
-                        "h-7 px-2 text-xs text-destructive/70 hover:text-destructive hover:bg-destructive/10"
+                          "h-7 px-2 text-xs text-destructive/70 hover:text-destructive hover:bg-destructive/10"
                         )}
                         onClick={(e) => {
                           e.preventDefault()
@@ -200,11 +200,11 @@ export function MyPetitionList({
                     <div className="flex items-center gap-3">
                       <span className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Vote className="h-3.5 w-3.5" />
-                        {petition.votes}
+                        {petition.voteCount}
                       </span>
                       <span className="flex items-center gap-1 text-xs text-muted-foreground">
                         <MessageSquare className="h-3.5 w-3.5" />
-                        {petition.comments}
+                        {petition.commentCount}
                       </span>
                     </div>
                     <span className="text-xs text-muted-foreground">

@@ -46,6 +46,7 @@ export default function MyPetitionsPage() {
       setCouncils(res.data)
     } catch (error) {
       console.error("학생회 목록 로드 실패:", error)
+      toast.error("학생회 목록을 불러오지 못했습니다.")
     }
   }
 
@@ -64,6 +65,7 @@ export default function MyPetitionsPage() {
       setData(res.data)
     } catch (error) {
       console.error("내 청원 로드 실패:", error)
+      toast.error("내 청원 목록을 불러오지 못했습니다.")
     } finally {
       setIsLoading(false)
     }

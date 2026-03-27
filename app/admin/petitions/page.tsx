@@ -10,6 +10,7 @@ import { postService } from "@/app/api/posts"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 const statuses = [
   { label: "전체", value: "ALL" },
@@ -59,10 +60,10 @@ export default function AdminPetitionsPage() {
           assignedToMe: true,
           status: activeStatus === "ALL" ? undefined : activeStatus
         })
-        console.log(response.data.content)
         setPetitions(response.data.content)
-      } catch (error) {
+      } catch (error: any) {
         console.error("Failed to fetch assigned petitions:", error)
+        toast.error("청원 목록을 불러오는 중 오류가 발생했습니다.")
       } finally {
         setLoading(false)
       }
