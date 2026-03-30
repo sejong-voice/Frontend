@@ -40,6 +40,9 @@ interface PetitionDetailResponse {
   title: string
   content: string
   status: PetitionStatus
+  resultContent?: string | null
+  resultCreatedAt?: string | null
+  resultUpdatedAt?: string | null
   postVotingDuration: string
   createdAt: string
   votingEndAt: string
@@ -66,6 +69,22 @@ function formatDate(value: string) {
     .format(date)
     .replace(/\s/g, "")
     .replace(/\.$/, "")
+}
+
+function formatDateTime(value: string) {
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) {
+    return "-"
+  }
+
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+  const hours = String(date.getHours()).padStart(2, "0")
+  const minutes = String(date.getMinutes()).padStart(2, "0")
+
+  return `${year}.${month}.${day} ${hours}:${minutes}`
 }
 
 function mapReply(reply: CommentResponse): ReplyData {
@@ -111,7 +130,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
   const fetchVoteSummary = useCallback(async () => {
     const result = await postService.getVoteSummary(id)
     setVoteSummary(result.data)
-  }, [id, isAdmin])
+  }, [id])
 
   const handleCreateComment = useCallback(
     async (content: string) => {
@@ -120,10 +139,11 @@ export default function PetitionDetailPage({ params }: PageProps) {
         parentId: null,
         content,
       })
+
       try {
         await fetchComments()
-      } catch (error) {
-        console.error("댓글 등록 후 목록 갱신 실패:", error)
+      } catch (refreshError) {
+        console.error("댓글 목록 갱신 실패:", refreshError)
       }
     },
     [fetchComments, id]
@@ -136,10 +156,11 @@ export default function PetitionDetailPage({ params }: PageProps) {
         parentId,
         content,
       })
+
       try {
         await fetchComments()
-      } catch (error) {
-        console.error("대댓글 등록 후 목록 갱신 실패:", error)
+      } catch (refreshError) {
+        console.error("대댓글 목록 갱신 실패:", refreshError)
       }
     },
     [fetchComments, id]
@@ -148,10 +169,11 @@ export default function PetitionDetailPage({ params }: PageProps) {
   const handleDeleteComment = useCallback(
     async (commentId: string) => {
       await commentService.deleteComment(commentId)
+
       try {
         await fetchComments()
-      } catch (error) {
-        console.error("댓글 삭제 후 목록 갱신 실패:", error)
+      } catch (refreshError) {
+        console.error("댓글 삭제 후 목록 갱신 실패:", refreshError)
       }
     },
     [fetchComments]
@@ -164,17 +186,21 @@ export default function PetitionDetailPage({ params }: PageProps) {
     []
   )
 
-  const handleReportPost = useCallback(async (reason: PostReportReason) => {
-    await postService.reportPost(id, { reason })
-  }, [id])
+  const handleReportPost = useCallback(
+    async (reason: PostReportReason) => {
+      await postService.reportPost(id, { reason })
+    },
+    [id]
+  )
 
   const handleVote = useCallback(
     async (choice: VoteChoice) => {
       await postService.castVote(id, { choice })
+
       try {
         await fetchVoteSummary()
-      } catch (error) {
-        console.error("투표 결과 갱신 실패:", error)
+      } catch (refreshError) {
+        console.error("투표 결과 갱신 실패:", refreshError)
       }
     },
     [fetchVoteSummary, id]
@@ -191,13 +217,17 @@ export default function PetitionDetailPage({ params }: PageProps) {
       setCanManageAsAdmin(false)
 
       try {
-        const [postResult, voteSummaryResult, commentsResult, assignedPetitionsResult] =
-          await Promise.allSettled([
-            postService.getPost(id),
-            postService.getVoteSummary(id),
-            commentService.getCommentsByPost(id),
-            isAdmin ? postService.getPosts({ assignedToMe: true }) : Promise.resolve(null),
-          ])
+        const [
+          postResult,
+          voteSummaryResult,
+          commentsResult,
+          assignedPetitionsResult,
+        ] = await Promise.allSettled([
+          postService.getPost(id),
+          postService.getVoteSummary(id),
+          commentService.getCommentsByPost(id),
+          isAdmin ? postService.getPosts({ assignedToMe: true }) : Promise.resolve(null),
+        ])
 
         if (!isMounted) return
 
@@ -218,6 +248,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
         } else {
           console.error("댓글 목록 조회 실패:", commentsResult.reason)
         }
+
         if (isAdmin) {
           if (assignedPetitionsResult.status === "fulfilled") {
             setCanManageAsAdmin(
@@ -227,8 +258,8 @@ export default function PetitionDetailPage({ params }: PageProps) {
             console.error("할당 청원 조회 실패:", assignedPetitionsResult.reason)
           }
         }
-      } catch (err) {
-        console.error("게시글 상세 조회 실패:", err)
+      } catch (fetchError) {
+        console.error("게시글 상세 조회 실패:", fetchError)
 
         if (!isMounted) return
         setPetition(null)
@@ -245,7 +276,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
     return () => {
       isMounted = false
     }
-  }, [id])
+  }, [id, isAdmin])
 
   if (isLoading) {
     return (
@@ -273,12 +304,18 @@ export default function PetitionDetailPage({ params }: PageProps) {
   const totalCommentCount = getTotalCommentCount(comments)
   const canReportPost = !!user && petition.userId !== user.id
   const isAuthor = !!user && petition.userId === user.id
-  const officialResponseContent =
-    petition.status === "COMPLETED"
-      ? "학생회의 공식 입장문이 등록되었습니다."
-      : petition.status === "REJECTED"
-        ? "학생회의 반려 의견이 등록되었습니다."
-        : null
+  const shouldShowOfficialResponse =
+    (petition.status === "COMPLETED" || petition.status === "REJECTED") &&
+    !!petition.resultContent?.trim()
+  const officialResponseDateSource =
+    petition.resultCreatedAt || petition.resultUpdatedAt || ""
+  const officialResponseDate = officialResponseDateSource
+    ? `게시 ${formatDateTime(officialResponseDateSource)}`
+    : "-"
+  const isOfficialResponseEdited =
+    !!petition.resultCreatedAt &&
+    !!petition.resultUpdatedAt &&
+    petition.resultCreatedAt !== petition.resultUpdatedAt
 
   return (
     <div className="min-h-screen bg-background">
@@ -298,7 +335,6 @@ export default function PetitionDetailPage({ params }: PageProps) {
 
           <Separator />
 
-          {/* Status banner for non-active petitions */}
           {petition.status !== "VOTING" && (
             <PetitionStatusBanner status={petition.status} />
           )}
@@ -322,11 +358,12 @@ export default function PetitionDetailPage({ params }: PageProps) {
             totalVotes={voteSummary?.totalCount || 0}
           />
 
-          {officialResponseContent && (
+          {shouldShowOfficialResponse && (
             <PetitionOfficialResponse
-              content={officialResponseContent}
+              content={petition.resultContent ?? ""}
               respondent={petition.councilName}
-              date="-"
+              date={officialResponseDate}
+              isEdited={isOfficialResponseEdited}
             />
           )}
 
