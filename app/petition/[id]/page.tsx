@@ -30,6 +30,8 @@ import { PetitionStatusBanner } from "@/components/petition/petition-status-bann
 import { PetitionVote } from "@/components/petition/petition-vote";
 import { PetitionActions } from "@/components/petition/petition-actions";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 interface PetitionDetailResponse {
@@ -124,6 +126,11 @@ export default function PetitionDetailPage({ params }: PageProps) {
   const [canManageAsAdmin, setCanManageAsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const [isEditingOfficialResponse, setIsEditingOfficialResponse] =
+    useState(false);
+  const [officialResponseDraft, setOfficialResponseDraft] = useState("");
+  const [isUpdatingOfficialResponse, setIsUpdatingOfficialResponse] =
+    useState(false);
 
   const fetchComments = useCallback(async () => {
     const result = await commentService.getCommentsByPost(id);
@@ -230,6 +237,42 @@ export default function PetitionDetailPage({ params }: PageProps) {
     [fetchVoteSummary, id],
   );
 
+  const handleStartEditingOfficialResponse = useCallback(() => {
+    if (!petition?.resultContent) return;
+
+    setOfficialResponseDraft(petition.resultContent);
+    setIsEditingOfficialResponse(true);
+  }, [petition?.resultContent]);
+
+  const handleCancelEditingOfficialResponse = useCallback(() => {
+    setOfficialResponseDraft(petition?.resultContent ?? "");
+    setIsEditingOfficialResponse(false);
+  }, [petition?.resultContent]);
+
+  const handleUpdateOfficialResponse = useCallback(async () => {
+    if (!petition || !officialResponseDraft.trim()) return;
+
+    setIsUpdatingOfficialResponse(true);
+    try {
+      await postService.submitPostResult(id, {
+        status: petition.status === "REJECTED" ? "REJECTED" : "COMPLETED",
+        resultContent: officialResponseDraft.trim(),
+      });
+
+      const refreshedPost = await postService.getPost(id);
+      setPetition(refreshedPost.data as PetitionDetailResponse);
+      setIsEditingOfficialResponse(false);
+      toast.success("공식 입장문을 수정했습니다.");
+    } catch (error: any) {
+      toast.error(
+        error.response?.data?.message ||
+          "공식 입장문 수정에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+      );
+    } finally {
+      setIsUpdatingOfficialResponse(false);
+    }
+  }, [id, officialResponseDraft, petition]);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -262,6 +305,8 @@ export default function PetitionDetailPage({ params }: PageProps) {
         }
 
         setPetition(postResult.value.data as PetitionDetailResponse);
+        setIsEditingOfficialResponse(false);
+        setOfficialResponseDraft("");
 
         if (voteSummaryResult.status === "fulfilled") {
           setVoteSummary(voteSummaryResult.value.data);
@@ -391,12 +436,62 @@ export default function PetitionDetailPage({ params }: PageProps) {
           />
 
           {shouldShowOfficialResponse && (
-            <PetitionOfficialResponse
-              content={petition.resultContent ?? ""}
-              respondent={petition.councilName}
-              date={officialResponseDate}
-              isEdited={isOfficialResponseEdited}
-            />
+            <>
+              <PetitionOfficialResponse
+                content={petition.resultContent ?? ""}
+                respondent={petition.councilName}
+                date={officialResponseDate}
+                isEdited={isOfficialResponseEdited}
+                showEditAction={canManageAsAdmin}
+                onEdit={handleStartEditingOfficialResponse}
+              />
+
+              {canManageAsAdmin && isEditingOfficialResponse && (
+                <div className="flex flex-col gap-3 rounded-md border border-border bg-card p-4">
+                  <p className="text-sm font-medium text-foreground">
+                    공식 입장문 수정
+                  </p>
+                  <Textarea
+                    value={officialResponseDraft}
+                    onChange={(event) =>
+                      setOfficialResponseDraft(event.target.value)
+                    }
+                    className="min-h-[140px] resize-none text-sm"
+                    placeholder="학생회의 공식 입장을 수정해 주세요."
+                    disabled={isUpdatingOfficialResponse}
+                  />
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs text-muted-foreground">
+                      {officialResponseDraft.length} / 2000자
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCancelEditingOfficialResponse}
+                        disabled={isUpdatingOfficialResponse}
+                      >
+                        취소
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleUpdateOfficialResponse}
+                        disabled={
+                          !officialResponseDraft.trim() ||
+                          isUpdatingOfficialResponse
+                        }
+                      >
+                        {isUpdatingOfficialResponse ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "저장"
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           <Separator />
