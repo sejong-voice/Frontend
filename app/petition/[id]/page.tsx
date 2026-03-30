@@ -1,65 +1,65 @@
-"use client"
+"use client";
 
-import { use, useCallback, useEffect, useState } from "react"
-import { Loader2 } from "lucide-react"
+import { use, useCallback, useEffect, useState } from "react";
+import { Loader2 } from "lucide-react";
 import {
   commentService,
   type CommentReportReason,
   type CommentResponse,
-} from "@/app/api/comments"
+} from "@/app/api/comments";
 import {
   postService,
   type PostReportReason,
   type VoteChoice,
   type VoteSummaryResponse,
-} from "@/app/api/posts"
-import { useAuth } from "@/components/auth/auth-provider"
-import { ConnectedHeader } from "@/components/layout/connected-header"
-import { PetitionBody } from "@/components/petition/petition-body"
+} from "@/app/api/posts";
+import { useAuth } from "@/components/auth/auth-provider";
+import { ConnectedHeader } from "@/components/layout/connected-header";
+import { PetitionBody } from "@/components/petition/petition-body";
 import {
   PetitionComments,
   type Comment,
   type ReplyData,
-} from "@/components/petition/petition-comments"
+} from "@/components/petition/petition-comments";
 import {
   PetitionDetailHeader,
   type PetitionStatus,
-} from "@/components/petition/petition-detail-header"
-import { PetitionOfficialResponse } from "@/components/petition/petition-official-response"
-import { PetitionStatusBanner } from "@/components/petition/petition-status-banner"
-import { PetitionVote } from "@/components/petition/petition-vote"
-import { PetitionActions } from "@/components/petition/petition-actions"
-import { Separator } from "@/components/ui/separator"
-import { toast } from "sonner"
+} from "@/components/petition/petition-detail-header";
+import { PetitionOfficialResponse } from "@/components/petition/petition-official-response";
+import { PetitionStatusBanner } from "@/components/petition/petition-status-banner";
+import { PetitionVote } from "@/components/petition/petition-vote";
+import { PetitionActions } from "@/components/petition/petition-actions";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
 
 interface PetitionDetailResponse {
-  id: string
-  userId: string
-  userStudentNo: string
-  councilId: string
-  councilName: string
-  title: string
-  content: string
-  status: PetitionStatus
-  resultContent?: string | null
-  resultCreatedAt?: string | null
-  resultUpdatedAt?: string | null
-  postVotingDuration: string
-  createdAt: string
-  votingEndAt: string
+  id: string;
+  userId: string;
+  userStudentNo: string;
+  councilId: string;
+  councilName: string;
+  title: string;
+  content: string;
+  status: PetitionStatus;
+  resultContent?: string | null;
+  resultCreatedAt?: string | null;
+  resultUpdatedAt?: string | null;
+  postVotingDuration: string;
+  createdAt: string;
+  votingEndAt: string;
 }
 
 interface PageProps {
-  params: Promise<{ id: string }>
+  params: Promise<{ id: string }>;
 }
 
-const ANONYMOUS_LABEL = "익명"
+const ANONYMOUS_LABEL = "익명";
 
 function formatDate(value: string) {
-  const date = new Date(value)
+  const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return "-"
+    return "-";
   }
 
   return new Intl.DateTimeFormat("ko-KR", {
@@ -69,23 +69,23 @@ function formatDate(value: string) {
   })
     .format(date)
     .replace(/\s/g, "")
-    .replace(/\.$/, "")
+    .replace(/\.$/, "");
 }
 
 function formatDateTime(value: string) {
-  const date = new Date(value)
+  const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return "-"
+    return "-";
   }
 
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, "0")
-  const day = String(date.getDate()).padStart(2, "0")
-  const hours = String(date.getHours()).padStart(2, "0")
-  const minutes = String(date.getMinutes()).padStart(2, "0")
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
 
-  return `${year}.${month}.${day} ${hours}:${minutes}`
+  return `${year}.${month}.${day} ${hours}:${minutes}`;
 }
 
 function mapReply(reply: CommentResponse): ReplyData {
@@ -95,7 +95,7 @@ function mapReply(reply: CommentResponse): ReplyData {
     content: reply.content,
     date: formatDate(reply.createdAt),
     canDelete: reply.canDelete,
-  }
+  };
 }
 
 function mapComment(comment: CommentResponse): Comment {
@@ -106,181 +106,136 @@ function mapComment(comment: CommentResponse): Comment {
     date: formatDate(comment.createdAt),
     canDelete: comment.canDelete,
     replies: (comment.children || []).map(mapReply),
-  }
+  };
 }
 
 function getTotalCommentCount(comments: Comment[]) {
-  return comments.reduce((acc, comment) => acc + 1 + comment.replies.length, 0)
+  return comments.reduce((acc, comment) => acc + 1 + comment.replies.length, 0);
 }
 
 export default function PetitionDetailPage({ params }: PageProps) {
-  const { id } = use(params)
-  const { user, isAdmin } = useAuth()
-  const [petition, setPetition] = useState<PetitionDetailResponse | null>(null)
-  const [voteSummary, setVoteSummary] = useState<VoteSummaryResponse | null>(null)
-  const [comments, setComments] = useState<Comment[]>([])
-  const [canManageAsAdmin, setCanManageAsAdmin] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState("")
+  const { id } = use(params);
+  const { user, isAdmin } = useAuth();
+  const [petition, setPetition] = useState<PetitionDetailResponse | null>(null);
+  const [voteSummary, setVoteSummary] = useState<VoteSummaryResponse | null>(
+    null,
+  );
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [canManageAsAdmin, setCanManageAsAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const fetchComments = useCallback(async () => {
-    const result = await commentService.getCommentsByPost(id)
-    setComments(result.data.map(mapComment))
-  }, [id])
+    const result = await commentService.getCommentsByPost(id);
+    setComments(result.data.map(mapComment));
+  }, [id]);
 
   const fetchVoteSummary = useCallback(async () => {
-    const result = await postService.getVoteSummary(id)
-    setVoteSummary(result.data)
-  }, [id])
+    const result = await postService.getVoteSummary(id);
+    setVoteSummary(result.data);
+  }, [id]);
 
   const handleCreateComment = useCallback(
     async (content: string) => {
-<<<<<<< HEAD
-      await commentService.createComment({
-        postId: id,
-        parentId: null,
-        content,
-      })
-
-=======
->>>>>>> 1c2e6614c51f329a5aa4a59b69afa1a365ad7f77
       try {
         await commentService.createComment({
           postId: id,
           parentId: null,
           content,
-        })
-        toast.success("댓글이 등록되었습니다.")
-        await fetchComments()
-<<<<<<< HEAD
-      } catch (refreshError) {
-        console.error("댓글 목록 갱신 실패:", refreshError)
-=======
+        });
+        toast.success("댓글이 등록되었습니다.");
+        await fetchComments();
       } catch (error: any) {
-        console.error("댓글 등록 실패:", error)
-        toast.error(error.response?.data?.message || "댓글 등록에 실패했습니다.")
->>>>>>> 1c2e6614c51f329a5aa4a59b69afa1a365ad7f77
+        console.error("댓글 등록 실패:", error);
+        toast.error(
+          error.response?.data?.message || "댓글 등록에 실패했습니다.",
+        );
       }
     },
-    [fetchComments, id]
-  )
+    [fetchComments, id],
+  );
 
   const handleCreateReply = useCallback(
     async (parentId: string, content: string) => {
-<<<<<<< HEAD
-      await commentService.createComment({
-        postId: id,
-        parentId,
-        content,
-      })
-
-=======
->>>>>>> 1c2e6614c51f329a5aa4a59b69afa1a365ad7f77
       try {
         await commentService.createComment({
           postId: id,
           parentId,
           content,
-        })
-        toast.success("답글이 등록되었습니다.")
-        await fetchComments()
-<<<<<<< HEAD
-      } catch (refreshError) {
-        console.error("대댓글 목록 갱신 실패:", refreshError)
-=======
+        });
+        toast.success("답글이 등록되었습니다.");
+        await fetchComments();
       } catch (error: any) {
-        console.error("답글 등록 실패:", error)
-        toast.error(error.response?.data?.message || "답글 등록에 실패했습니다.")
->>>>>>> 1c2e6614c51f329a5aa4a59b69afa1a365ad7f77
+        console.error("답글 등록 실패:", error);
+        toast.error(
+          error.response?.data?.message || "답글 등록에 실패했습니다.",
+        );
       }
     },
-    [fetchComments, id]
-  )
+    [fetchComments, id],
+  );
 
   const handleDeleteComment = useCallback(
     async (commentId: string) => {
-<<<<<<< HEAD
-      await commentService.deleteComment(commentId)
-
-=======
->>>>>>> 1c2e6614c51f329a5aa4a59b69afa1a365ad7f77
       try {
-        await commentService.deleteComment(commentId)
-        toast.success("댓글이 삭제되었습니다.")
-        await fetchComments()
-<<<<<<< HEAD
-      } catch (refreshError) {
-        console.error("댓글 삭제 후 목록 갱신 실패:", refreshError)
-=======
+        await commentService.deleteComment(commentId);
+        toast.success("댓글이 삭제되었습니다.");
+        await fetchComments();
       } catch (error: any) {
-        console.error("댓글 삭제 실패:", error)
-        toast.error(error.response?.data?.message || "댓글 삭제에 실패했습니다.")
->>>>>>> 1c2e6614c51f329a5aa4a59b69afa1a365ad7f77
+        console.error("댓글 삭제 실패:", error);
+        toast.error(
+          error.response?.data?.message || "댓글 삭제에 실패했습니다.",
+        );
       }
     },
-    [fetchComments]
-  )
+    [fetchComments],
+  );
 
   const handleReportComment = useCallback(async (commentId: string) => {
     try {
-      await commentService.reportComment(commentId, { reason: "OTHER" })
-      toast.success("신고가 접수되었습니다.")
+      await commentService.reportComment(commentId, { reason: "OTHER" });
+      toast.success("신고가 접수되었습니다.");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "신고 처리에 실패했습니다.")
+      toast.error(error.response?.data?.message || "신고 처리에 실패했습니다.");
     }
-  }, [])
+  }, []);
 
-<<<<<<< HEAD
-  const handleReportPost = useCallback(
-    async (reason: PostReportReason) => {
-      await postService.reportPost(id, { reason })
-    },
-    [id]
-  )
-
-  const handleVote = useCallback(
-    async (choice: VoteChoice) => {
-      await postService.castVote(id, { choice })
-
-=======
   const handleReportPost = useCallback(async () => {
     try {
-      await postService.reportPost(id, { reason: "OTHER" })
-      toast.success("신고가 접수되었습니다.")
+      await postService.reportPost(id, { reason: "OTHER" });
+      toast.success("신고가 접수되었습니다.");
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "신고 처리에 실패했습니다.")
+      toast.error(error.response?.data?.message || "신고 처리에 실패했습니다.");
     }
-  }, [id])
+  }, [id]);
 
   const handleVote = useCallback(
     async (choice: VoteChoice) => {
->>>>>>> 1c2e6614c51f329a5aa4a59b69afa1a365ad7f77
       try {
-        await postService.castVote(id, { choice })
-        toast.success(choice === "AGREE" ? "동의하셨습니다." : "비동의하셨습니다.")
-        await fetchVoteSummary()
-<<<<<<< HEAD
-      } catch (refreshError) {
-        console.error("투표 결과 갱신 실패:", refreshError)
-=======
+        await postService.castVote(id, { choice });
+        toast.success(
+          choice === "AGREE" ? "동의하셨습니다." : "비동의하셨습니다.",
+        );
+        await fetchVoteSummary();
       } catch (error: any) {
-        console.error("투표 실패:", error)
-        toast.error(error.response?.data?.message || "투표 처리에 실패했습니다.")
->>>>>>> 1c2e6614c51f329a5aa4a59b69afa1a365ad7f77
+        console.error("투표 실패:", error);
+        toast.error(
+          error.response?.data?.message || "투표 처리에 실패했습니다.",
+        );
       }
     },
-    [fetchVoteSummary, id]
-  )
+    [fetchVoteSummary, id],
+  );
 
   useEffect(() => {
-    let isMounted = true
+    let isMounted = true;
 
     async function fetchPetition() {
-      setIsLoading(true)
-      setError("")
-      setVoteSummary(null)
-      setComments([])
-      setCanManageAsAdmin(false)
+      setIsLoading(true);
+      setError("");
+      setVoteSummary(null);
+      setComments([]);
+      setCanManageAsAdmin(false);
 
       try {
         const [
@@ -292,65 +247,72 @@ export default function PetitionDetailPage({ params }: PageProps) {
           postService.getPost(id),
           postService.getVoteSummary(id),
           commentService.getCommentsByPost(id),
-          isAdmin ? postService.getPosts({ assignedToMe: true }) : Promise.resolve(null),
-        ])
+          isAdmin
+            ? postService.getPosts({ assignedToMe: true })
+            : Promise.resolve(null),
+        ]);
 
-        if (!isMounted) return
+        if (!isMounted) return;
 
         if (postResult.status === "rejected") {
-          throw postResult.reason
+          throw postResult.reason;
         }
 
-        setPetition(postResult.value.data as PetitionDetailResponse)
+        setPetition(postResult.value.data as PetitionDetailResponse);
 
         if (voteSummaryResult.status === "fulfilled") {
-          setVoteSummary(voteSummaryResult.value.data)
+          setVoteSummary(voteSummaryResult.value.data);
         } else {
-          console.error("투표 요약 조회 실패:", voteSummaryResult.reason)
+          console.error("투표 요약 조회 실패:", voteSummaryResult.reason);
         }
 
         if (commentsResult.status === "fulfilled") {
-          setComments(commentsResult.value.data.map(mapComment))
+          setComments(commentsResult.value.data.map(mapComment));
         } else {
-          console.error("댓글 목록 조회 실패:", commentsResult.reason)
+          console.error("댓글 목록 조회 실패:", commentsResult.reason);
         }
 
         if (isAdmin) {
           if (assignedPetitionsResult.status === "fulfilled") {
             setCanManageAsAdmin(
-              assignedPetitionsResult.value?.data.content.some((post) => post.id === id) ?? false
-            )
+              assignedPetitionsResult.value?.data.content.some(
+                (post) => post.id === id,
+              ) ?? false,
+            );
           } else {
-            console.error("할당 청원 조회 실패:", assignedPetitionsResult.reason)
+            console.error(
+              "할당 청원 조회 실패:",
+              assignedPetitionsResult.reason,
+            );
           }
         }
       } catch (fetchError) {
-        console.error("게시글 상세 조회 실패:", fetchError)
+        console.error("게시글 상세 조회 실패:", fetchError);
 
-        if (!isMounted) return
-        setPetition(null)
-        setError("게시글 정보를 불러오지 못했습니다.")
-        toast.error("게시글 정보를 불러오지 못했습니다.")
+        if (!isMounted) return;
+        setPetition(null);
+        setError("게시글 정보를 불러오지 못했습니다.");
+        toast.error("게시글 정보를 불러오지 못했습니다.");
       } finally {
         if (isMounted) {
-          setIsLoading(false)
+          setIsLoading(false);
         }
       }
     }
 
-    fetchPetition()
+    fetchPetition();
 
     return () => {
-      isMounted = false
-    }
-  }, [id, isAdmin])
+      isMounted = false;
+    };
+  }, [id, isAdmin]);
 
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
-    )
+    );
   }
 
   if (!petition) {
@@ -365,24 +327,24 @@ export default function PetitionDetailPage({ params }: PageProps) {
           </div>
         </main>
       </div>
-    )
+    );
   }
 
-  const totalCommentCount = getTotalCommentCount(comments)
-  const canReportPost = !!user && petition.userId !== user.id
-  const isAuthor = !!user && petition.userId === user.id
+  const totalCommentCount = getTotalCommentCount(comments);
+  const canReportPost = !!user && petition.userId !== user.id;
+  const isAuthor = !!user && petition.userId === user.id;
   const shouldShowOfficialResponse =
     (petition.status === "COMPLETED" || petition.status === "REJECTED") &&
-    !!petition.resultContent?.trim()
+    !!petition.resultContent?.trim();
   const officialResponseDateSource =
-    petition.resultCreatedAt || petition.resultUpdatedAt || ""
+    petition.resultCreatedAt || petition.resultUpdatedAt || "";
   const officialResponseDate = officialResponseDateSource
     ? `게시 ${formatDateTime(officialResponseDateSource)}`
-    : "-"
+    : "-";
   const isOfficialResponseEdited =
     !!petition.resultCreatedAt &&
     !!petition.resultUpdatedAt &&
-    petition.resultCreatedAt !== petition.resultUpdatedAt
+    petition.resultCreatedAt !== petition.resultUpdatedAt;
 
   return (
     <div className="min-h-screen bg-background">
@@ -447,5 +409,5 @@ export default function PetitionDetailPage({ params }: PageProps) {
         </div>
       </main>
     </div>
-  )
+  );
 }
