@@ -2,6 +2,7 @@ import React from "react"
 import type { Metadata, Viewport } from "next"
 import { Noto_Sans_KR } from "next/font/google"
 import { AuthProvider } from "@/components/auth/auth-provider"
+import { Toaster } from "sonner"
 
 import "./globals.css"
 
@@ -29,6 +30,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <AuthProvider>
           {children}
+          <Toaster position="top-right" richColors />
         </AuthProvider>
       </body>
     </html>

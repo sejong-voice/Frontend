@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/pagination"
 import { Loader2 } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
+import { toast } from "sonner"
 
 export default function Page() {
   const { isAdmin } = useAuth()
@@ -43,6 +44,7 @@ export default function Page() {
       setCouncils(res.data)
     } catch (error) {
       console.error("학생회 목록 로드 실패:", error)
+      toast.error("학생회 목록을 불러오지 못했습니다.")
     }
   }
 
@@ -60,6 +62,7 @@ export default function Page() {
       setData(res.data)
     } catch (error) {
       console.error("청원 목록 로드 실패:", error)
+      toast.error("청원 목록을 불러오지 못했습니다.")
     } finally {
       setIsLoading(false)
     }

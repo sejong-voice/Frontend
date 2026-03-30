@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { authService } from "../../app/api/auth";
+import { toast } from "sonner";
 
 export interface AuthUser {
   id: string;
@@ -41,7 +42,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshMe = useCallback(async () => {
     try {
       const res = await authService.getProfile();
-      console.log(res);
       if (res.status === 200) {
         setUser(res.data);
       } else {
@@ -52,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("인증되지 않은 사용자이거나 세션이 만료되었습니다.");
       } else {
         console.error("프로필 로드 실패:", error);
+        toast.error("인증 처리 중 오류가 발생했습니다.");
       }
       setUser(null);
     } finally {
@@ -65,8 +66,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         // 로그인 요청
         const res = await authService.login(studentNo, password);
-
-        console.log("로그인 성공:", res.data);
 
         // 백엔드 응답 구조에 따라 토큰 추출
         const token = (res.data as any).accessToken || (res.data as any).token || (res.data as any).jwt;

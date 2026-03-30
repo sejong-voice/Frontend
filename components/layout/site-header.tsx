@@ -49,6 +49,7 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
             className="hidden items-center gap-1 md:flex"
             aria-label="메인 메뉴"
           >
+            {/* Public items */}
             {publicNavItems.map((item) => (
               <Link
                 key={item.href}
@@ -57,13 +58,15 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
                   "rounded-md px-3 py-2 text-sm font-medium transition-colors",
                   pathname === item.href
                     ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
                 )}
               >
                 {item.label}
               </Link>
             ))}
-            {userName && authNavItems.map((item) => (
+
+            {/* Auth items (only for regular students) */}
+            {userName && !isAdmin && authNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -71,21 +74,23 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
                   "rounded-md px-3 py-2 text-sm font-medium transition-colors",
                   pathname === item.href
                     ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
                 )}
               >
-                {item.label === "내 청원" && isAdmin ? "입장문" : item.label}
+                {item.label}
               </Link>
             ))}
+
+            {/* Admin items */}
             {isAdmin && adminNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium transition-colors border-2 border-primary/20 bg-primary/5",
+                  "rounded-md px-3 py-2 text-sm font-medium transition-colors",
                   pathname === item.href
-                    ? "bg-primary text-primary-foreground"
-                    : "text-primary hover:bg-primary/10"
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
                 )}
               >
                 {item.label}

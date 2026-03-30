@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/auth-provider";
+import { toast } from "sonner";
 
 export function LoginForm() {
   const { login } = useAuth();
@@ -31,16 +32,21 @@ export function LoginForm() {
       const result = await login(studentNo, password);
 
       if (result.success) {
+        toast.success("로그인되었습니다.");
         if (result.role === "ADMIN") {
           router.push("/admin/petitions");
         } else {
           router.push("/");
         }
       } else {
-        setError(result.message || "로그인에 실패했습니다.");
+        const msg = result.message || "로그인에 실패했습니다.";
+        setError(msg);
+        toast.error(msg);
       }
     } catch (err) {
-      setError("서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      const msg = "서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setIsLoading(false);
     }
