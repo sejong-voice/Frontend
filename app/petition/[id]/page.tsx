@@ -191,18 +191,21 @@ export default function PetitionDetailPage({ params }: PageProps) {
     [fetchComments],
   );
 
-  const handleReportComment = useCallback(async (commentId: string) => {
+  const handleReportComment = useCallback(
+    async (commentId: string, reason: CommentReportReason) => {
     try {
-      await commentService.reportComment(commentId, { reason: "OTHER" });
+      await commentService.reportComment(commentId, { reason });
       toast.success("신고가 접수되었습니다.");
     } catch (error: any) {
       toast.error(error.response?.data?.message || "신고 처리에 실패했습니다.");
     }
-  }, []);
+    },
+    [],
+  );
 
-  const handleReportPost = useCallback(async () => {
+  const handleReportPost = useCallback(async (reason: PostReportReason) => {
     try {
-      await postService.reportPost(id, { reason: "OTHER" });
+      await postService.reportPost(id, { reason });
       toast.success("신고가 접수되었습니다.");
     } catch (error: any) {
       toast.error(error.response?.data?.message || "신고 처리에 실패했습니다.");
