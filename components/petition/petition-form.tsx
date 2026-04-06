@@ -67,11 +67,23 @@ export function PetitionForm() {
   const contentLength = content.length
 
   useEffect(() => {
-    setIsCouncilLoading(true)
-    councilService.getCouncils(councilKeyword)
-      .then(res => setCouncils(res.data))
-      .catch(console.error)
-      .finally(() => setIsCouncilLoading(false))
+    let active = true
+    const timer = setTimeout(async () => {
+      setIsCouncilLoading(true)
+      try {
+        const res = await councilService.getCouncils(councilKeyword)
+        if (active) setCouncils(res.data)
+      } catch (error) {
+        console.error("학생회 목록 로드 실패:", error)
+      } finally {
+        if (active) setIsCouncilLoading(false)
+      }
+    }, 300)
+
+    return () => {
+      active = false
+      clearTimeout(timer)
+    }
   }, [councilKeyword])
 
   useEffect(() => {

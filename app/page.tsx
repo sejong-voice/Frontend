@@ -39,15 +39,22 @@ export default function Page() {
   } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  const fetchCouncils = async () => {
-    try {
-      const res = await councilService.getCouncils(councilKeyword)
-      setCouncils(res.data)
-    } catch (error) {
-      console.error("학생회 목록 로드 실패:", error)
-      toast.error("학생회 목록을 불러오지 못했습니다.")
+  useEffect(() => {
+    let active = true
+    const timer = setTimeout(async () => {
+      try {
+        const res = await councilService.getCouncils(councilKeyword)
+        if (active) setCouncils(res.data)
+      } catch (error) {
+        console.error("학생회 목록 로드 실패:", error)
+      }
+    }, 300)
+
+    return () => {
+      active = false
+      clearTimeout(timer)
     }
-  }
+  }, [councilKeyword])
 
   const fetchPetitions = async () => {
     setIsLoading(true)
@@ -68,10 +75,6 @@ export default function Page() {
       setIsLoading(false)
     }
   }
-
-  useEffect(() => {
-    fetchCouncils()
-  }, [councilKeyword])
 
   useEffect(() => {
     fetchPetitions()
