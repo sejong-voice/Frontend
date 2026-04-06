@@ -89,7 +89,13 @@ export function PetitionForm() {
   useEffect(() => {
     if (isAdmin) {
       postService.getPosts({ assignedToMe: true })
-        .then(res => setAssignedPetitions(res.data.content))
+        .then(res => {
+          // 이미 처리 완료되었거나 반려된 청원은 제외
+          const pendingPetitions = res.data.content.filter(
+            p => p.status !== "COMPLETED" && p.status !== "REJECTED"
+          )
+          setAssignedPetitions(pendingPetitions)
+        })
         .catch(console.error)
     }
   }, [isAdmin])

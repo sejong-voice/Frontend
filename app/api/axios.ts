@@ -3,9 +3,7 @@ import axios from "axios";
 export const api = axios.create({
   baseURL: "",
   withCredentials: true, // 쿠키(세션)를 같이 보내기 위해 필수
-  headers: {
-    "Content-Type": "application/json",
-  },
+  headers: {},
   // Spring Security 등에서 사용하는 CSRF 토큰 설정 (필요한 경우)
   xsrfCookieName: "XSRF-TOKEN",
   xsrfHeaderName: "X-XSRF-TOKEN",

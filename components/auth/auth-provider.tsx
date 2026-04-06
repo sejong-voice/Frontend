@@ -78,11 +78,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const resProfile = await authService.getProfile();
         return { success: true, role: resProfile.data.role };
       } catch (error: any) {
-        console.error("로그인 실패 상세:", {
-          status: error.response?.status,
-          data: error.response?.data,
-          message: error.message
-        });
+        // console.error("로그인 실패 상세:", {
+        //   status: error.response?.status,
+        //   data: error.response?.data,
+        //   message: error.message
+        // });
         const message =
           error.response?.data?.message ||
           error.response?.data?.error ||
