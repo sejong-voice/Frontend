@@ -13,7 +13,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Info, User, Loader2 } from "lucide-react"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Info, User, Loader2, Search, Check, ChevronsUpDown } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
 import { postService, type PostVotingDuration } from "@/app/api/posts"
 import { councilService, Council } from "@/app/api/councils"
@@ -36,10 +49,13 @@ export function PetitionForm() {
   const [category, setCategory] = useState<string>("")
   const [council, setCouncil] = useState<string>("")
   const [councils, setCouncils] = useState<Council[]>([])
+  const [councilKeyword, setCouncilKeyword] = useState("")
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const [votePeriod, setVotePeriod] = useState<PostVotingDuration>("ONE_WEEK")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isCouncilLoading, setIsCouncilLoading] = useState(false)
+  const [isCouncilOpen, setIsCouncilOpen] = useState(false)
   
   // Admin fields
   const [assignedPetitions, setAssignedPetitions] = useState<Petition[]>([])
@@ -49,8 +65,14 @@ export function PetitionForm() {
   const contentLength = content.length
 
   useEffect(() => {
-    councilService.getCouncils().then(res => setCouncils(res.data)).catch(console.error)
-    
+    setIsCouncilLoading(true)
+    councilService.getCouncils(councilKeyword)
+      .then(res => setCouncils(res.data))
+      .catch(console.error)
+      .finally(() => setIsCouncilLoading(false))
+  }, [councilKeyword])
+
+  useEffect(() => {
     if (isAdmin) {
       postService.getPosts({ assignedToMe: true })
         .then(res => setAssignedPetitions(res.data.content))
@@ -219,22 +241,56 @@ export function PetitionForm() {
               {"담당 학생회"}
               <span className="ml-1 text-destructive">{"*"}</span>
             </label>
-            <Select value={council} onValueChange={setCouncil}>
-              <SelectTrigger id="council-select" className="w-full md:w-72">
-                <SelectValue placeholder="학생회를 선택하세요" />
-              </SelectTrigger>
-              <SelectContent>
-                {councils.length === 0 ? (
-                  <SelectItem value="loading" disabled>{"학생회 목록 로딩 중..."}</SelectItem>
-                ) : (
-                  councils.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+            <div className="flex flex-col gap-2">
+              <Popover open={isCouncilOpen} onOpenChange={setIsCouncilOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={isCouncilOpen}
+                    className="w-full md:w-72 justify-between font-normal"
+                  >
+                    {council
+                      ? councils.find((c) => c.id === council)?.name || "학생회 선택"
+                      : "학생회를 선택하세요"}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-full md:w-72 p-0">
+                  <Command shouldFilter={false}>
+                    <CommandInput 
+                      placeholder="학생회 이름으로 검색..." 
+                      value={councilKeyword}
+                      onValueChange={setCouncilKeyword}
+                    />
+                    <CommandList>
+                      {isCouncilLoading && <div className="p-4 text-sm text-center text-muted-foreground">{"로딩 중..."}</div>}
+                      {!isCouncilLoading && councils.length === 0 && <CommandEmpty>{"검색 결과가 없습니다."}</CommandEmpty>}
+                      <CommandGroup>
+                        {councils.map((c) => (
+                          <CommandItem
+                            key={c.id}
+                            value={c.id}
+                            onSelect={() => {
+                              setCouncil(c.id)
+                              setIsCouncilOpen(false)
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                council === c.id ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {c.name}
+                          </CommandItem>
+                        ))}
+                      </CommandGroup>
+                    </CommandList>
+                  </Command>
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
         )}
 

@@ -30,6 +30,7 @@ export default function Page() {
   const [searchQuery, setSearchQuery] = useState("")
   const [page, setPage] = useState(0)
   const [councils, setCouncils] = useState<Council[]>([])
+  const [councilKeyword, setCouncilKeyword] = useState("")
   const [data, setData] = useState<{
     content: Petition[]
     totalPages: number
@@ -38,9 +39,9 @@ export default function Page() {
   } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  const fetchInitialData = async () => {
+  const fetchCouncils = async () => {
     try {
-      const res = await councilService.getCouncils()
+      const res = await councilService.getCouncils(councilKeyword)
       setCouncils(res.data)
     } catch (error) {
       console.error("학생회 목록 로드 실패:", error)
@@ -69,8 +70,8 @@ export default function Page() {
   }
 
   useEffect(() => {
-    fetchInitialData()
-  }, [])
+    fetchCouncils()
+  }, [councilKeyword])
 
   useEffect(() => {
     fetchPetitions()
@@ -112,6 +113,8 @@ export default function Page() {
               setPage(0) // 검색 시 첫 페이지로
             }}
             councils={councils}
+            councilKeyword={councilKeyword}
+            onCouncilKeywordChange={setCouncilKeyword}
             hideCouncilFilter={isAdmin}
           />
 
