@@ -1,11 +1,6 @@
 import { api } from "./axios";
 import { Petition } from "@/components/petition/petition-list";
 
-export interface PostResultData {
-  status: "VOTING" | "COMPLETED" | "REJECTED";
-  resultContent: string;
-}
-
 export interface GetPostsParams {
   page?: number;
   size?: number;
@@ -36,11 +31,13 @@ export interface CreatePostData {
   content: string;
   councilId: string;
   postVotingDuration: PostVotingDuration;
+  imageIds: string[];
 }
 
 export interface UpdatePostData {
   title: string;
   content: string;
+  imageIds: string[];
 }
 
 export interface VoteSummaryResponse {
@@ -71,6 +68,7 @@ export interface PostReportData {
 export interface PostResultData {
   status: "VOTING" | "COMPLETED" | "REJECTED";
   resultContent: string;
+  imageIds: string[];
 }
 
 export const postService = {

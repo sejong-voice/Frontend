@@ -11,11 +11,12 @@ import {
   XCircle,
   FileText,
   Send,
+  Loader2,
 } from "lucide-react";
 import type { PetitionStatus } from "@/components/petition/petition-detail-header";
 import { postService } from "@/app/api/posts";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { ImageUploader } from "./image-uploader";
 
 interface PetitionActionsProps {
   petitionId: string;
@@ -37,6 +38,7 @@ export function PetitionActions({
   const [statusToSubmit, setStatusToSubmit] = useState<
     "COMPLETED" | "REJECTED"
   >("COMPLETED");
+  const [images, setImages] = useState<{ imageId: string; imageUrl: string }[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
@@ -47,6 +49,7 @@ export function PetitionActions({
       await postService.submitPostResult(petitionId, {
         status: statusToSubmit,
         resultContent: responseText,
+        imageIds: images.map((img) => img.imageId),
       });
       toast.success(
         statusToSubmit === "COMPLETED"
@@ -62,7 +65,7 @@ export function PetitionActions({
     }
   };
 
-  const showAuthorActions = isAuthor;
+  const showAuthorActions = false; // Hide author management box
   const showAdminActions = canManageAsAdmin && status === "APPROVED";
   const canDelete = isAuthor;
 
@@ -70,34 +73,6 @@ export function PetitionActions({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Author actions */}
-      {showAuthorActions && (
-        <section
-          className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card px-6 py-4"
-          aria-label="작성자 액션"
-        >
-          <span className="mr-1 text-xs font-medium text-muted-foreground">
-            {"작성자 관리:"}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5 bg-transparent"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-            {"수정"}
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1.5 bg-transparent text-destructive hover:bg-destructive hover:text-destructive-foreground"
-          >
-            <Trash2 className="h-3.5 w-3.5" />
-            {"삭제"}
-          </Button>
-        </section>
-      )}
-
       {/* Admin actions */}
       {showAdminActions && (
         <section
@@ -172,6 +147,13 @@ export function PetitionActions({
                 onChange={(e) => setResponseText(e.target.value)}
                 className="min-h-[120px] resize-none text-sm"
               />
+              <div className="py-2">
+                <ImageUploader 
+                  images={images} 
+                  onChange={setImages} 
+                  maxImages={3} 
+                />
+              </div>
               <div className="flex items-center justify-between">
                 <span className="text-xs text-muted-foreground">
                   {responseText.length}

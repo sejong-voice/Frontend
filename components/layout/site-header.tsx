@@ -46,7 +46,7 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
 
         <div className="flex items-center gap-4">
           <nav
-            className="hidden items-center gap-1 md:flex"
+            className="flex items-center gap-0.5 md:gap-1"
             aria-label="메인 메뉴"
           >
             {/* Public items */}
@@ -55,7 +55,7 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  "rounded-md px-3 py-2 text-sm font-medium transition-colors hidden md:inline-flex",
                   pathname === item.href
                     ? "bg-accent text-accent-foreground"
                     : "text-muted-foreground hover:text-foreground hover:bg-accent/50"

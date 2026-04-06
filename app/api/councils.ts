@@ -6,7 +6,9 @@ export interface Council {
 }
 
 export const councilService = {
-  getCouncils: async () => {
-    return api.get<Council[]>("/api/v1/councils");
+  getCouncils: async (keyword?: string) => {
+    return api.get<Council[]>("/api/v1/councils", {
+      params: { keyword },
+    });
   },
 };

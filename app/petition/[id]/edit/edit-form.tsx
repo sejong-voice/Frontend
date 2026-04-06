@@ -10,6 +10,7 @@ import { Info, User, Loader2 } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
 import { postService } from "@/app/api/posts"
 import { toast } from "sonner"
+import { ImageUploader } from "@/components/petition/image-uploader"
 
 const MAX_CONTENT_LENGTH = 2000
 
@@ -18,6 +19,7 @@ export function PetitionEditForm({ id }: { id: string }) {
   const { user } = useAuth()
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
+  const [images, setImages] = useState<{ imageId: string; imageUrl: string }[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -29,6 +31,7 @@ export function PetitionEditForm({ id }: { id: string }) {
         const res = await postService.getPost(id)
         setTitle(res.data.title)
         setContent(res.data.content)
+        setImages(res.data.images || [])
       } catch (error) {
         console.error("청원 정보 로드 실패:", error)
         toast.error("청원 정보를 불러올 수 없습니다.")
@@ -51,6 +54,7 @@ export function PetitionEditForm({ id }: { id: string }) {
       await postService.updatePost(id, {
         title,
         content,
+        imageIds: images.map((img) => img.imageId),
       })
       toast.success("청원이 수정되었습니다.")
       router.push("/my-petitions")
@@ -131,6 +135,13 @@ export function PetitionEditForm({ id }: { id: string }) {
             </span>
           </div>
         </div>
+
+        {/* Image Upload */}
+        <ImageUploader 
+          images={images} 
+          onChange={setImages} 
+          maxImages={3} 
+        />
       </div>
 
       {/* Actions */}

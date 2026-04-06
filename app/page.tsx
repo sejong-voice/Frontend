@@ -30,6 +30,7 @@ export default function Page() {
   const [searchQuery, setSearchQuery] = useState("")
   const [page, setPage] = useState(0)
   const [councils, setCouncils] = useState<Council[]>([])
+  const [councilKeyword, setCouncilKeyword] = useState("")
   const [data, setData] = useState<{
     content: Petition[]
     totalPages: number
@@ -38,15 +39,22 @@ export default function Page() {
   } | null>(null)
   const [isLoading, setIsLoading] = useState(true)
 
-  const fetchInitialData = async () => {
-    try {
-      const res = await councilService.getCouncils()
-      setCouncils(res.data)
-    } catch (error) {
-      console.error("학생회 목록 로드 실패:", error)
-      toast.error("학생회 목록을 불러오지 못했습니다.")
+  useEffect(() => {
+    let active = true
+    const timer = setTimeout(async () => {
+      try {
+        const res = await councilService.getCouncils(councilKeyword)
+        if (active) setCouncils(res.data)
+      } catch (error) {
+        console.error("학생회 목록 로드 실패:", error)
+      }
+    }, 300)
+
+    return () => {
+      active = false
+      clearTimeout(timer)
     }
-  }
+  }, [councilKeyword])
 
   const fetchPetitions = async () => {
     setIsLoading(true)
@@ -67,10 +75,6 @@ export default function Page() {
       setIsLoading(false)
     }
   }
-
-  useEffect(() => {
-    fetchInitialData()
-  }, [])
 
   useEffect(() => {
     fetchPetitions()
@@ -112,6 +116,8 @@ export default function Page() {
               setPage(0) // 검색 시 첫 페이지로
             }}
             councils={councils}
+            councilKeyword={councilKeyword}
+            onCouncilKeywordChange={setCouncilKeyword}
             hideCouncilFilter={isAdmin}
           />
 

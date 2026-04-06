@@ -78,11 +78,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const resProfile = await authService.getProfile();
         return { success: true, role: resProfile.data.role };
       } catch (error: any) {
-        console.error("로그인 실패 상세:", error.response?.data || error.message);
+        // console.error("로그인 실패 상세:", {
+        //   status: error.response?.status,
+        //   data: error.response?.data,
+        //   message: error.message
+        // });
         const message =
           error.response?.data?.message ||
           error.response?.data?.error ||
-          "로그인 정보가 올바르지 않습니다.";
+          (error.response?.status === 401 ? "학번 또는 비밀번호가 틀렸습니다." : "로그인 중 오류가 발생했습니다.");
         return { success: false, message };
       }
     },

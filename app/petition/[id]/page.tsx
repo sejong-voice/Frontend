@@ -2,6 +2,7 @@
 
 import { use, useCallback, useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   commentService,
   type CommentReportReason,
@@ -29,26 +30,28 @@ import { PetitionOfficialResponse } from "@/components/petition/petition-officia
 import { PetitionStatusBanner } from "@/components/petition/petition-status-banner";
 import { PetitionVote } from "@/components/petition/petition-vote";
 import { PetitionActions } from "@/components/petition/petition-actions";
+import { ImageUploader } from "@/components/petition/image-uploader";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 interface PetitionDetailResponse {
-  id: string;
-  userId: string;
-  userStudentNo: string;
-  councilId: string;
-  councilName: string;
-  title: string;
-  content: string;
-  status: PetitionStatus;
-  resultContent?: string | null;
-  resultCreatedAt?: string | null;
-  resultUpdatedAt?: string | null;
-  postVotingDuration: string;
-  createdAt: string;
-  votingEndAt: string;
+  id: string
+  userId: string
+  userStudentNo: string
+  councilId: string
+  councilName: string
+  title: string
+  content: string
+  status: PetitionStatus
+  createdAt: string
+  votingEndAt: string
+  images?: { imageId: string; imageUrl: string }[]
+  resultContent?: string
+  resultImages?: { imageId: string; imageUrl: string }[]
+  resultCreatedAt?: string
+  resultUpdatedAt?: string
 }
 
 interface PageProps {
@@ -129,6 +132,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
   const [isEditingOfficialResponse, setIsEditingOfficialResponse] =
     useState(false);
   const [officialResponseDraft, setOfficialResponseDraft] = useState("");
+  const [officialResponseImages, setOfficialResponseImages] = useState<{ imageId: string; imageUrl: string }[]>([]);
   const [isUpdatingOfficialResponse, setIsUpdatingOfficialResponse] =
     useState(false);
 
@@ -200,24 +204,27 @@ export default function PetitionDetailPage({ params }: PageProps) {
 
   const handleReportComment = useCallback(
     async (commentId: string, reason: CommentReportReason) => {
-    try {
-      await commentService.reportComment(commentId, { reason });
-      toast.success("신고가 접수되었습니다.");
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "신고 처리에 실패했습니다.");
-    }
+      try {
+        await commentService.reportComment(commentId, { reason });
+        toast.success("신고가 접수되었습니다.");
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || "신고 처리에 실패했습니다.");
+      }
     },
     [],
   );
 
-  const handleReportPost = useCallback(async (reason: PostReportReason) => {
-    try {
-      await postService.reportPost(id, { reason });
-      toast.success("신고가 접수되었습니다.");
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "신고 처리에 실패했습니다.");
-    }
-  }, [id]);
+  const handleReportPost = useCallback(
+    async (reason: PostReportReason) => {
+      try {
+        await postService.reportPost(id, { reason });
+        toast.success("신고가 접수되었습니다.");
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || "신고 처리에 실패했습니다.");
+      }
+    },
+    [id],
+  );
 
   const handleVote = useCallback(
     async (choice: VoteChoice) => {
@@ -238,32 +245,44 @@ export default function PetitionDetailPage({ params }: PageProps) {
   );
 
   const handleStartEditingOfficialResponse = useCallback(() => {
-    if (!petition?.resultContent) return;
+    if (!petition) return;
 
-    setOfficialResponseDraft(petition.resultContent);
+    setOfficialResponseDraft(petition.resultContent || "");
+    setOfficialResponseImages(petition.resultImages || []);
     setIsEditingOfficialResponse(true);
-  }, [petition?.resultContent]);
+  }, [petition]);
 
   const handleCancelEditingOfficialResponse = useCallback(() => {
     setOfficialResponseDraft(petition?.resultContent ?? "");
+    setOfficialResponseImages(petition?.resultImages ?? []);
     setIsEditingOfficialResponse(false);
-  }, [petition?.resultContent]);
+  }, [petition]);
 
   const handleUpdateOfficialResponse = useCallback(async () => {
     if (!petition || !officialResponseDraft.trim()) return;
 
+    if (officialResponseDraft.length > 2000) {
+      toast.error("공식 입장문은 최대 2000자까지 작성할 수 있습니다.");
+      return;
+    }
+
     setIsUpdatingOfficialResponse(true);
+    const payload = {
+      status: (petition.status === "REJECTED" ? "REJECTED" : "COMPLETED") as "COMPLETED" | "REJECTED",
+      resultContent: officialResponseDraft.trim(),
+      imageIds: officialResponseImages.map(img => img.imageId),
+    };
+    // console.log("입장문 수정 요청 페이로드:", payload);
+
     try {
-      await postService.submitPostResult(id, {
-        status: petition.status === "REJECTED" ? "REJECTED" : "COMPLETED",
-        resultContent: officialResponseDraft.trim(),
-      });
+      await postService.submitPostResult(id, payload);
 
       const refreshedPost = await postService.getPost(id);
       setPetition(refreshedPost.data as PetitionDetailResponse);
       setIsEditingOfficialResponse(false);
       toast.success("공식 입장문을 수정했습니다.");
     } catch (error: any) {
+      // console.error("공식 입장문 수정보완 에러 상세:", error.response?.data || error);
       toast.error(
         error.response?.data?.message ||
           "공식 입장문 수정에 실패했습니다. 잠시 후 다시 시도해 주세요.",
@@ -271,7 +290,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
     } finally {
       setIsUpdatingOfficialResponse(false);
     }
-  }, [id, officialResponseDraft, petition]);
+  }, [id, officialResponseDraft, officialResponseImages, petition]);
 
   useEffect(() => {
     let isMounted = true;
@@ -389,10 +408,6 @@ export default function PetitionDetailPage({ params }: PageProps) {
   const officialResponseDate = officialResponseDateSource
     ? `게시 ${formatDateTime(officialResponseDateSource)}`
     : "-";
-  const isOfficialResponseEdited =
-    !!petition.resultCreatedAt &&
-    !!petition.resultUpdatedAt &&
-    petition.resultCreatedAt !== petition.resultUpdatedAt;
 
   return (
     <div className="min-h-screen bg-background">
@@ -416,7 +431,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
             <PetitionStatusBanner status={petition.status} />
           )}
 
-          <PetitionBody content={petition.content} />
+          <PetitionBody content={petition.content} images={petition.images} />
 
           {voteSummary && (
             <PetitionVote
@@ -439,9 +454,9 @@ export default function PetitionDetailPage({ params }: PageProps) {
             <>
               <PetitionOfficialResponse
                 content={petition.resultContent ?? ""}
-                respondent={petition.councilName}
+                respondent={petition.councilName || "담당 학생회"}
                 date={officialResponseDate}
-                isEdited={isOfficialResponseEdited}
+                images={petition.resultImages}
                 showEditAction={canManageAsAdmin}
                 onEdit={handleStartEditingOfficialResponse}
               />
@@ -453,13 +468,30 @@ export default function PetitionDetailPage({ params }: PageProps) {
                   </p>
                   <Textarea
                     value={officialResponseDraft}
-                    onChange={(event) =>
-                      setOfficialResponseDraft(event.target.value)
-                    }
-                    className="min-h-[140px] resize-none text-sm"
+                    onChange={(e) => {
+                      if (e.target.value.length <= 2000) {
+                        setOfficialResponseDraft(e.target.value);
+                      }
+                    }}
                     placeholder="학생회의 공식 입장을 수정해 주세요."
                     disabled={isUpdatingOfficialResponse}
+                    className="min-h-[200px]"
                   />
+                  <div className="flex justify-end pr-1">
+                    <span className={cn(
+                      "text-[10px] tabular-nums",
+                      officialResponseDraft.length > 1800 ? "text-destructive" : "text-muted-foreground"
+                    )}>
+                      {officialResponseDraft.length} / 2000자
+                    </span>
+                  </div>
+                  <div className="py-2">
+                    <ImageUploader 
+                      images={officialResponseImages} 
+                      onChange={setOfficialResponseImages}
+                      maxImages={3}
+                    />
+                  </div>
                   <div className="flex items-center justify-between gap-3">
                     <span className="text-xs text-muted-foreground">
                       {officialResponseDraft.length} / 2000자

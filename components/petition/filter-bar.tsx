@@ -6,12 +6,20 @@ import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
 
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { Button } from "@/components/ui/button"
+import { Check, ChevronsUpDown } from "lucide-react"
 
 const statuses = [
   { label: "전체", value: "ALL" },
@@ -30,6 +38,8 @@ interface FilterBarProps {
   searchQuery: string
   onSearchChange: (query: string) => void
   councils: { id: string; name: string }[]
+  councilKeyword?: string
+  onCouncilKeywordChange?: (keyword: string) => void
   hideCouncilFilter?: boolean
   hideStatusFilter?: boolean
 }
@@ -42,9 +52,12 @@ export function FilterBar({
   searchQuery,
   onSearchChange,
   councils,
+  councilKeyword = "",
+  onCouncilKeywordChange,
   hideCouncilFilter = false,
   hideStatusFilter = false,
 }: FilterBarProps) {
+  const [open, setOpen] = useState(false)
   return (
     <div className="flex flex-col gap-4 border-b border-border pb-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -83,21 +96,70 @@ export function FilterBar({
       </div>
 
       {!hideCouncilFilter && (
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-muted-foreground">{"학생회 필터:"}</span>
-          <Select value={activeCouncilId} onValueChange={onCouncilChange}>
-            <SelectTrigger className="w-full md:w-48 h-9 text-sm">
-              <SelectValue placeholder="학생회 선택" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">{"전체 학생회"}</SelectItem>
-              {councils?.map((c) => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+        <div className="flex flex-col gap-2 md:flex-row md:items-center">
+          <span className="text-sm font-medium text-muted-foreground mr-1">{"학생회 필터:"}</span>
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={open}
+                className="w-full md:w-64 justify-between font-normal h-9 text-sm"
+              >
+                {activeCouncilId === "ALL"
+                  ? "전체 학생회"
+                  : councils.find((c) => c.id === activeCouncilId)?.name || "학생회 선택"}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-full md:w-64 p-0">
+              <Command shouldFilter={false}>
+                <CommandInput 
+                  placeholder="학생회 이름으로 검색..." 
+                  value={councilKeyword}
+                  onValueChange={onCouncilKeywordChange}
+                />
+                <CommandList>
+                  {councils.length === 0 && councilKeyword && <CommandEmpty>{"검색 결과가 없습니다."}</CommandEmpty>}
+                  <CommandGroup>
+                    <CommandItem
+                      value="ALL"
+                      onSelect={() => {
+                        onCouncilChange("ALL")
+                        setOpen(false)
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          activeCouncilId === "ALL" ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {"전체 학생회"}
+                    </CommandItem>
+                    {councils.map((c) => (
+                      <CommandItem
+                        key={c.id}
+                        value={c.id}
+                        onSelect={() => {
+                          onCouncilChange(c.id)
+                          setOpen(false)
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            activeCouncilId === c.id ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {c.name}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
       )}
     </div>
