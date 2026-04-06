@@ -44,6 +44,7 @@ interface PetitionDetailResponse {
   postVotingDuration: string
   createdAt: string
   votingEndAt: string
+  images?: { id: string; url: string }[]
 }
 
 interface PageProps {
@@ -316,11 +317,11 @@ export default function PetitionDetailPage({ params }: PageProps) {
           <Separator />
 
           {/* Status banner for non-active petitions */}
-          {petition.status !== "VOTING" && (
+            {petition.status !== "VOTING" && (
             <PetitionStatusBanner status={petition.status} />
           )}
-
-          <PetitionBody content={petition.content} />
+          
+          <PetitionBody content={petition.content} images={petition.images} />
 
           {voteSummary && (
             <PetitionVote

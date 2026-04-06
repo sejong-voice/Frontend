@@ -33,6 +33,7 @@ import { councilService, Council } from "@/app/api/councils"
 import { toast } from "sonner"
 import { useEffect } from "react"
 import { Petition } from "@/components/petition/petition-list"
+import { ImageUploader } from "./image-uploader"
 
 const categories = ["학사제도", "학교시설", "학생복지", "기타"] as const
 const votePeriods = [
@@ -56,6 +57,7 @@ export function PetitionForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isCouncilLoading, setIsCouncilLoading] = useState(false)
   const [isCouncilOpen, setIsCouncilOpen] = useState(false)
+  const [images, setImages] = useState<{ id: string; url: string }[]>([])
   
   // Admin fields
   const [assignedPetitions, setAssignedPetitions] = useState<Petition[]>([])
@@ -104,6 +106,7 @@ export function PetitionForm() {
           content,
           councilId: council,
           postVotingDuration: votePeriod,
+          imageIds: images.map((img) => img.id),
         })
       }
       toast.success(isAdmin ? "입장문이 등록되었습니다." : "청원이 등록되었습니다.")
@@ -350,6 +353,15 @@ export function PetitionForm() {
             </span>
           </div>
         </div>
+
+        {/* Image Upload (Student Only) */}
+        {!isAdmin && (
+          <ImageUploader 
+            images={images} 
+            onChange={setImages} 
+            maxImages={3} 
+          />
+        )}
 
         {/* Vote period (Student Only) */}
         {!isAdmin && (

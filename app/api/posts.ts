@@ -36,11 +36,13 @@ export interface CreatePostData {
   content: string;
   councilId: string;
   postVotingDuration: PostVotingDuration;
+  imageIds: string[];
 }
 
 export interface UpdatePostData {
   title: string;
   content: string;
+  imageIds: string[];
 }
 
 export interface VoteSummaryResponse {
