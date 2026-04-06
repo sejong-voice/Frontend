@@ -22,6 +22,7 @@ export function ImageUploader({ images, onChange, maxImages = 3 }: ImageUploader
 
     if (images.length + files.length > maxImages) {
       toast.error(`최대 ${maxImages}개까지 이미지를 업로드할 수 있습니다.`)
+      if (fileInputRef.current) fileInputRef.current.value = ""
       return
     }
 
