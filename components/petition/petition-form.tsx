@@ -57,7 +57,7 @@ export function PetitionForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isCouncilLoading, setIsCouncilLoading] = useState(false)
   const [isCouncilOpen, setIsCouncilOpen] = useState(false)
-  const [images, setImages] = useState<{ id: string; url: string }[]>([])
+  const [images, setImages] = useState<{ imageId: string; imageUrl: string }[]>([])
   
   // Admin fields
   const [assignedPetitions, setAssignedPetitions] = useState<Petition[]>([])
@@ -99,7 +99,7 @@ export function PetitionForm() {
         await postService.submitPostResult(selectedPostId, {
           status: resultStatus,
           resultContent: content,
-          imageIds: images.map((img) => img.id),
+          imageIds: images.map((img) => img.imageId),
         })
       } else {
         await postService.createPost({
@@ -107,7 +107,7 @@ export function PetitionForm() {
           content,
           councilId: council,
           postVotingDuration: votePeriod,
-          imageIds: images.map((img) => img.id),
+          imageIds: images.map((img) => img.imageId),
         })
       }
       toast.success(isAdmin ? "입장문이 등록되었습니다." : "청원이 등록되었습니다.")

@@ -1,11 +1,6 @@
 import { api } from "./axios";
 import { Petition } from "@/components/petition/petition-list";
 
-export interface PostResultData {
-  status: "VOTING" | "COMPLETED" | "REJECTED";
-  resultContent: string;
-}
-
 export interface GetPostsParams {
   page?: number;
   size?: number;

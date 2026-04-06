@@ -35,20 +35,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 interface PetitionDetailResponse {
-  id: string;
-  userId: string;
-  userStudentNo: string;
-  councilId: string;
-  councilName: string;
-  title: string;
-  content: string;
-  status: PetitionStatus;
-  resultContent?: string | null;
-  resultCreatedAt?: string | null;
-  resultUpdatedAt?: string | null;
-  postVotingDuration: string;
-  createdAt: string;
-  votingEndAt: string;
+  id: string
+  userId: string
+  userStudentNo: string
+  councilId: string
+  councilName: string
+  title: string
+  content: string
+  status: PetitionStatus
+  createdAt: string
+  votingEndAt: string
+  images?: { imageId: string; imageUrl: string }[]
+  resultContent?: string
+  resultImages?: { imageId: string; imageUrl: string }[]
+  resultCreatedAt?: string
+  resultUpdatedAt?: string
 }
 
 interface PageProps {
@@ -200,24 +201,27 @@ export default function PetitionDetailPage({ params }: PageProps) {
 
   const handleReportComment = useCallback(
     async (commentId: string, reason: CommentReportReason) => {
-    try {
-      await commentService.reportComment(commentId, { reason });
-      toast.success("신고가 접수되었습니다.");
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "신고 처리에 실패했습니다.");
-    }
+      try {
+        await commentService.reportComment(commentId, { reason });
+        toast.success("신고가 접수되었습니다.");
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || "신고 처리에 실패했습니다.");
+      }
     },
     [],
   );
 
-  const handleReportPost = useCallback(async (reason: PostReportReason) => {
-    try {
-      await postService.reportPost(id, { reason });
-      toast.success("신고가 접수되었습니다.");
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "신고 처리에 실패했습니다.");
-    }
-  }, [id]);
+  const handleReportPost = useCallback(
+    async (reason: PostReportReason) => {
+      try {
+        await postService.reportPost(id, { reason });
+        toast.success("신고가 접수되었습니다.");
+      } catch (error: any) {
+        toast.error(error.response?.data?.message || "신고 처리에 실패했습니다.");
+      }
+    },
+    [id],
+  );
 
   const handleVote = useCallback(
     async (choice: VoteChoice) => {
@@ -257,6 +261,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
       await postService.submitPostResult(id, {
         status: petition.status === "REJECTED" ? "REJECTED" : "COMPLETED",
         resultContent: officialResponseDraft.trim(),
+        imageIds: [], // Image editing not yet supported in detail view
       });
 
       const refreshedPost = await postService.getPost(id);
@@ -389,10 +394,6 @@ export default function PetitionDetailPage({ params }: PageProps) {
   const officialResponseDate = officialResponseDateSource
     ? `게시 ${formatDateTime(officialResponseDateSource)}`
     : "-";
-  const isOfficialResponseEdited =
-    !!petition.resultCreatedAt &&
-    !!petition.resultUpdatedAt &&
-    petition.resultCreatedAt !== petition.resultUpdatedAt;
 
   return (
     <div className="min-h-screen bg-background">
@@ -415,7 +416,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
           {petition.status !== "VOTING" && (
             <PetitionStatusBanner status={petition.status} />
           )}
-          
+
           <PetitionBody content={petition.content} images={petition.images} />
 
           {voteSummary && (
@@ -439,9 +440,9 @@ export default function PetitionDetailPage({ params }: PageProps) {
             <>
               <PetitionOfficialResponse
                 content={petition.resultContent ?? ""}
-                respondent={petition.councilName}
+                respondent={petition.councilName || "담당 학생회"}
                 date={officialResponseDate}
-                isEdited={isOfficialResponseEdited}
+                images={petition.resultImages}
                 showEditAction={canManageAsAdmin}
                 onEdit={handleStartEditingOfficialResponse}
               />

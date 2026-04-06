@@ -19,7 +19,7 @@ export function PetitionEditForm({ id }: { id: string }) {
   const { user } = useAuth()
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
-  const [images, setImages] = useState<{ id: string; url: string }[]>([])
+  const [images, setImages] = useState<{ imageId: string; imageUrl: string }[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -54,7 +54,7 @@ export function PetitionEditForm({ id }: { id: string }) {
       await postService.updatePost(id, {
         title,
         content,
-        imageIds: images.map((img) => img.id),
+        imageIds: images.map((img) => img.imageId),
       })
       toast.success("청원이 수정되었습니다.")
       router.push("/my-petitions")

@@ -1,6 +1,6 @@
 interface PetitionBodyProps {
   content: string
-  images?: { id: string; url: string }[]
+  images?: { imageId: string; imageUrl: string }[]
 }
 
 export function PetitionBody({ content, images = [] }: PetitionBodyProps) {
@@ -16,16 +16,16 @@ export function PetitionBody({ content, images = [] }: PetitionBodyProps) {
             <span className="text-xs font-medium text-muted-foreground">{"첨부 이미지"}</span>
             <span className="text-xs text-muted-foreground">{`(${images.length})`}</span>
           </div>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-col items-center gap-6">
             {images.map((img, index) => (
               <div 
-                key={index} 
-                className="overflow-hidden rounded-lg border border-border bg-muted shadow-sm transition-transform hover:scale-[1.02]"
+                key={img.imageId || index} 
+                className="w-full max-w-2xl overflow-hidden rounded-lg border border-border bg-muted shadow-sm transition-transform hover:scale-[1.01]"
               >
                 <img 
-                  src={img.url} 
+                  src={img.imageUrl} 
                   alt="Petition attachment" 
-                  className="max-h-[300px] w-auto object-contain"
+                  className="mx-auto block max-h-[500px] w-full object-contain"
                 />
               </div>
             ))}

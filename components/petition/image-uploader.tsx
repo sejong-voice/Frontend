@@ -7,8 +7,8 @@ import { imageService } from "@/app/api/images"
 import { toast } from "sonner"
 
 interface ImageUploaderProps {
-  images: { id: string; url: string }[]
-  onChange: (images: { id: string; url: string }[]) => void
+  images: { imageId: string; imageUrl: string }[]
+  onChange: (images: { imageId: string; imageUrl: string }[]) => void
   maxImages?: number
 }
 
@@ -30,7 +30,7 @@ export function ImageUploader({ images, onChange, maxImages = 3 }: ImageUploader
       const newImages = [...images]
       for (const file of Array.from(files)) {
         const res = await imageService.uploadImage(file)
-        newImages.push({ id: res.data.imageId, url: res.data.imageUrl })
+        newImages.push({ imageId: res.data.imageId, imageUrl: res.data.imageUrl })
       }
       onChange(newImages)
     } catch (error) {
@@ -42,8 +42,8 @@ export function ImageUploader({ images, onChange, maxImages = 3 }: ImageUploader
     }
   }
 
-  const handleRemove = (id: string) => {
-    onChange(images.filter((img) => img.id !== id))
+  const handleRemove = (imageId: string) => {
+    onChange(images.filter((img) => img.imageId !== imageId))
   }
 
   return (
@@ -60,17 +60,17 @@ export function ImageUploader({ images, onChange, maxImages = 3 }: ImageUploader
       <div className="flex flex-wrap gap-3">
         {images.map((img) => (
           <div
-            key={img.id}
+            key={img.imageId}
             className="group relative h-24 w-24 overflow-hidden rounded-lg border border-border bg-muted"
           >
             <img
-              src={img.url}
+              src={img.imageUrl}
               alt="Uploaded content"
               className="h-full w-full object-cover"
             />
             <button
               type="button"
-              onClick={() => handleRemove(img.id)}
+              onClick={() => handleRemove(img.imageId)}
               className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-background/80 text-foreground shadow-sm opacity-0 transition-opacity group-hover:opacity-100"
             >
               <X className="h-3 w-3" />

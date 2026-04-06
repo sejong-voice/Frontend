@@ -20,7 +20,7 @@ export interface Petition {
   // Optional/Computed fields if needed for UI compatibility
   commentCount: number
   voteCount: number
-  images?: { id: string; url: string }[]
+  images?: { imageId: string; imageUrl: string }[]
 }
 
 const statusMap: Record<PetitionStatus, { label: string; style: string }> = {
