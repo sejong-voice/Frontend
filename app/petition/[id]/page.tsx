@@ -45,6 +45,9 @@ interface PetitionDetailResponse {
   createdAt: string
   votingEndAt: string
   images?: { id: string; url: string }[]
+  resultContent?: string
+  resultImages?: { id: string; url: string }[]
+  resultUpdatedAt?: string
 }
 
 interface PageProps {
@@ -291,12 +294,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
   const totalCommentCount = getTotalCommentCount(comments)
   const canReportPost = !!user && petition.userId !== user.id
   const isAuthor = !!user && petition.userId === user.id
-  const officialResponseContent =
-    petition.status === "COMPLETED"
-      ? "학생회의 공식 입장문이 등록되었습니다."
-      : petition.status === "REJECTED"
-        ? "학생회의 반려 의견이 등록되었습니다."
-        : null
+  const officialResponseContent = petition.resultContent
 
   return (
     <div className="min-h-screen bg-background">
@@ -343,8 +341,9 @@ export default function PetitionDetailPage({ params }: PageProps) {
           {officialResponseContent && (
             <PetitionOfficialResponse
               content={officialResponseContent}
-              respondent={petition.councilName}
-              date="-"
+              respondent={petition.councilName || "담당 학생회"}
+              date={petition.resultUpdatedAt ? formatDate(petition.resultUpdatedAt) : "-"}
+              images={petition.resultImages}
             />
           )}
 

@@ -73,6 +73,7 @@ export interface PostReportData {
 export interface PostResultData {
   status: "VOTING" | "COMPLETED" | "REJECTED";
   resultContent: string;
+  imageIds: string[];
 }
 
 export const postService = {

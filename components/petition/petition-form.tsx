@@ -99,6 +99,7 @@ export function PetitionForm() {
         await postService.submitPostResult(selectedPostId, {
           status: resultStatus,
           resultContent: content,
+          imageIds: images.map((img) => img.id),
         })
       } else {
         await postService.createPost({
@@ -354,14 +355,12 @@ export function PetitionForm() {
           </div>
         </div>
 
-        {/* Image Upload (Student Only) */}
-        {!isAdmin && (
-          <ImageUploader 
-            images={images} 
-            onChange={setImages} 
-            maxImages={3} 
-          />
-        )}
+        {/* Image Upload */}
+        <ImageUploader 
+          images={images} 
+          onChange={setImages} 
+          maxImages={3} 
+        />
 
         {/* Vote period (Student Only) */}
         {!isAdmin && (

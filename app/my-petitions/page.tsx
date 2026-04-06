@@ -76,9 +76,13 @@ export default function MyPetitionsPage() {
     if (!loading && !user) {
       router.replace("/login")
     } else if (user) {
+      if (isAdmin) {
+        router.replace("/admin/petitions")
+        return
+      }
       fetchCouncils()
     }
-  }, [loading, user, router, councilKeyword])
+  }, [loading, user, router, councilKeyword, isAdmin])
 
   useEffect(() => {
     if (user) {

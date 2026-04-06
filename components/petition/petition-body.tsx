@@ -17,9 +17,9 @@ export function PetitionBody({ content, images = [] }: PetitionBodyProps) {
             <span className="text-xs text-muted-foreground">{`(${images.length})`}</span>
           </div>
           <div className="flex flex-wrap gap-4">
-            {images.map((img) => (
+            {images.map((img, index) => (
               <div 
-                key={img.id} 
+                key={index} 
                 className="overflow-hidden rounded-lg border border-border bg-muted shadow-sm transition-transform hover:scale-[1.02]"
               >
                 <img 

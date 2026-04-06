@@ -46,6 +46,7 @@ const referrerMap: Record<string, { href: string; label: string }> = {
   "in-progress": { href: "/in-progress", label: "진행중" },
   answered: { href: "/answered", label: "답변완료" },
   my: { href: "/my-petitions", label: "내 청원" },
+  admin: { href: "/admin/petitions", label: "청원 관리" },
 }
 
 const POST_REPORT_REASON_OPTIONS: { value: PostReportReason; label: string }[] = [
