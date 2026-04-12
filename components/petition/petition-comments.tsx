@@ -8,6 +8,7 @@ import {
   ChevronUp,
   CornerDownRight,
   Flag,
+  Loader2,
   LogIn,
   MessageSquare,
   Reply,
@@ -33,6 +34,7 @@ export interface ReplyData {
   content: string
   date: string
   canDelete: boolean
+  isPlaceholder?: boolean
 }
 
 export interface Comment {
@@ -42,6 +44,7 @@ export interface Comment {
   date: string
   canDelete: boolean
   replies: ReplyData[]
+  isPlaceholder?: boolean
 }
 
 const COMMENT_REPORT_REASON_OPTIONS: {
@@ -68,6 +71,8 @@ function getActionErrorMessage(error: unknown, fallback: string): string {
 interface PetitionCommentsProps {
   comments: Comment[]
   totalCount: number
+  hasMore?: boolean
+  isLoadingMore?: boolean
   readOnly?: boolean
   onCreateComment?: (content: string) => Promise<void>
   onCreateReply?: (parentId: string, content: string) => Promise<void>
@@ -76,6 +81,7 @@ interface PetitionCommentsProps {
     commentId: string,
     reason: CommentReportReason
   ) => Promise<void>
+  onLoadMore?: () => Promise<void> | void
 }
 
 function CommentItem({
@@ -98,6 +104,7 @@ function CommentItem({
   ) => Promise<void>
   disableReplyAction?: boolean
 }) {
+  const isPlaceholder = !!comment.isPlaceholder
   const [showReportConfirm, setShowReportConfirm] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -168,9 +175,16 @@ function CommentItem({
           </span>
           <span className="text-xs text-muted-foreground">{comment.date}</span>
         </div>
-        <p className="text-sm leading-relaxed text-foreground">{comment.content}</p>
+        <p
+          className={cn(
+            "text-sm leading-relaxed",
+            isPlaceholder ? "text-muted-foreground" : "text-foreground"
+          )}
+        >
+          {comment.content}
+        </p>
 
-        {showActions && (
+        {showActions && !isPlaceholder && (
           <div className="mt-1 flex items-center gap-3">
             {!isReply && onReply && (
               <button
@@ -453,11 +467,14 @@ function CommentThread({
 export function PetitionComments({
   comments,
   totalCount,
+  hasMore = false,
+  isLoadingMore = false,
   readOnly = false,
   onCreateComment,
   onCreateReply,
   onDeleteComment,
   onReportComment,
+  onLoadMore,
 }: PetitionCommentsProps) {
   const { user } = useAuth()
   const [newComment, setNewComment] = useState("")
@@ -553,6 +570,27 @@ export function PetitionComments({
                 />
               </div>
             ))}
+
+            {hasMore && (
+              <div className="flex justify-center pt-5">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => void onLoadMore?.()}
+                  disabled={isLoadingMore || !onLoadMore}
+                  className="gap-2"
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      불러오는 중...
+                    </>
+                  ) : (
+                    "댓글 더보기"
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>
