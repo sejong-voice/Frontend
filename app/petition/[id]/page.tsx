@@ -138,7 +138,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
 
   const fetchComments = useCallback(async () => {
     const result = await commentService.getCommentsByPost(id);
-    setComments(result.data.map(mapComment));
+    setComments(result.data.content.map(mapComment));
   }, [id]);
 
   const fetchVoteSummary = useCallback(async () => {
@@ -334,7 +334,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
         }
 
         if (commentsResult.status === "fulfilled") {
-          setComments(commentsResult.value.data.map(mapComment));
+          setComments(commentsResult.value.data.content.map(mapComment));
         } else {
           console.error("댓글 목록 조회 실패:", commentsResult.reason);
         }

@@ -59,7 +59,7 @@ export interface CommentReportData {
 
 export const commentService = {
   getCommentsByPost: async (postId: string) => {
-    return api.get<CommentResponse[]>(`/api/v1/comments/post/${postId}`);
+    return api.get<CommentPageResponse>(`/api/v1/comments/post/${postId}`);
   },
 
   createComment: async (data: CreateCommentData) => {
