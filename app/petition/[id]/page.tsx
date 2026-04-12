@@ -7,6 +7,7 @@ import {
   commentService,
   type CommentReportReason,
   type CommentResponse,
+  type ReplyResponse,
 } from "@/app/api/comments";
 import {
   postService,
@@ -93,25 +94,72 @@ function formatDateTime(value: string) {
   return `${year}.${month}.${day} ${hours}:${minutes}`;
 }
 
-function mapReply(reply: CommentResponse): ReplyData {
+function getAnonymousAuthorLabel(
+  anonymousNumber: number | null,
+  postAuthor: boolean,
+) {
+  if (postAuthor) {
+    return "익명(글쓴이)";
+  }
+
+  if (typeof anonymousNumber === "number") {
+    return `익명${anonymousNumber}`;
+  }
+
+  return "익명";
+}
+
+function getRootPlaceholderContent(status: CommentResponse["status"]) {
+  if (status === "DELETED") {
+    return "삭제된 댓글입니다.";
+  }
+
+  if (status === "BLINDED") {
+    return "숨김 처리된 댓글입니다.";
+  }
+
+  return "";
+}
+
+function mapReply(reply: ReplyResponse): ReplyData {
   return {
     id: reply.id,
-    author: ANONYMOUS_LABEL,
+    author: getAnonymousAuthorLabel(reply.anonymousNumber, reply.postAuthor),
     content: reply.content,
     date: formatDate(reply.createdAt),
     canDelete: reply.canDelete,
   };
 }
 
-function mapComment(comment: CommentResponse): Comment {
+function mapComment(comment: CommentResponse): Comment | null {
+  const activeReplies = (comment.replies || []).filter(
+    (reply) => reply.status === "ACTIVE",
+  );
+
+  if (comment.status !== "ACTIVE" && activeReplies.length === 0) {
+    return null;
+  }
+
   return {
     id: comment.id,
-    author: ANONYMOUS_LABEL,
-    content: comment.content,
+    author: getAnonymousAuthorLabel(
+      comment.anonymousNumber,
+      comment.postAuthor,
+    ),
+    content:
+      comment.status === "ACTIVE"
+        ? comment.content
+        : getRootPlaceholderContent(comment.status),
     date: formatDate(comment.createdAt),
     canDelete: comment.canDelete,
-    replies: (comment.children || []).map(mapReply),
+    replies: activeReplies.map(mapReply),
   };
+}
+
+function mapComments(comments: CommentResponse[]) {
+  return comments
+    .map(mapComment)
+    .filter((comment): comment is Comment => comment !== null);
 }
 
 function getTotalCommentCount(comments: Comment[]) {
@@ -138,7 +186,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
 
   const fetchComments = useCallback(async () => {
     const result = await commentService.getCommentsByPost(id);
-    setComments(result.data.content.map(mapComment));
+    setComments(mapComments(result.data.content));
   }, [id]);
 
   const fetchVoteSummary = useCallback(async () => {
@@ -334,7 +382,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
         }
 
         if (commentsResult.status === "fulfilled") {
-          setComments(commentsResult.value.data.content.map(mapComment));
+          setComments(mapComments(commentsResult.value.data.content));
         } else {
           console.error("댓글 목록 조회 실패:", commentsResult.reason);
         }
