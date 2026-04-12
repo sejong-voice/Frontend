@@ -8,6 +8,7 @@ import {
   ChevronUp,
   CornerDownRight,
   Flag,
+  Loader2,
   LogIn,
   MessageSquare,
   Reply,
@@ -70,6 +71,8 @@ function getActionErrorMessage(error: unknown, fallback: string): string {
 interface PetitionCommentsProps {
   comments: Comment[]
   totalCount: number
+  hasMore?: boolean
+  isLoadingMore?: boolean
   readOnly?: boolean
   onCreateComment?: (content: string) => Promise<void>
   onCreateReply?: (parentId: string, content: string) => Promise<void>
@@ -78,6 +81,7 @@ interface PetitionCommentsProps {
     commentId: string,
     reason: CommentReportReason
   ) => Promise<void>
+  onLoadMore?: () => Promise<void> | void
 }
 
 function CommentItem({
@@ -463,11 +467,14 @@ function CommentThread({
 export function PetitionComments({
   comments,
   totalCount,
+  hasMore = false,
+  isLoadingMore = false,
   readOnly = false,
   onCreateComment,
   onCreateReply,
   onDeleteComment,
   onReportComment,
+  onLoadMore,
 }: PetitionCommentsProps) {
   const { user } = useAuth()
   const [newComment, setNewComment] = useState("")
@@ -563,6 +570,27 @@ export function PetitionComments({
                 />
               </div>
             ))}
+
+            {hasMore && (
+              <div className="flex justify-center pt-5">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => void onLoadMore?.()}
+                  disabled={isLoadingMore || !onLoadMore}
+                  className="gap-2"
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      불러오는 중...
+                    </>
+                  ) : (
+                    "댓글 더보기"
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>

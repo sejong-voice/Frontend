@@ -38,6 +38,12 @@ export interface CommentPageResponse {
   last: boolean;
 }
 
+export interface GetCommentsParams {
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
 export interface CreateCommentData {
   postId: string;
   rootCommentId?: string | null;
@@ -58,8 +64,10 @@ export interface CommentReportData {
 }
 
 export const commentService = {
-  getCommentsByPost: async (postId: string) => {
-    return api.get<CommentPageResponse>(`/api/v1/comments/post/${postId}`);
+  getCommentsByPost: async (postId: string, params?: GetCommentsParams) => {
+    return api.get<CommentPageResponse>(`/api/v1/comments/post/${postId}`, {
+      params,
+    });
   },
 
   createComment: async (data: CreateCommentData) => {

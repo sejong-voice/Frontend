@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   commentService,
+  type CommentPageResponse,
   type CommentReportReason,
   type CommentResponse,
   type ReplyResponse,
@@ -164,9 +165,7 @@ function mapComments(comments: CommentResponse[]) {
     .filter((comment): comment is Comment => comment !== null);
 }
 
-function getTotalCommentCount(comments: Comment[]) {
-  return comments.reduce((acc, comment) => acc + 1 + comment.replies.length, 0);
-}
+const COMMENT_PAGE_SIZE = 20;
 
 export default function PetitionDetailPage({ params }: PageProps) {
   const { id } = use(params);
@@ -176,6 +175,10 @@ export default function PetitionDetailPage({ params }: PageProps) {
     null,
   );
   const [comments, setComments] = useState<Comment[]>([]);
+  const [commentTotalCount, setCommentTotalCount] = useState(0);
+  const [commentPage, setCommentPage] = useState(0);
+  const [hasMoreComments, setHasMoreComments] = useState(false);
+  const [isLoadingMoreComments, setIsLoadingMoreComments] = useState(false);
   const [canManageAsAdmin, setCanManageAsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -186,10 +189,53 @@ export default function PetitionDetailPage({ params }: PageProps) {
   const [isUpdatingOfficialResponse, setIsUpdatingOfficialResponse] =
     useState(false);
 
+  const applyCommentPageResponse = useCallback(
+    (pageData: CommentPageResponse, mode: "replace" | "append" = "replace") => {
+      const mappedComments = mapComments(pageData.content);
+
+      setComments((prev) =>
+        mode === "append" ? [...prev, ...mappedComments] : mappedComments,
+      );
+      setCommentTotalCount(pageData.activeCommentCount);
+      setCommentPage(pageData.page);
+      setHasMoreComments(!pageData.last);
+    },
+    [],
+  );
+
   const fetchComments = useCallback(async () => {
-    const result = await commentService.getCommentsByPost(id);
-    setComments(mapComments(result.data.content));
-  }, [id]);
+    const result = await commentService.getCommentsByPost(id, {
+      page: 0,
+      size: COMMENT_PAGE_SIZE,
+      sort: "createdAt,asc",
+    });
+    applyCommentPageResponse(result.data, "replace");
+  }, [applyCommentPageResponse, id]);
+
+  const handleLoadMoreComments = useCallback(async () => {
+    if (isLoadingMoreComments || !hasMoreComments) return;
+
+    setIsLoadingMoreComments(true);
+    try {
+      const result = await commentService.getCommentsByPost(id, {
+        page: commentPage + 1,
+        size: COMMENT_PAGE_SIZE,
+        sort: "createdAt,asc",
+      });
+      applyCommentPageResponse(result.data, "append");
+    } catch (error) {
+      console.error("댓글 더보기 로드 실패:", error);
+      toast.error("댓글 목록을 더 불러오지 못했습니다.");
+    } finally {
+      setIsLoadingMoreComments(false);
+    }
+  }, [
+    applyCommentPageResponse,
+    commentPage,
+    hasMoreComments,
+    id,
+    isLoadingMoreComments,
+  ]);
 
   const fetchVoteSummary = useCallback(async () => {
     const result = await postService.getVoteSummary(id);
@@ -350,6 +396,10 @@ export default function PetitionDetailPage({ params }: PageProps) {
       setError("");
       setVoteSummary(null);
       setComments([]);
+      setCommentTotalCount(0);
+      setCommentPage(0);
+      setHasMoreComments(false);
+      setIsLoadingMoreComments(false);
       setCanManageAsAdmin(false);
 
       try {
@@ -361,7 +411,11 @@ export default function PetitionDetailPage({ params }: PageProps) {
         ] = await Promise.allSettled([
           postService.getPost(id),
           postService.getVoteSummary(id),
-          commentService.getCommentsByPost(id),
+          commentService.getCommentsByPost(id, {
+            page: 0,
+            size: COMMENT_PAGE_SIZE,
+            sort: "createdAt,asc",
+          }),
           isAdmin
             ? postService.getPosts({ assignedToMe: true })
             : Promise.resolve(null),
@@ -384,7 +438,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
         }
 
         if (commentsResult.status === "fulfilled") {
-          setComments(mapComments(commentsResult.value.data.content));
+          applyCommentPageResponse(commentsResult.value.data, "replace");
         } else {
           console.error("댓글 목록 조회 실패:", commentsResult.reason);
         }
@@ -422,7 +476,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
     return () => {
       isMounted = false;
     };
-  }, [id, isAdmin]);
+  }, [applyCommentPageResponse, id, isAdmin]);
 
   if (isLoading) {
     return (
@@ -447,7 +501,6 @@ export default function PetitionDetailPage({ params }: PageProps) {
     );
   }
 
-  const totalCommentCount = getTotalCommentCount(comments);
   const canReportPost = !!user && petition.userId !== user.id;
   const isAuthor = !!user && petition.userId === user.id;
   const shouldShowOfficialResponse =
@@ -580,7 +633,10 @@ export default function PetitionDetailPage({ params }: PageProps) {
 
           <PetitionComments
             comments={comments}
-            totalCount={totalCommentCount}
+            totalCount={commentTotalCount}
+            hasMore={hasMoreComments}
+            isLoadingMore={isLoadingMoreComments}
+            onLoadMore={handleLoadMoreComments}
             onCreateComment={handleCreateComment}
             onCreateReply={handleCreateReply}
             onDeleteComment={handleDeleteComment}
