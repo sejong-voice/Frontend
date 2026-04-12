@@ -151,7 +151,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
       try {
         await commentService.createComment({
           postId: id,
-          parentId: null,
+          rootCommentId: null,
           content,
         });
         toast.success("댓글이 등록되었습니다.");
@@ -167,11 +167,11 @@ export default function PetitionDetailPage({ params }: PageProps) {
   );
 
   const handleCreateReply = useCallback(
-    async (parentId: string, content: string) => {
+    async (rootCommentId: string, content: string) => {
       try {
         await commentService.createComment({
           postId: id,
-          parentId,
+          rootCommentId,
           content,
         });
         toast.success("답글이 등록되었습니다.");
