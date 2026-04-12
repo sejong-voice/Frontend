@@ -33,6 +33,7 @@ export interface ReplyData {
   content: string
   date: string
   canDelete: boolean
+  isPlaceholder?: boolean
 }
 
 export interface Comment {
@@ -42,6 +43,7 @@ export interface Comment {
   date: string
   canDelete: boolean
   replies: ReplyData[]
+  isPlaceholder?: boolean
 }
 
 const COMMENT_REPORT_REASON_OPTIONS: {
@@ -98,6 +100,7 @@ function CommentItem({
   ) => Promise<void>
   disableReplyAction?: boolean
 }) {
+  const isPlaceholder = !!comment.isPlaceholder
   const [showReportConfirm, setShowReportConfirm] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -168,9 +171,16 @@ function CommentItem({
           </span>
           <span className="text-xs text-muted-foreground">{comment.date}</span>
         </div>
-        <p className="text-sm leading-relaxed text-foreground">{comment.content}</p>
+        <p
+          className={cn(
+            "text-sm leading-relaxed",
+            isPlaceholder ? "text-muted-foreground" : "text-foreground"
+          )}
+        >
+          {comment.content}
+        </p>
 
-        {showActions && (
+        {showActions && !isPlaceholder && (
           <div className="mt-1 flex items-center gap-3">
             {!isReply && onReply && (
               <button

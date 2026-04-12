@@ -128,6 +128,7 @@ function mapReply(reply: ReplyResponse): ReplyData {
     content: reply.content,
     date: formatDate(reply.createdAt),
     canDelete: reply.canDelete,
+    isPlaceholder: false,
   };
 }
 
@@ -153,6 +154,7 @@ function mapComment(comment: CommentResponse): Comment | null {
     date: formatDate(comment.createdAt),
     canDelete: comment.canDelete,
     replies: activeReplies.map(mapReply),
+    isPlaceholder: comment.status !== "ACTIVE",
   };
 }
 
