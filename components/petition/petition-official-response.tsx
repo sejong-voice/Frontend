@@ -116,7 +116,7 @@ export function PetitionOfficialResponse({
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <h3 className="text-sm font-semibold text-foreground">
-                    {`추가 답변 ${statement.sequence - 1 > 1 ? (statement.sequence - 1) : ""}`}
+                    {`추가 답변 ${statement.sequence - 1}`}
                   </h3>
                 </div>
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">

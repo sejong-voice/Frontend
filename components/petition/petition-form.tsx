@@ -65,6 +65,9 @@ export function PetitionForm() {
   const [assignedPetitions, setAssignedPetitions] = useState<Petition[]>([])
   const [selectedPostId, setSelectedPostId] = useState<string>("")
   const [resultStatus, setResultStatus] = useState<"COMPLETED" | "REJECTED">("COMPLETED")
+  const [petitionKeyword, setPetitionKeyword] = useState("")
+  const [isPetitionLoading, setIsPetitionLoading] = useState(false)
+  const [isPetitionOpen, setIsPetitionOpen] = useState(false)
 
   const contentLength = content.length
 
@@ -89,26 +92,37 @@ export function PetitionForm() {
   }, [councilKeyword])
 
   useEffect(() => {
-    if (!authLoading && isAdmin) {
-      // 입장문 작성이 가능한 모든 상태의 청원을 불러옵니다.
-      Promise.all([
-        postService.getPosts({ assignedToMe: true, status: "APPROVED", size: 500 }),
-        postService.getPosts({ assignedToMe: true, status: "COMPLETED", size: 500 }),
-        postService.getPosts({ assignedToMe: true, status: "REJECTED", size: 500 }),
-      ])
-        .then(results => {
-          const allPetitions = results.flatMap(res => res.data.content)
-          
-          // 중복 제거 및 전체 목록 저장
-          const uniquePetitions = Array.from(new Map(allPetitions.map(p => [p.id, p])).values());
-          setAssignedPetitions(uniquePetitions)
-        })
-        .catch(error => {
-          console.error("할당된 청원 로드 실패:", error)
-          toast.error("연결 가능한 청원 목록을 불러오지 못했습니다.")
-        })
+    if (!isAdmin || authLoading) return
+
+    let active = true
+    const timer = setTimeout(async () => {
+      setIsPetitionLoading(true)
+      try {
+        // 모든 상태를 한 번에 가져오거나 검색 조건에 맞게 가져옴
+        // 여기서는 키워드가 있을 때 해당 키워드로 검색된 할당된 청원을 가져옵니다.
+        const [resApproved, resCompleted, resRejected] = await Promise.all([
+          postService.getPosts({ assignedToMe: true, status: "APPROVED", keyword: petitionKeyword, size: 50 }),
+          postService.getPosts({ assignedToMe: true, status: "COMPLETED", keyword: petitionKeyword, size: 50 }),
+          postService.getPosts({ assignedToMe: true, status: "REJECTED", keyword: petitionKeyword, size: 50 }),
+        ])
+
+        if (active) {
+          const all = [...resApproved.data.content, ...resCompleted.data.content, ...resRejected.data.content]
+          const unique = Array.from(new Map(all.map(p => [p.id, p])).values())
+          setAssignedPetitions(unique)
+        }
+      } catch (error) {
+        console.error("할당된 청원 로드 실패:", error)
+      } finally {
+        if (active) setIsPetitionLoading(false)
+      }
+    }, 300)
+
+    return () => {
+      active = false
+      clearTimeout(timer)
     }
-  }, [authLoading, isAdmin])
+  }, [authLoading, isAdmin, petitionKeyword])
 
   // 현재 선택된 모드에 따라 필터링된 목록
   const filteredPetitions = assignedPetitions.filter(p => {
@@ -116,10 +130,11 @@ export function PetitionForm() {
     const statementCount = p.statements?.length ?? 0;
 
     if (adminActionType === "INITIAL") {
-      return s === "APPROVED";
+      // 최초 입장문: APPROVED 상태이면서 아직 입장문이 없는 경우
+      return s === "APPROVED" && statementCount === 0;
     } else {
-      // 추가 입장문 대상: 이미 처리되었으나 입장문이 1개인 경우
-      // (목록 API에서 statements가 없는 경우도 일단 노출하여 상세조회 시 판단)
+      // 추가 입장문: COMPLETED/REJECTED 상태이면서 입장문이 1개만 있는 경우
+      // (이미 2개(최초+추가)가 있다면 더 이상 추가할 수 없으므로 제외)
       return (s === "COMPLETED" || s === "REJECTED") && (!p.statements || statementCount === 1);
     }
   })
@@ -255,32 +270,59 @@ export function PetitionForm() {
                 htmlFor="petition-select"
                 className="text-sm font-medium text-foreground"
               >
-                {adminActionType === "INITIAL" ? "연결할 청원 선택 (검토중)" : "연결할 청원 선택 (처리완료/반려)"}
+                {adminActionType === "INITIAL" ? "연결할 청원 검색 (검토중)" : "연결할 청원 검색 (처리완료/반려)"}
                 <span className="ml-1 text-destructive">{"*"}</span>
               </label>
-              <Select value={selectedPostId} onValueChange={setSelectedPostId}>
-                <SelectTrigger id="petition-select" className="w-full">
-                  <SelectValue placeholder={adminActionType === "INITIAL" ? "최초 입장문을 작성할 청원을 선택하세요" : "추가 답변을 작성할 청원을 선택하세요"} />
-                </SelectTrigger>
-                <SelectContent side="bottom">
-                  {filteredPetitions.length === 0 ? (
-                    <SelectItem value="none" disabled>
-                      {adminActionType === "INITIAL" ? "최초 작성 가능한 청원이 없습니다." : "추가 작성 가능한 청원이 없습니다."}
-                    </SelectItem>
-                  ) : (
-                    filteredPetitions.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        <div className="flex items-center gap-2">
-                          <span className="truncate">{p.title}</span>
-                          <Badge variant="outline" className="shrink-0 text-[10px] h-4 px-1">
-                            {adminActionType === "INITIAL" ? "최초" : "추가"}
-                          </Badge>
-                        </div>
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
+              <div className="flex flex-col gap-2">
+                <Popover open={isPetitionOpen} onOpenChange={setIsPetitionOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={isPetitionOpen}
+                      className="w-full justify-between font-normal"
+                    >
+                      {selectedPostId
+                        ? assignedPetitions.find((p) => p.id === selectedPostId)?.title || "청원 선택"
+                        : adminActionType === "INITIAL" ? "최초 입장문을 작성할 청원을 선택하세요" : "추가 답변을 작성할 청원을 선택하세요"}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent side="bottom" className="w-[var(--radix-popover-trigger-width)] p-0">
+                    <Command shouldFilter={false}>
+                      <CommandInput
+                        placeholder="청원 제목으로 검색..."
+                        value={petitionKeyword}
+                        onValueChange={setPetitionKeyword}
+                      />
+                      <CommandList>
+                        {isPetitionLoading && <div className="p-4 text-sm text-center text-muted-foreground">{"로딩 중..."}</div>}
+                        {!isPetitionLoading && filteredPetitions.length === 0 && <CommandEmpty>{"검색 결과가 없습니다."}</CommandEmpty>}
+                        <CommandGroup>
+                          {filteredPetitions.map((p) => (
+                            <CommandItem
+                              key={p.id}
+                              value={p.id}
+                              onSelect={() => {
+                                setSelectedPostId(p.id)
+                                setIsPetitionOpen(false)
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  selectedPostId === p.id ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              <span className="truncate text-sm">{p.title}</span>
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
 
             {!isAdditionalStatement ? (
