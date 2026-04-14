@@ -34,11 +34,7 @@ export interface CreatePostData {
   imageIds: string[];
 }
 
-export interface UpdatePostData {
-  title: string;
-  content: string;
-  imageIds: string[];
-}
+
 
 export interface VoteSummaryResponse {
   agreeCount: number;
@@ -65,9 +61,9 @@ export interface PostReportData {
   description?: string;
 }
 
-export interface PostResultData {
-  status: "VOTING" | "COMPLETED" | "REJECTED";
-  resultContent: string;
+export interface PostStatementRequest {
+  finalStatus?: "COMPLETED" | "REJECTED";
+  content: string;
   imageIds: string[];
 }
 
@@ -96,15 +92,11 @@ export const postService = {
     return api.post("/api/v1/posts", data);
   },
 
-  updatePost: async (id: string, data: UpdatePostData) => {
-    return api.put(`/api/v1/posts/${id}`, data);
-  },
-
   deletePost: async (id: string) => {
     return api.delete(`/api/v1/posts/${id}`);
   },
 
-  submitPostResult: async (id: string, data: PostResultData) => {
-    return api.put(`/api/v1/posts/${id}/result`, data);
+  submitPostStatement: async (id: string, data: PostStatementRequest) => {
+    return api.post(`/api/v1/posts/${id}/statements`, data);
   },
 };
