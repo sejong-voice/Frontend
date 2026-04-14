@@ -67,6 +67,12 @@ export interface PostStatementRequest {
   imageIds: string[];
 }
 
+export interface UpdatePostData {
+  title: string;
+  content: string;
+  imageIds: string[];
+}
+
 export const postService = {
   getPosts: async (params: GetPostsParams) => {
     return api.get<PaginatedResponse<Petition>>("/api/v1/posts", { params });
@@ -90,6 +96,10 @@ export const postService = {
 
   createPost: async (data: CreatePostData) => {
     return api.post("/api/v1/posts", data);
+  },
+
+  updatePost: async (id: string, data: UpdatePostData) => {
+    return api.put(`/api/v1/posts/${id}`, data);
   },
 
   deletePost: async (id: string) => {
