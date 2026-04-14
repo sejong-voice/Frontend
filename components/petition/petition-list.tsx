@@ -5,6 +5,14 @@ import { MessageSquare, Vote } from "lucide-react"
 
 export type PetitionStatus = "VOTING" | "APPROVED" | "PENDING" | "COMPLETED" | "REJECTED" | "DELETED"
 
+export interface PostStatement {
+  id: string
+  sequence: number
+  content: string
+  createdAt: string
+  images: { imageId: string; imageUrl: string }[]
+}
+
 export interface Petition {
   id: string
   userId: string
@@ -21,6 +29,7 @@ export interface Petition {
   commentCount: number
   voteCount: number
   images?: { imageId: string; imageUrl: string }[]
+  statements?: PostStatement[]
 }
 
 const statusMap: Record<PetitionStatus, { label: string; style: string }> = {

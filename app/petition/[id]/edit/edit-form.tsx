@@ -29,6 +29,14 @@ export function PetitionEditForm({ id }: { id: string }) {
     async function loadPetition() {
       try {
         const res = await postService.getPost(id)
+        
+        // 투표중(VOTING) 상태인 경우에만 수정을 허용합니다.
+        if (res.data.status !== "VOTING") {
+          toast.error("투표가 시작되었거나 종료된 청원은 수정할 수 없습니다.")
+          router.replace("/my-petitions")
+          return
+        }
+
         setTitle(res.data.title)
         setContent(res.data.content)
         setImages(res.data.images || [])

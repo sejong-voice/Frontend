@@ -109,9 +109,7 @@ export default function MyPetitionsPage() {
     )
   }
 
-  function handleEdit(id: string) {
-    router.push(`/petition/${id}/edit`)
-  }
+
 
   async function handleDelete(id: string) {
     if (confirm("정말 이 청원을 삭제하시겠습니까?")) {
@@ -206,7 +204,6 @@ export default function MyPetitionsPage() {
             <>
               <MyPetitionList
                 petitions={data?.content || []}
-                onEdit={handleEdit as any}
                 onDelete={handleDelete as any}
                 isAdmin={isAdmin}
               />

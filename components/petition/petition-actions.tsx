@@ -46,9 +46,9 @@ export function PetitionActions({
 
     setIsSubmitting(true);
     try {
-      await postService.submitPostResult(petitionId, {
-        status: statusToSubmit,
-        resultContent: responseText,
+      await postService.submitPostStatement(petitionId, {
+        finalStatus: statusToSubmit,
+        content: responseText,
         imageIds: images.map((img) => img.imageId),
       });
       toast.success(
@@ -65,14 +65,60 @@ export function PetitionActions({
     }
   };
 
-  const showAuthorActions = false; // Hide author management box
+  const handleDelete = async () => {
+    if (!window.confirm("정말로 이 청원을 삭제하시겠습니까?")) return;
+
+    setIsSubmitting(true);
+    try {
+      await postService.deletePost(petitionId);
+      toast.success("청원이 삭제되었습니다.");
+      window.location.href = "/my-petitions";
+    } catch (error: any) {
+      console.error("삭제 실패:", error);
+      toast.error(error.response?.data?.message || "삭제 처리에 실패했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const showAuthorActions = isAuthor && status === "VOTING";
   const showAdminActions = canManageAsAdmin && status === "APPROVED";
-  const canDelete = isAuthor;
 
   if (!showAuthorActions && !showAdminActions) return null;
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Author actions */}
+      {showAuthorActions && (
+        <section
+          className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 px-6 py-4"
+          aria-label="작성자 관리 영역"
+        >
+          <div className="flex flex-col gap-0.5">
+            <span className="text-sm font-semibold text-destructive">
+              {"청원 삭제"}
+            </span>
+            <p className="text-xs text-muted-foreground">
+              {"투표 종료 전에는 청원을 삭제할 수 있습니다."}
+            </p>
+          </div>
+          <Button
+            variant="destructive"
+            size="sm"
+            className="gap-1.5"
+            onClick={handleDelete}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Trash2 className="h-3.5 w-3.5" />
+            )}
+            {"청원 삭제하기"}
+          </Button>
+        </section>
+      )}
+
       {/* Admin actions */}
       {showAdminActions && (
         <section

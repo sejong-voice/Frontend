@@ -18,14 +18,12 @@ const statusStyles: Record<PetitionStatus, { label: string; style: string }> = {
 
 interface MyPetitionListProps {
   petitions: Petition[]
-  onEdit?: (id: string) => void
   onDelete?: (id: string) => void
   isAdmin?: boolean
 }
 
 export function MyPetitionList({
   petitions,
-  onEdit,
   onDelete,
   isAdmin,
 }: MyPetitionListProps) {
@@ -113,34 +111,23 @@ export function MyPetitionList({
                     {petition.createdAt ? new Date(petition.createdAt).toLocaleDateString() : "-"}
                   </span>
                   <div className="flex items-center justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        onEdit?.(petition.id)
-                      }}
-                      aria-label={`${petition.title} 수정`}
-                    >
-                      <Pencil className="mr-1 h-3 w-3" />
-                      {"수정"}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className={cn(
-                        "h-7 px-2 text-xs text-destructive/70 hover:text-destructive hover:bg-destructive/10"
-                      )}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        onDelete?.(petition.id)
-                      }}
-                      aria-label={`${petition.title} 삭제`}
-                    >
-                      <Trash2 className="mr-1 h-3 w-3" />
-                      {"삭제"}
-                    </Button>
+                    {statusKey === "VOTING" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className={cn(
+                          "h-7 px-2 text-xs text-destructive/70 hover:text-destructive hover:bg-destructive/10"
+                        )}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          onDelete?.(petition.id)
+                        }}
+                        aria-label={`${petition.title} 삭제`}
+                      >
+                        <Trash2 className="mr-1 h-3 w-3" />
+                        {"삭제"}
+                      </Button>
+                    )}
                   </div>
                 </div>
 
@@ -162,32 +149,22 @@ export function MyPetitionList({
                       </span>
                     </div>
                     <div className="flex items-center gap-0.5">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          onEdit?.(petition.id)
-                        }}
-                        aria-label={`${petition.title} 수정`}
-                      >
-                        <Pencil className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className={cn(
-                          "h-7 px-2 text-xs text-destructive/70 hover:text-destructive hover:bg-destructive/10"
-                        )}
-                        onClick={(e) => {
-                          e.preventDefault()
-                          onDelete?.(petition.id)
-                        }}
-                        aria-label={`${petition.title} 삭제`}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
+                      {statusKey === "VOTING" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={cn(
+                            "h-7 px-2 text-xs text-destructive/70 hover:text-destructive hover:bg-destructive/10"
+                          )}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            onDelete?.(petition.id)
+                          }}
+                          aria-label={`${petition.title} 삭제`}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                   <Link
