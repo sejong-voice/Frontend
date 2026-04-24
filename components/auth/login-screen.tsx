@@ -1,6 +1,7 @@
 "use client"
 
 import Image from "next/image"
+import Link from "next/link"
 import { LoginForm } from "@/components/auth/login-form"
 
 export function LoginScreen() {
@@ -9,14 +10,16 @@ export function LoginScreen() {
       <div className="w-full max-w-sm">
         {/* Logo & Title */}
         <div className="mb-10 flex flex-col items-center gap-4">
-          <Image
-            src="/sejong-logo.png"
-            alt="세종대학교 로고"
-            width={72}
-            height={72}
-            className="rounded-xl"
-            priority
-          />
+          <Link href="/" className="hover:opacity-80 transition-opacity">
+            <Image
+              src="/sejong-logo.png"
+              alt="세종대학교 로고"
+              width={72}
+              height={72}
+              className="rounded-xl"
+              priority
+            />
+          </Link>
           <div className="flex flex-col items-center gap-1.5">
             <h1 className="text-xl font-bold tracking-tight text-foreground">
               {"세종 신문고"}

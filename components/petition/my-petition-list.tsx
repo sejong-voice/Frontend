@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { cn, formatToKST } from "@/lib/utils"
 import { MessageSquare, Vote, Pencil, Trash2 } from "lucide-react"
 import type { Petition, PetitionStatus } from "@/components/petition/petition-list"
 
@@ -108,7 +108,7 @@ export function MyPetitionList({
                     </span>
                   </div>
                   <span className="text-xs text-muted-foreground">
-                    {petition.createdAt ? new Date(petition.createdAt).toLocaleDateString() : "-"}
+                    {formatToKST(petition.createdAt)}
                   </span>
                   <div className="flex items-center justify-end gap-1">
                     {statusKey === "VOTING" && (
@@ -185,7 +185,7 @@ export function MyPetitionList({
                       </span>
                     </div>
                     <span className="text-xs text-muted-foreground">
-                      {petition.createdAt ? new Date(petition.createdAt).toLocaleDateString() : "-"}
+                      {formatToKST(petition.createdAt)}
                     </span>
                   </div>
                 </div>

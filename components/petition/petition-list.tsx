@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
+import { cn, formatToKST } from "@/lib/utils"
 import { MessageSquare, Vote } from "lucide-react"
 
 export type PetitionStatus = "VOTING" | "APPROVED" | "PENDING" | "COMPLETED" | "REJECTED" | "DELETED"
@@ -120,7 +120,7 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
                     </span>
                   </div>
                   <span className="text-right text-xs text-muted-foreground">
-                    {petition.createdAt ? new Date(petition.createdAt).toLocaleDateString() : "-"}
+                    {formatToKST(petition.createdAt)}
                   </span>
                 </div>
 
@@ -152,7 +152,7 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
                       </span>
                     </div>
                     <span className="text-xs text-muted-foreground">
-                      {petition.createdAt ? new Date(petition.createdAt).toLocaleDateString() : "-"}
+                      {formatToKST(petition.createdAt)}
                     </span>
                   </div>
                 </div>

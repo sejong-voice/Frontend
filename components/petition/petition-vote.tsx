@@ -6,7 +6,7 @@ import { CheckCircle2, Loader2, LogIn, ThumbsDown, ThumbsUp } from "lucide-react
 import type { VoteChoice, VoteSummaryResponse } from "@/app/api/posts"
 import { useAuth } from "@/components/auth/auth-provider"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { cn, formatToKST } from "@/lib/utils"
 
 interface PetitionVoteProps extends VoteSummaryResponse {
   isActive: boolean
@@ -33,16 +33,7 @@ export function PetitionVote({
 
   const agreePercent = totalCount > 0 ? Math.round((agreeCount / totalCount) * 100) : 0
   const disagreePercent = totalCount > 0 ? 100 - agreePercent : 0
-  const votingEndDate = votingEndAt
-    ? new Intl.DateTimeFormat("ko-KR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      })
-        .format(new Date(votingEndAt))
-        .replace(/\s/g, "")
-        .replace(/\.$/, "")
-    : null
+  const votingEndDate = votingEndAt ? formatToKST(votingEndAt, "date") : null
 
   async function handleVote(choice: VoteChoice) {
     if (!user || !isActive || !onVote || isSubmitting) return
