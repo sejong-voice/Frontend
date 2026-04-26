@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useSearchParams } from "next/navigation"
+import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import type { PostReportReason } from "@/app/api/posts"
 import { Badge } from "@/components/ui/badge"
@@ -97,6 +97,7 @@ export function PetitionDetailHeader({
   onReport,
 }: PetitionDetailHeaderProps) {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const fromParam = searchParams.get("from")
   const back = (fromParam && referrerMap[fromParam]) || referrerMap.all
   const [showReportConfirm, setShowReportConfirm] = useState(false)
@@ -134,13 +135,20 @@ export function PetitionDetailHeader({
 
   return (
     <div className="flex flex-col gap-5">
-      <Link
-        href={back.href}
-        className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      <button
+        type="button"
+        onClick={() => {
+          if (window.history.length > 2 || document.referrer.includes(window.location.host)) {
+            router.back()
+          } else {
+            router.push(back.href)
+          }
+        }}
+        className="flex items-center gap-1.5 text-sm text-muted-foreground w-fit transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         {back.label + " 목록으로"}
-      </Link>
+      </button>
 
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2.5">

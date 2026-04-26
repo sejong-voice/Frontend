@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useState, Suspense, useCallback } from "react"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { useAuth } from "@/components/auth/auth-provider"
 import { ConnectedHeader } from "@/components/layout/connected-header"
 import { PetitionList, Petition } from "@/components/petition/petition-list"
@@ -38,12 +38,29 @@ const getStatusDescription = (status: string) => {
   }
 }
 
-export default function AdminPetitionsPage() {
+function AdminPetitionsContent() {
   const { user, isAdmin, loading: authLoading } = useAuth()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  
   const [petitions, setPetitions] = useState<Petition[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeStatus, setActiveStatus] = useState("ALL")
-  const router = useRouter()
+  const [activeStatus, setActiveStatus] = useState(searchParams.get("status") || "ALL")
+
+  useEffect(() => {
+    setActiveStatus(searchParams.get("status") || "ALL")
+  }, [searchParams])
+
+  const updateStatus = useCallback((status: string) => {
+    setActiveStatus(status)
+    const params = new URLSearchParams(window.location.search)
+    if (status === "ALL") params.delete("status")
+    else params.set("status", status)
+    
+    const newUrl = `${window.location.pathname}?${params.toString()}`
+    const finalUrl = newUrl.endsWith('?') ? newUrl.slice(0, -1) : newUrl
+    window.history.replaceState({ ...window.history.state, as: finalUrl, url: finalUrl }, '', finalUrl)
+  }, [])
 
   useEffect(() => {
     if (!authLoading && !isAdmin) {
@@ -83,76 +100,88 @@ export default function AdminPetitionsPage() {
   }
 
   return (
+    <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <ShieldCheck className="h-6 w-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-foreground">
+              {"청원 관리 시스템"}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {"학생회 전용 청원 모니터링 및 처리 페이지입니다."}
+            </p>
+          </div>
+        </div>
+        <Button asChild className="shrink-0">
+          <Link href="/petition/new">
+            <Plus className="mr-1.5 h-4 w-4" />
+            {"입장문 작성"}
+          </Link>
+        </Button>
+      </div>
+
+      <section className="flex flex-col gap-6 rounded-xl border border-border bg-card p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-2">
+            <Inbox className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold">{"청원 목록"}</h2>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="상태 필터">
+            {statuses.map((status) => (
+              <button
+                key={status.value}
+                role="tab"
+                aria-selected={activeStatus === status.value}
+                onClick={() => updateStatus(status.value)}
+                className={cn(
+                  "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                  activeStatus === status.value
+                    ? "bg-foreground text-background"
+                    : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+                )}
+              >
+                {status.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <p className="text-sm text-muted-foreground">
+          {getStatusDescription(activeStatus)}
+        </p>
+
+        {loading ? (
+          <div className="flex h-40 items-center justify-center rounded-lg border border-dashed border-border bg-muted/20">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : petitions.length > 0 ? (
+          <PetitionList petitions={petitions} from="admin" />
+        ) : (
+          <div className="flex h-40 items-center justify-center rounded-lg border border-dashed border-border text-muted-foreground">
+            {"할당된 청원이 없습니다."}
+          </div>
+        )}
+      </section>
+    </div>
+  )
+}
+
+export default function AdminPetitionsPage() {
+  return (
     <div className="min-h-screen bg-background">
       <ConnectedHeader />
       <main className="mx-auto max-w-5xl px-6 py-8">
-        <div className="flex flex-col gap-8">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <ShieldCheck className="h-6 w-6" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                  {"청원 관리 시스템"}
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  {"학생회 전용 청원 모니터링 및 처리 페이지입니다."}
-                </p>
-              </div>
-            </div>
-            <Button asChild className="shrink-0">
-              <Link href="/petition/new">
-                <Plus className="mr-1.5 h-4 w-4" />
-                {"입장문 작성"}
-              </Link>
-            </Button>
+        <Suspense fallback={
+          <div className="flex h-screen items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
           </div>
-
-          <section className="flex flex-col gap-6 rounded-xl border border-border bg-card p-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-center gap-2">
-                <Inbox className="h-5 w-5 text-primary" />
-                <h2 className="text-lg font-semibold">{"청원 목록"}</h2>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="상태 필터">
-                {statuses.map((status) => (
-                  <button
-                    key={status.value}
-                    role="tab"
-                    aria-selected={activeStatus === status.value}
-                    onClick={() => setActiveStatus(status.value)}
-                    className={cn(
-                      "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-                      activeStatus === status.value
-                        ? "bg-foreground text-background"
-                        : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
-                    )}
-                  >
-                    {status.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <p className="text-sm text-muted-foreground">
-              {getStatusDescription(activeStatus)}
-            </p>
-
-            {loading ? (
-              <div className="flex h-40 items-center justify-center rounded-lg border border-dashed border-border bg-muted/20">
-                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-              </div>
-            ) : petitions.length > 0 ? (
-              <PetitionList petitions={petitions} from="admin" />
-            ) : (
-              <div className="flex h-40 items-center justify-center rounded-lg border border-dashed border-border text-muted-foreground">
-                {"할당된 청원이 없습니다."}
-              </div>
-            )}
-          </section>
-        </div>
+        }>
+          <AdminPetitionsContent />
+        </Suspense>
       </main>
     </div>
   )
