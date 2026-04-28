@@ -11,6 +11,15 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination"
 
 const statuses = [
   { label: "전체", value: "ALL" },
@@ -40,10 +49,16 @@ const getStatusDescription = (status: string) => {
 
 export default function AdminPetitionsPage() {
   const { user, isAdmin, loading: authLoading } = useAuth()
-  const [petitions, setPetitions] = useState<Petition[]>([])
-  const [loading, setLoading] = useState(true)
+  const [petitions, setPetitions] = useState<{
+    content: Petition[]
+    totalPages: number
+    totalElements: number
+    number: number
+  } | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const [activeStatus, setActiveStatus] = useState("ALL")
   const router = useRouter()
+  const [page, setPage] = useState(0)
 
   useEffect(() => {
     if (!authLoading && !isAdmin) {
@@ -54,25 +69,28 @@ export default function AdminPetitionsPage() {
   useEffect(() => {
     const fetchAssignedPetitions = async () => {
       if (!isAdmin) return
+      setIsLoading(true) // 필터 변경 시 로딩 상태 표시
       try {
-        setLoading(true)
-        const response = await postService.getPosts({
+        const res = await postService.getPosts({
           assignedToMe: true,
-          status: activeStatus === "ALL" ? undefined : activeStatus
+          page,
+          size: 10,
+          status: activeStatus === "ALL" ? undefined : activeStatus,
+          sort: "createdAt,DESC"
         })
-        setPetitions(response.data.content)
-      } catch (error: any) {
-        console.error("Failed to fetch assigned petitions:", error)
-        toast.error("청원 목록을 불러오는 중 오류가 발생했습니다.")
+        setPetitions(res.data)
+      } catch (error) {
+        console.error("청원 목록 로드 실패:", error)
+        toast.error("청원 목록을 불러오지 못했습니다.")
       } finally {
-        setLoading(false)
+        setIsLoading(false)
       }
     }
 
     if (!authLoading && isAdmin) {
       fetchAssignedPetitions()
     }
-  }, [authLoading, isAdmin, activeStatus])
+  }, [page, authLoading, isAdmin, activeStatus])
 
   if (authLoading || !isAdmin) {
     return (
@@ -80,6 +98,12 @@ export default function AdminPetitionsPage() {
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
       </div>
     )
+  }
+
+  const handlePageChange = (newPage: number) => {
+    if (petitions && newPage >= 0 && newPage < petitions.totalPages) {
+      setPage(newPage)
+    }
   }
 
   return (
@@ -122,7 +146,10 @@ export default function AdminPetitionsPage() {
                     key={status.value}
                     role="tab"
                     aria-selected={activeStatus === status.value}
-                    onClick={() => setActiveStatus(status.value)}
+                    onClick={() => {
+                      setActiveStatus(status.value)
+                      setPage(0) // 상태 변경 시 첫 페이지로 리셋
+                    }}
                     className={cn(
                       "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
                       activeStatus === status.value
@@ -140,12 +167,73 @@ export default function AdminPetitionsPage() {
               {getStatusDescription(activeStatus)}
             </p>
 
-            {loading ? (
+            {isLoading ? (
               <div className="flex h-40 items-center justify-center rounded-lg border border-dashed border-border bg-muted/20">
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
               </div>
-            ) : petitions.length > 0 ? (
-              <PetitionList petitions={petitions} from="admin" />
+            ) : petitions && petitions.content.length > 0 ? (
+              <>
+                <PetitionList petitions={petitions.content} />
+
+                {petitions.totalPages > 1 && (
+                  <Pagination className="mt-8">
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            handlePageChange(page - 1)
+                          }}
+                          className={page === 0 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+
+                      {[...Array(petitions.totalPages)].map((_, i) => {
+                        if (
+                          petitions.totalPages <= 7 ||
+                          i === 0 ||
+                          i === petitions.totalPages - 1 ||
+                          (i >= page - 1 && i <= page + 1)
+                        ) {
+                          return (
+                            <PaginationItem key={i}>
+                              <PaginationLink
+                                href="#"
+                                isActive={page === i}
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  handlePageChange(i)
+                                }}
+                                className="cursor-pointer"
+                              >
+                                {i + 1}
+                              </PaginationLink>
+                            </PaginationItem>
+                          )
+                        } else if (
+                          (i === 1 && page > 2) ||
+                          (i === petitions.totalPages - 2 && page < petitions.totalPages - 3)
+                        ) {
+                          return <PaginationItem key={i}><PaginationEllipsis /></PaginationItem>
+                        }
+                        return null
+                      })}
+
+                      <PaginationItem>
+                        <PaginationNext
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            handlePageChange(page + 1)
+                          }}
+                          className={page === petitions.totalPages - 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                )}
+              </>
             ) : (
               <div className="flex h-40 items-center justify-center rounded-lg border border-dashed border-border text-muted-foreground">
                 {"할당된 청원이 없습니다."}
