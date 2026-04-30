@@ -11,4 +11,7 @@ export const councilService = {
       params: { keyword },
     });
   },
+  earlyApprove: async (postId: string) => {
+    return api.post(`/api/v1/posts/${postId}/close`);
+  },
 };

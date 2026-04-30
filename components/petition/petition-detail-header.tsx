@@ -1,27 +1,37 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useSearchParams } from "next/navigation"
-import Link from "next/link"
-import type { PostReportReason } from "@/app/api/posts"
-import { Badge } from "@/components/ui/badge"
+import { useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import type { PostReportReason } from "@/app/api/posts";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { cn } from "@/lib/utils"
-import { ArrowLeft, Building2, Calendar, Flag, Folder, User } from "lucide-react"
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import {
+  ArrowLeft,
+  Building2,
+  Calendar,
+  Flag,
+  Folder,
+  User,
+  CheckCircle2, // 아이콘 추가
+} from "lucide-react";
+import { councilService } from "@/app/api/councils";
 
-export type PetitionStatus = 
-  | "VOTING" 
-  | "APPROVED" 
-  | "PENDING" 
-  | "COMPLETED" 
-  | "REJECTED" 
-  | "DELETED"
+export type PetitionStatus =
+  | "VOTING"
+  | "APPROVED"
+  | "PENDING"
+  | "COMPLETED"
+  | "REJECTED"
+  | "DELETED";
 
 export const statusLabelMap: Record<PetitionStatus, string> = {
   VOTING: "투표중",
@@ -30,7 +40,7 @@ export const statusLabelMap: Record<PetitionStatus, string> = {
   COMPLETED: "처리완료",
   REJECTED: "반려",
   DELETED: "삭제됨",
-}
+};
 
 const statusStyles: Record<PetitionStatus, string> = {
   VOTING: "border-primary/30 bg-accent text-accent-foreground",
@@ -39,7 +49,7 @@ const statusStyles: Record<PetitionStatus, string> = {
   PENDING: "border-border bg-secondary text-muted-foreground",
   REJECTED: "border-orange-200 bg-orange-50 text-orange-700",
   DELETED: "border-red-200 bg-red-50 text-red-700",
-}
+};
 
 const referrerMap: Record<string, { href: string; label: string }> = {
   all: { href: "/", label: "전체 청원" },
@@ -47,45 +57,51 @@ const referrerMap: Record<string, { href: string; label: string }> = {
   answered: { href: "/answered", label: "답변완료" },
   my: { href: "/my-petitions", label: "내 청원" },
   admin: { href: "/admin/petitions", label: "청원 관리" },
-}
+};
 
-const POST_REPORT_REASON_OPTIONS: { value: PostReportReason; label: string }[] = [
-  { value: "SPAM", label: "스팸/광고" },
-  { value: "ABUSE", label: "욕설/비방" },
-  { value: "HATE", label: "혐오/차별" },
-  { value: "PRIVACY", label: "개인정보 노출" },
-  { value: "DUPLICATE", label: "중복 청원" },
-  { value: "OTHER", label: "기타" },
-]
+const POST_REPORT_REASON_OPTIONS: { value: PostReportReason; label: string }[] =
+  [
+    { value: "SPAM", label: "스팸/광고" },
+    { value: "ABUSE", label: "욕설/비방" },
+    { value: "HATE", label: "혐오/차별" },
+    { value: "PRIVACY", label: "개인정보 노출" },
+    { value: "DUPLICATE", label: "중복 청원" },
+    { value: "OTHER", label: "기타" },
+  ];
 
 function getReportErrorMessage(error: unknown, fallback: string): string {
   const message = (
     error as {
-      response?: { data?: { message?: string } }
+      response?: { data?: { message?: string } };
     }
-  )?.response?.data?.message
+  )?.response?.data?.message;
 
-  return typeof message === "string" && message.trim() ? message : fallback
+  return typeof message === "string" && message.trim() ? message : fallback;
 }
 
 function maskStudentId(id: string): string {
-  if (id.length <= 3) return id
-  return id.slice(0, -3) + "***"
+  if (id.length <= 3) return id;
+  return id.slice(0, -3) + "***";
 }
 
 interface PetitionDetailHeaderProps {
-  title: string
-  status: PetitionStatus
-  category: string
-  studentId: string
-  userName?: string
-  date: string
-  council: string
-  showReportAction?: boolean
-  onReport?: (reason: PostReportReason) => Promise<void>
+  id: string;
+  title: string;
+  status: PetitionStatus;
+  category: string;
+  studentId: string;
+  userName?: string;
+  date: string;
+  council: string;
+  showReportAction?: boolean;
+  isAdmin?: boolean;
+  canCloseEarly?: boolean;
+  onEarlyApprove?: () => Promise<void>;
+  onReport?: (reason: PostReportReason) => Promise<void>;
 }
 
 export function PetitionDetailHeader({
+  id,
   title,
   status,
   category,
@@ -94,53 +110,93 @@ export function PetitionDetailHeader({
   date,
   council,
   showReportAction = false,
+  canCloseEarly = false,
   onReport,
+  isAdmin,
 }: PetitionDetailHeaderProps) {
-  const searchParams = useSearchParams()
-  const fromParam = searchParams.get("from")
-  const back = (fromParam && referrerMap[fromParam]) || referrerMap.all
-  const [showReportConfirm, setShowReportConfirm] = useState(false)
-  const [selectedReason, setSelectedReason] = useState<PostReportReason>("SPAM")
-  const [isReporting, setIsReporting] = useState(false)
-  const [reportFeedback, setReportFeedback] = useState<string | null>(null)
-  const [reportError, setReportError] = useState<string | null>(null)
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const fromParam = searchParams.get("from");
+  const back = (fromParam && referrerMap[fromParam]) || referrerMap.all;
+  const [showReportConfirm, setShowReportConfirm] = useState(false);
+  const [selectedReason, setSelectedReason] =
+    useState<PostReportReason>("SPAM");
+  const [isReporting, setIsReporting] = useState(false);
+  const [reportFeedback, setReportFeedback] = useState<string | null>(null);
+  const [reportError, setReportError] = useState<string | null>(null);
+  const [isApproving, setIsApproving] = useState(false); // 조기승인 로딩 상태
 
   function openReportConfirm() {
-    setShowReportConfirm(true)
-    setReportFeedback(null)
-    setReportError(null)
+    setShowReportConfirm(true);
+    setReportFeedback(null);
+    setReportError(null);
   }
 
-  async function handleReport() {
-    if (!onReport || isReporting) return
+  // 조기 승인 핸들러
+  const handleEarlyApprove = async () => {
+    if (isApproving) return;
 
-    setIsReporting(true)
-    setReportError(null)
+    if (!window.confirm("청원을 조기 승인하시겠습니까?")) return;
+
+    setIsApproving(true);
     try {
-      await onReport(selectedReason)
-      setShowReportConfirm(false)
-      setReportFeedback("신고가 접수되었습니다.")
+      await councilService.earlyApprove(id);
+      toast.success("청원이 조기 승인되었습니다.");
+      window.location.reload();
+    } catch (error: any) {
+      const errorData = error.response?.data;
+      if (errorData?.code === "POST_010") {
+        toast.error("조기 승인 조건을 충족하지 못했습니다.");
+      } else {
+        toast.error(
+          errorData?.message || "조기 승인 처리 중 오류가 발생했습니다.",
+        );
+      }
+    } finally {
+      setIsApproving(false);
+    }
+  };
+
+  async function handleReport() {
+    if (!onReport || isReporting) return;
+
+    setIsReporting(true);
+    setReportError(null);
+    try {
+      await onReport(selectedReason);
+      setShowReportConfirm(false);
+      setReportFeedback("신고가 접수되었습니다.");
     } catch (error) {
       setReportError(
         getReportErrorMessage(
           error,
-          "게시글 신고에 실패했습니다. 잠시 후 다시 시도해 주세요."
-        )
-      )
+          "게시글 신고에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+        ),
+      );
     } finally {
-      setIsReporting(false)
+      setIsReporting(false);
     }
   }
 
   return (
     <div className="flex flex-col gap-5">
-      <Link
-        href={back.href}
-        className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      <button
+        type="button"
+        onClick={() => {
+          if (
+            window.history.length > 2 ||
+            document.referrer.includes(window.location.host)
+          ) {
+            router.back();
+          } else {
+            router.push(back.href);
+          }
+        }}
+        className="flex items-center gap-1.5 text-sm text-muted-foreground w-fit transition-colors hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         {back.label + " 목록으로"}
-      </Link>
+      </button>
 
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2.5">
@@ -151,16 +207,31 @@ export function PetitionDetailHeader({
             {statusLabelMap[status] || status}
           </Badge>
 
-          {showReportAction && !showReportConfirm && (
-            <button
-              onClick={openReportConfirm}
-              className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-destructive"
-              type="button"
-            >
-              <Flag className="h-3.5 w-3.5" />
-              신고
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            {/* 조기 승인 버튼: 관리자,투표중,조기승인가능할 때만 노출 */}
+            {isAdmin && status === "VOTING" && canCloseEarly && (
+              <button
+                onClick={handleEarlyApprove}
+                disabled={isApproving}
+                className="flex items-center gap-1 text-xs font-medium text-blue-600 transition-colors hover:text-blue-800 disabled:opacity-50"
+                type="button"
+              >
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                {isApproving ? "처리 중..." : "조기 승인"}
+              </button>
+            )}
+
+            {showReportAction && !showReportConfirm && (
+              <button
+                onClick={openReportConfirm}
+                className="flex items-center gap-1 text-xs text-muted-foreground transition-colors hover:text-destructive"
+                type="button"
+              >
+                <Flag className="h-3.5 w-3.5" />
+                신고
+              </button>
+            )}
+          </div>
         </div>
 
         {showReportConfirm && (
@@ -168,7 +239,9 @@ export function PetitionDetailHeader({
             <span>신고 사유를 선택해 주세요.</span>
             <Select
               value={selectedReason}
-              onValueChange={(value) => setSelectedReason(value as PostReportReason)}
+              onValueChange={(value) =>
+                setSelectedReason(value as PostReportReason)
+              }
               disabled={isReporting}
             >
               <SelectTrigger className="h-9 text-sm">
@@ -235,5 +308,5 @@ export function PetitionDetailHeader({
         </div>
       </div>
     </div>
-  )
+  );
 }
