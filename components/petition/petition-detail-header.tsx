@@ -96,7 +96,6 @@ interface PetitionDetailHeaderProps {
   showReportAction?: boolean;
   isAdmin?: boolean;
   canCloseEarly?: boolean;
-  onEarlyApprove?: () => Promise<void>;
   onReport?: (reason: PostReportReason) => Promise<void>;
 }
 
