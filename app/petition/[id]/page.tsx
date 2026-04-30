@@ -39,21 +39,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 interface PetitionDetailResponse {
-  id: string
-  userId: string
-  userStudentNo: string
-  councilId: string
-  councilName: string
-  title: string
-  content: string
-  status: PetitionStatus
-  createdAt: string
-  votingEndAt: string
-  images?: { imageId: string; imageUrl: string }[]
-  resultContent?: string
-  resultImages?: { imageId: string; imageUrl: string }[]
-  resultCreatedAt?: string
-  resultUpdatedAt?: string
+  id: string;
+  userId: string;
+  userStudentNo: string;
+  councilId: string;
+  councilName: string;
+  title: string;
+  content: string;
+  status: PetitionStatus;
+  createdAt: string;
+  votingEndAt: string;
+  images?: { imageId: string; imageUrl: string }[];
+  resultContent?: string;
+  resultImages?: { imageId: string; imageUrl: string }[];
+  resultCreatedAt?: string;
+  resultUpdatedAt?: string;
+  canCloseEarly?: boolean;
 }
 
 interface PageProps {
@@ -185,7 +186,9 @@ export default function PetitionDetailPage({ params }: PageProps) {
   const [isEditingOfficialResponse, setIsEditingOfficialResponse] =
     useState(false);
   const [officialResponseDraft, setOfficialResponseDraft] = useState("");
-  const [officialResponseImages, setOfficialResponseImages] = useState<{ imageId: string; imageUrl: string }[]>([]);
+  const [officialResponseImages, setOfficialResponseImages] = useState<
+    { imageId: string; imageUrl: string }[]
+  >([]);
   const [isUpdatingOfficialResponse, setIsUpdatingOfficialResponse] =
     useState(false);
 
@@ -304,7 +307,9 @@ export default function PetitionDetailPage({ params }: PageProps) {
         await commentService.reportComment(commentId, { reason });
         toast.success("신고가 접수되었습니다.");
       } catch (error: any) {
-        toast.error(error.response?.data?.message || "신고 처리에 실패했습니다.");
+        toast.error(
+          error.response?.data?.message || "신고 처리에 실패했습니다.",
+        );
       }
     },
     [],
@@ -316,7 +321,9 @@ export default function PetitionDetailPage({ params }: PageProps) {
         await postService.reportPost(id, { reason });
         toast.success("신고가 접수되었습니다.");
       } catch (error: any) {
-        toast.error(error.response?.data?.message || "신고 처리에 실패했습니다.");
+        toast.error(
+          error.response?.data?.message || "신고 처리에 실패했습니다.",
+        );
       }
     },
     [id],
@@ -364,9 +371,11 @@ export default function PetitionDetailPage({ params }: PageProps) {
 
     setIsUpdatingOfficialResponse(true);
     const payload = {
-      status: (petition.status === "REJECTED" ? "REJECTED" : "COMPLETED") as "COMPLETED" | "REJECTED",
+      status: (petition.status === "REJECTED" ? "REJECTED" : "COMPLETED") as
+        | "COMPLETED"
+        | "REJECTED",
       resultContent: officialResponseDraft.trim(),
-      imageIds: officialResponseImages.map(img => img.imageId),
+      imageIds: officialResponseImages.map((img) => img.imageId),
     };
     // console.log("입장문 수정 요청 페이로드:", payload);
 
@@ -518,6 +527,9 @@ export default function PetitionDetailPage({ params }: PageProps) {
       <main className="mx-auto max-w-3xl px-6 py-8">
         <div className="flex flex-col gap-6">
           <PetitionDetailHeader
+            isAdmin={isAdmin}
+            canCloseEarly={petition.canCloseEarly}
+            id={petition.id}
             title={petition.title}
             status={petition.status}
             category="미분류"
@@ -581,16 +593,20 @@ export default function PetitionDetailPage({ params }: PageProps) {
                     className="min-h-[200px]"
                   />
                   <div className="flex justify-end pr-1">
-                    <span className={cn(
-                      "text-[10px] tabular-nums",
-                      officialResponseDraft.length > 1800 ? "text-destructive" : "text-muted-foreground"
-                    )}>
+                    <span
+                      className={cn(
+                        "text-[10px] tabular-nums",
+                        officialResponseDraft.length > 1800
+                          ? "text-destructive"
+                          : "text-muted-foreground",
+                      )}
+                    >
                       {officialResponseDraft.length} / 2000자
                     </span>
                   </div>
                   <div className="py-2">
-                    <ImageUploader 
-                      images={officialResponseImages} 
+                    <ImageUploader
+                      images={officialResponseImages}
                       onChange={setOfficialResponseImages}
                       maxImages={3}
                     />
