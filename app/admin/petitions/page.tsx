@@ -7,6 +7,7 @@ import { ConnectedHeader } from "@/components/layout/connected-header";
 import { PetitionList, Petition } from "@/components/petition/petition-list";
 import { Loader2, ShieldCheck, Inbox, Plus } from "lucide-react";
 import { postService } from "@/app/api/posts";
+import { categoryService, Category } from "@/app/api/categories";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -64,6 +65,10 @@ function AdminPetitionsContent() {
   const [activeStatus, setActiveStatus] = useState(
     searchParams.get("status") || "ALL",
   );
+  const [activeCategoryId, setActiveCategoryId] = useState(
+    searchParams.get("categoryId") || "ALL",
+  );
+  const [categories, setCategories] = useState<Category[]>([]);
   const [page, setPage] = useState(
     parseInt(searchParams.get("page") || "0", 10),
   );
@@ -84,6 +89,7 @@ function AdminPetitionsContent() {
         const response = await postService.getPosts({
           assignedToMe: true,
           status: activeStatus === "ALL" ? undefined : activeStatus,
+          categoryId: activeCategoryId === "ALL" ? undefined : activeCategoryId,
           page: page,
           size: 10,
           sort: "createdAt,DESC",
@@ -100,18 +106,26 @@ function AdminPetitionsContent() {
     if (!authLoading && isAdmin) {
       fetchAssignedPetitions();
     }
-  }, [authLoading, isAdmin, activeStatus, page]);
+  }, [authLoading, isAdmin, activeStatus, activeCategoryId, page]);
+
+  useEffect(() => {
+    categoryService.getCategories().then(res => setCategories(res.data)).catch(console.error);
+  }, []);
 
   // 4. URL 업데이트 및 상태 변경 함수
-  const handleFilterChange = (newStatus: string, newPage: number) => {
+  const handleFilterChange = (newStatus: string, newCategoryId: string, newPage: number) => {
     // 로컬 상태 업데이트 (리렌더링 발생)
     setActiveStatus(newStatus);
+    setActiveCategoryId(newCategoryId);
     setPage(newPage);
 
     // URL 파라미터 동기화
     const params = new URLSearchParams(searchParams.toString());
     if (newStatus === "ALL") params.delete("status");
     else params.set("status", newStatus);
+
+    if (newCategoryId === "ALL") params.delete("categoryId");
+    else params.set("categoryId", newCategoryId);
 
     if (newPage === 0) params.delete("page");
     else params.set("page", newPage.toString());
@@ -123,12 +137,16 @@ function AdminPetitionsContent() {
   };
 
   const handleStatusChange = (status: string) => {
-    handleFilterChange(status, 0); // 상태 바꿀 땐 페이지 0으로 리셋
+    handleFilterChange(status, activeCategoryId, 0); // 상태 바꿀 땐 페이지 0으로 리셋
+  };
+
+  const handleCategoryChange = (categoryId: string) => {
+    handleFilterChange(activeStatus, categoryId, 0);
   };
 
   const handlePageChange = (newPage: number) => {
     if (petitions && newPage >= 0 && newPage < petitions.totalPages) {
-      handleFilterChange(activeStatus, newPage);
+      handleFilterChange(activeStatus, activeCategoryId, newPage);
     }
   };
 
@@ -165,39 +183,80 @@ function AdminPetitionsContent() {
       </div>
 
       <section className="flex flex-col gap-6 rounded-xl border border-border bg-card p-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-2">
-            <Inbox className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold">{"청원 목록"}</h2>
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+          <div className="flex flex-col gap-2">
+            <div className="flex items-center gap-2">
+              <Inbox className="h-5 w-5 text-primary" />
+              <h2 className="text-lg font-semibold">{"청원 목록"}</h2>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {getStatusDescription(activeStatus)}
+            </p>
           </div>
 
-          <div
-            className="flex flex-wrap items-center gap-1.5"
-            role="tablist"
-            aria-label="상태 필터"
-          >
-            {statuses.map((status) => (
-              <button
-                key={status.value}
-                role="tab"
-                aria-selected={activeStatus === status.value}
-                onClick={() => handleStatusChange(status.value)}
-                className={cn(
-                  "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-                  activeStatus === status.value
-                    ? "bg-foreground text-background"
-                    : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground",
-                )}
+          <div className="flex flex-col gap-2 md:items-end">
+            <div
+              className="flex flex-wrap items-center gap-1.5 md:justify-end"
+              role="tablist"
+              aria-label="상태 필터"
+            >
+              {statuses.map((status) => (
+                <button
+                  key={status.value}
+                  role="tab"
+                  aria-selected={activeStatus === status.value}
+                  onClick={() => handleStatusChange(status.value)}
+                  className={cn(
+                    "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                    activeStatus === status.value
+                      ? "bg-foreground text-background"
+                      : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground",
+                  )}
+                >
+                  {status.label}
+                </button>
+              ))}
+            </div>
+
+            {categories.length > 0 && (
+              <div
+                className="flex flex-wrap items-center gap-1.5 md:justify-end"
+                role="tablist"
+                aria-label="카테고리 필터"
               >
-                {status.label}
-              </button>
-            ))}
+                <button
+                  role="tab"
+                  aria-selected={activeCategoryId === "ALL"}
+                  onClick={() => handleCategoryChange("ALL")}
+                  className={cn(
+                    "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                    activeCategoryId === "ALL"
+                      ? "bg-foreground text-background"
+                      : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground",
+                  )}
+                >
+                  {"전체"}
+                </button>
+                {categories.map((c) => (
+                  <button
+                    key={c.id}
+                    role="tab"
+                    aria-selected={activeCategoryId === c.id}
+                    onClick={() => handleCategoryChange(c.id)}
+                    className={cn(
+                      "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                      activeCategoryId === c.id
+                        ? "bg-foreground text-background"
+                        : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground",
+                    )}
+                  >
+                    {c.name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-
-        <p className="text-sm text-muted-foreground">
-          {getStatusDescription(activeStatus)}
-        </p>
 
         {loading ? (
           <div className="flex h-40 items-center justify-center rounded-lg border border-dashed border-border bg-muted/20">

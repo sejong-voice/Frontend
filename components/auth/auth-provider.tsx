@@ -27,9 +27,16 @@ interface AuthContextValue {
   login: (
     studentNo: string,
     password: string,
-  ) => Promise<{ success: boolean; message?: string; role?: string }>;
+  ) => Promise<{ success: boolean; message?: string; role?: string; requiresConsent?: boolean; isQuitStatus?: boolean }>;
+  consentLogin: (
+    studentNo: string,
+    password: string,
+    serviceAgreed: boolean,
+    policyAgreed: boolean,
+  ) => Promise<{ success: boolean; message?: string; role?: string; isQuitStatus?: boolean }>;
   refreshMe: () => Promise<void>;
   logout: () => Promise<void>;
+  quit: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -78,15 +85,60 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const resProfile = await authService.getProfile();
         return { success: true, role: resProfile.data.role };
       } catch (error: any) {
-        // console.error("로그인 실패 상세:", {
-        //   status: error.response?.status,
-        //   data: error.response?.data,
-        //   message: error.message
-        // });
+        const errorData = error.response?.data;
+
+        // Check if backend indicates user is in QUIT status
+        if (
+          errorData?.errorCode === "AUTH_011" ||
+          (errorData?.message && errorData.message.includes("탈퇴 예정"))
+        ) {
+          return { success: false, message: "탈퇴 예정 계정입니다. 계정 삭제 전까지 이용할 수 없습니다.", isQuitStatus: true };
+        }
+
+        // Check if backend indicates consent is required
+        if (
+          error.response?.status === 403 || 
+          errorData?.errorCode === "CONSENT_REQUIRED" || 
+          (errorData?.message && errorData.message.includes("동의"))
+        ) {
+          return { success: false, requiresConsent: true, message: "약관 동의가 필요합니다." };
+        }
+
         const message =
-          error.response?.data?.message ||
-          error.response?.data?.error ||
+          errorData?.message ||
+          errorData?.error ||
           (error.response?.status === 401 ? "학번 또는 비밀번호가 틀렸습니다." : "로그인 중 오류가 발생했습니다.");
+        return { success: false, message };
+      }
+    },
+    [refreshMe],
+  );
+
+  const consentLogin = useCallback(
+    async (studentNo: string, password: string, serviceAgreed: boolean, policyAgreed: boolean) => {
+      try {
+        const res = await authService.consentLogin({ studentNo, password, serviceAgreed, policyAgreed });
+
+        const token = (res.data as any).accessToken || (res.data as any).token || (res.data as any).jwt;
+        if (token) {
+          localStorage.setItem("accessToken", token);
+        }
+
+        await refreshMe();
+        const resProfile = await authService.getProfile();
+        return { success: true, role: resProfile.data.role };
+      } catch (error: any) {
+        const errorData = error.response?.data;
+        if (
+          errorData?.errorCode === "AUTH_011" ||
+          (errorData?.message && errorData.message.includes("탈퇴 예정"))
+        ) {
+          return { success: false, message: "탈퇴 예정 계정입니다. 계정 삭제 전까지 이용할 수 없습니다.", isQuitStatus: true };
+        }
+        const message =
+          errorData?.message ||
+          errorData?.error ||
+          "로그인 중 오류가 발생했습니다.";
         return { success: false, message };
       }
     },
@@ -104,6 +156,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     window.location.href = "/login";
   }, []);
 
+  const quit = useCallback(async () => {
+    try {
+      await authService.quit();
+    } catch (error) {
+      console.error("회원 탈퇴 요청 실패:", error);
+      throw error;
+    }
+    localStorage.removeItem("accessToken");
+    setUser(null);
+    window.location.href = "/login";
+  }, []);
+
   // 앱 초기 로드 시 실행
   useEffect(() => {
     refreshMe();
@@ -113,7 +177,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ loading, user, isAdmin, login, refreshMe, logout }}
+      value={{ loading, user, isAdmin, login, consentLogin, refreshMe, logout, quit }}
     >
       {children}
     </AuthContext.Provider>

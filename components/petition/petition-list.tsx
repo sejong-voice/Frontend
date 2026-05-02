@@ -11,6 +11,8 @@ export interface Petition {
   userStudentNo: string
   councilId: string
   councilName: string
+  categoryId: string
+  categoryName: string
   title: string
   content: string
   status: PetitionStatus
@@ -95,7 +97,7 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
                     </Badge>
                   </div>
                   <span className="text-xs text-muted-foreground">
-                    {petition.councilName || "기타"}
+                    {petition.categoryName || "기타"}
                   </span>
                   <span className="truncate text-sm font-medium text-foreground">
                     {petition.title}
@@ -125,7 +127,7 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
                       {statusInfo.label}
                     </Badge>
                     <span className="text-xs text-muted-foreground">
-                      {petition.councilName || "기타"}
+                      {petition.categoryName || "기타"}
                     </span>
                   </div>
                   <span className="truncate text-sm font-medium text-foreground">

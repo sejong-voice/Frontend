@@ -5,8 +5,6 @@ interface PetitionOfficialResponseProps {
   respondent: string
   date: string
   images?: { imageId: string; imageUrl: string }[]
-  showEditAction?: boolean
-  onEdit?: () => void
 }
 
 export function PetitionOfficialResponse({
@@ -14,8 +12,6 @@ export function PetitionOfficialResponse({
   respondent,
   date,
   images = [],
-  showEditAction = false,
-  onEdit,
 }: PetitionOfficialResponseProps) {
   return (
     <section
@@ -30,22 +26,10 @@ export function PetitionOfficialResponse({
               {"학생회 공식 입장"}
             </h2>
           </div>
-          <div className="flex items-center gap-2">
-            {showEditAction && onEdit && (
-              <button
-                type="button"
-                onClick={onEdit}
-                className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-accent"
-              >
-                <Pencil className="h-3 w-3" />
-                {"수정"}
-              </button>
-            )}
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5" />
-                <span>{date}</span>
-              </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5" />
+              <span>{date}</span>
             </div>
           </div>
         </div>
@@ -67,13 +51,13 @@ export function PetitionOfficialResponse({
             </div>
             <div className="flex flex-col items-center gap-6">
               {images.map((img, index) => (
-                <div 
-                  key={img.imageId || index} 
+                <div
+                  key={img.imageId || index}
                   className="w-full max-w-2xl overflow-hidden rounded-lg border border-border bg-muted shadow-sm transition-transform hover:scale-[1.01]"
                 >
-                  <img 
-                    src={img.imageUrl} 
-                    alt="Official response attachment" 
+                  <img
+                    src={img.imageUrl}
+                    alt="Official response attachment"
                     className="mx-auto block max-h-[500px] w-full object-contain"
                   />
                 </div>

@@ -23,9 +23,19 @@ import {
   PaginationPrevious,
   PaginationEllipsis,
 } from "@/components/ui/pagination";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 function MyPetitionsContent() {
-  const { loading, user, isAdmin } = useAuth();
+  const { loading, user, isAdmin, quit } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -52,6 +62,9 @@ function MyPetitionsContent() {
     number: number;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const [showQuitConfirm, setShowQuitConfirm] = useState(false);
+  const [isQuitting, setIsQuitting] = useState(false);
 
   // 뒤로가기 버튼 등으로 URL 파라미터가 변경되었을 때 로컬 상태 동기화
   useEffect(() => {
@@ -195,6 +208,17 @@ function MyPetitionsContent() {
     }
   };
 
+  const handleQuit = async () => {
+    setIsQuitting(true);
+    try {
+      await quit();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "회원 탈퇴 요청 중 오류가 발생했습니다.");
+      setIsQuitting(false);
+      setShowQuitConfirm(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-8">
       {/* Page header */}
@@ -314,6 +338,50 @@ function MyPetitionsContent() {
           )}
         </>
       )}
+
+      {/* 회원 탈퇴 버튼 */}
+      <div className="mt-12 flex justify-center border-t border-border pt-8 pb-4">
+        <Button 
+          variant="ghost" 
+          onClick={() => setShowQuitConfirm(true)}
+          className="text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 px-4"
+        >
+          회원 탈퇴 신청
+        </Button>
+      </div>
+
+      <AlertDialog open={showQuitConfirm} onOpenChange={setShowQuitConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-destructive">정말 탈퇴하시겠습니까?</AlertDialogTitle>
+            <AlertDialogDescription>
+              탈퇴 신청 시 즉시 <strong>탈퇴 예정 상태</strong>로 변경되며,<br/>
+              모든 서비스 이용 및 로그인이 차단됩니다.<br/><br/>
+              계속 진행하시겠습니까?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isQuitting}>취소</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={(e) => {
+                e.preventDefault();
+                handleQuit();
+              }}
+              disabled={isQuitting}
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            >
+              {isQuitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  처리 중...
+                </>
+              ) : (
+                "탈퇴 신청하기"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

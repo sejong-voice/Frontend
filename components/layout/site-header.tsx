@@ -17,6 +17,7 @@ const authNavItems = [
 
 const adminNavItems = [
   { label: "청원 관리", href: "/admin/petitions" },
+  { label: "투표 통계", href: "/admin/statistics" },
 ]
 
 interface SiteHeaderProps {

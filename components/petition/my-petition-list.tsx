@@ -4,8 +4,9 @@ import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { MessageSquare, Vote, Pencil, Trash2 } from "lucide-react"
+import { MessageSquare, Vote, Trash2 } from "lucide-react"
 import type { Petition, PetitionStatus } from "@/components/petition/petition-list"
+import { toast } from "sonner"
 
 const statusStyles: Record<PetitionStatus, { label: string; style: string }> = {
   VOTING: { label: "투표중", style: "border-primary/30 bg-accent text-accent-foreground" },
@@ -18,14 +19,12 @@ const statusStyles: Record<PetitionStatus, { label: string; style: string }> = {
 
 interface MyPetitionListProps {
   petitions: Petition[]
-  onEdit?: (id: string) => void
   onDelete?: (id: string) => void
   isAdmin?: boolean
 }
 
 export function MyPetitionList({
   petitions,
-  onEdit,
   onDelete,
   isAdmin,
 }: MyPetitionListProps) {
@@ -91,7 +90,7 @@ export function MyPetitionList({
                     </Badge>
                   </div>
                   <span className="text-xs text-muted-foreground">
-                    {petition.councilName || "기타"}
+                    {petition.categoryName || "기타"}
                   </span>
                   <Link
                     href={`/petition/${petition.id}?from=my`}
@@ -116,24 +115,15 @@ export function MyPetitionList({
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        onEdit?.(petition.id)
-                      }}
-                      aria-label={`${petition.title} 수정`}
-                    >
-                      <Pencil className="mr-1 h-3 w-3" />
-                      {"수정"}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
                       className={cn(
                         "h-7 px-2 text-xs text-destructive/70 hover:text-destructive hover:bg-destructive/10"
                       )}
                       onClick={(e) => {
                         e.preventDefault()
+                        if (petition.status !== "VOTING") {
+                          toast.error("투표 중인 청원만 삭제할 수 있습니다.");
+                          return;
+                        }
                         onDelete?.(petition.id)
                       }}
                       aria-label={`${petition.title} 삭제`}
@@ -158,22 +148,10 @@ export function MyPetitionList({
                         {statusInfo.label}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
-                        {petition.councilName || "기타"}
+                        {petition.categoryName || "기타"}
                       </span>
                     </div>
                     <div className="flex items-center gap-0.5">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          onEdit?.(petition.id)
-                        }}
-                        aria-label={`${petition.title} 수정`}
-                      >
-                        <Pencil className="h-3 w-3" />
-                      </Button>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -182,6 +160,10 @@ export function MyPetitionList({
                         )}
                         onClick={(e) => {
                           e.preventDefault()
+                          if (petition.status !== "VOTING") {
+                            toast.error("투표 중인 청원만 삭제할 수 있습니다.");
+                            return;
+                          }
                           onDelete?.(petition.id)
                         }}
                         aria-label={`${petition.title} 삭제`}
