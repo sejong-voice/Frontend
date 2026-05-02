@@ -26,6 +26,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { Info, User, Loader2, Search, Check, ChevronsUpDown } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
 import { postService, type PostVotingDuration } from "@/app/api/posts"
@@ -34,8 +44,8 @@ import { toast } from "sonner"
 import { useEffect } from "react"
 import { Petition } from "@/components/petition/petition-list"
 import { ImageUploader } from "./image-uploader"
+import { categoryService, Category } from "@/app/api/categories"
 
-const categories = ["학사제도", "학교시설", "학생복지", "기타"] as const
 const votePeriods = [
   { value: "ONE_WEEK", label: "1주" },
   { value: "TWO_WEEK", label: "2주" },
@@ -50,6 +60,7 @@ export function PetitionForm() {
   const [category, setCategory] = useState<string>("")
   const [council, setCouncil] = useState<string>("")
   const [councils, setCouncils] = useState<Council[]>([])
+  const [serverCategories, setServerCategories] = useState<Category[]>([])
   const [councilKeyword, setCouncilKeyword] = useState("")
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
@@ -63,15 +74,22 @@ export function PetitionForm() {
   const [assignedPetitions, setAssignedPetitions] = useState<Petition[]>([])
   const [selectedPostId, setSelectedPostId] = useState<string>("")
   const [resultStatus, setResultStatus] = useState<"COMPLETED" | "REJECTED">("COMPLETED")
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
   const contentLength = content.length
+
+  useEffect(() => {
+    categoryService.getCategories()
+      .then(res => setServerCategories(res.data))
+      .catch(console.error)
+  }, [])
 
   useEffect(() => {
     let active = true
     const timer = setTimeout(async () => {
       setIsCouncilLoading(true)
       try {
-        const res = await councilService.getCouncils(councilKeyword)
+        const res = await councilService.getCouncils(councilKeyword, true)
         if (active) setCouncils(res.data)
       } catch (error) {
         console.error("학생회 목록 로드 실패:", error)
@@ -88,20 +106,17 @@ export function PetitionForm() {
 
   useEffect(() => {
     if (isAdmin) {
-      postService.getPosts({ assignedToMe: true })
+      postService.getPosts({ assignedToMe: true, size: 1000, status: "APPROVED" })
         .then(res => {
-          // 이미 처리 완료되었거나 반려된 청원은 제외
-          const pendingPetitions = res.data.content.filter(
-            p => p.status !== "COMPLETED" && p.status !== "REJECTED"
-          )
-          setAssignedPetitions(pendingPetitions)
+          // '검토중(APPROVED)' 상태인 청원만 목록에 표시
+          setAssignedPetitions(res.data.content)
         })
         .catch(console.error)
     }
   }, [isAdmin])
 
-  async function handleSubmit() {
-    if (!isAdmin && (!title.trim() || !content.trim() || !council)) {
+  function handleSubmit() {
+    if (!isAdmin && (!title.trim() || !content.trim() || !council || !category)) {
       toast.error("모든 필드를 입력해 주세요.")
       return
     }
@@ -111,6 +126,11 @@ export function PetitionForm() {
       return
     }
 
+    setShowConfirmDialog(true)
+  }
+
+  async function executeSubmit() {
+    setShowConfirmDialog(false)
     setIsSubmitting(true)
     try {
       if (isAdmin) {
@@ -124,6 +144,7 @@ export function PetitionForm() {
           title,
           content,
           councilId: council,
+          categoryId: category,
           postVotingDuration: votePeriod,
           imageIds: images.map((img) => img.imageId),
         })
@@ -234,19 +255,19 @@ export function PetitionForm() {
               <span className="ml-1 text-destructive">{"*"}</span>
             </legend>
             <div className="flex flex-wrap items-center gap-2">
-              {categories.map((cat) => (
+              {serverCategories.map((cat) => (
                 <button
-                  key={cat}
+                  key={cat.id}
                   type="button"
-                  onClick={() => setCategory(cat)}
+                  onClick={() => setCategory(cat.id)}
                   className={cn(
                     "rounded-md border px-4 py-2 text-sm font-medium transition-colors",
-                    category === cat
+                    category === cat.id
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-border bg-card text-muted-foreground hover:border-foreground/20 hover:text-foreground"
                   )}
                 >
-                  {cat}
+                  {cat.name}
                 </button>
               ))}
             </div>
@@ -433,6 +454,25 @@ export function PetitionForm() {
           )}
         </Button>
       </div>
+
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{"등록하시겠습니까?"}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {isAdmin
+                ? "작성된 학생회 입장문은 수정할 수 없습니다. 계속 진행하시겠습니까?"
+                : "작성된 청원은 등록 후 수정할 수 없습니다. 계속 진행하시겠습니까?"}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{"취소"}</AlertDialogCancel>
+            <AlertDialogAction onClick={executeSubmit}>
+              {"확인"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

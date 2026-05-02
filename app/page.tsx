@@ -11,6 +11,7 @@ import {
 } from "@/components/petition/petition-list";
 import { postService } from "@/app/api/posts";
 import { councilService, Council } from "@/app/api/councils";
+import { categoryService, Category } from "@/app/api/categories";
 import {
   Pagination,
   PaginationContent,
@@ -34,6 +35,9 @@ function DashboardContent() {
   const [activeCouncilId, setActiveCouncilId] = useState(
     searchParams.get("councilId") || "ALL",
   );
+  const [activeCategoryId, setActiveCategoryId] = useState(
+    searchParams.get("categoryId") || "ALL",
+  );
   const [searchQuery, setSearchQuery] = useState(
     searchParams.get("query") || "",
   );
@@ -42,6 +46,7 @@ function DashboardContent() {
   );
 
   const [councils, setCouncils] = useState<Council[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [councilKeyword, setCouncilKeyword] = useState("");
   const [data, setData] = useState<{
     content: Petition[];
@@ -55,6 +60,7 @@ function DashboardContent() {
   useEffect(() => {
     setActiveStatus(searchParams.get("status") || "ALL");
     setActiveCouncilId(searchParams.get("councilId") || "ALL");
+    setActiveCategoryId(searchParams.get("categoryId") || "ALL");
     setSearchQuery(searchParams.get("query") || "");
     setPage(parseInt(searchParams.get("page") || "0", 10));
   }, [searchParams]);
@@ -64,12 +70,15 @@ function DashboardContent() {
     (updates: {
       status?: string;
       councilId?: string;
+      categoryId?: string;
       query?: string;
       page?: number;
     }) => {
       if (updates.status !== undefined) setActiveStatus(updates.status);
       if (updates.councilId !== undefined)
         setActiveCouncilId(updates.councilId);
+      if (updates.categoryId !== undefined)
+        setActiveCategoryId(updates.categoryId);
       if (updates.query !== undefined) setSearchQuery(updates.query);
       if (updates.page !== undefined) setPage(updates.page);
 
@@ -83,6 +92,10 @@ function DashboardContent() {
       if (updates.councilId !== undefined) {
         if (updates.councilId === "ALL") params.delete("councilId");
         else params.set("councilId", updates.councilId);
+      }
+      if (updates.categoryId !== undefined) {
+        if (updates.categoryId === "ALL") params.delete("categoryId");
+        else params.set("categoryId", updates.categoryId);
       }
       if (updates.query !== undefined) {
         if (!updates.query) params.delete("query");
@@ -105,6 +118,10 @@ function DashboardContent() {
     },
     [],
   );
+
+  useEffect(() => {
+    categoryService.getCategories().then(res => setCategories(res.data)).catch(console.error);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -132,6 +149,7 @@ function DashboardContent() {
         keyword: searchQuery || undefined,
         status: activeStatus === "ALL" ? undefined : activeStatus,
         councilId: activeCouncilId === "ALL" ? undefined : activeCouncilId,
+        categoryId: activeCategoryId === "ALL" ? undefined : activeCategoryId,
         sort: "createdAt,DESC",
       });
       setData(res.data);
@@ -141,7 +159,7 @@ function DashboardContent() {
     } finally {
       setIsLoading(false);
     }
-  }, [page, searchQuery, activeStatus, activeCouncilId]);
+  }, [page, searchQuery, activeStatus, activeCouncilId, activeCategoryId]);
 
   useEffect(() => {
     // 디바운스 처리
@@ -170,9 +188,12 @@ function DashboardContent() {
         onStatusChange={(s) => updateStateAndUrl({ status: s, page: 0 })}
         activeCouncilId={activeCouncilId}
         onCouncilChange={(id) => updateStateAndUrl({ councilId: id, page: 0 })}
+        activeCategoryId={activeCategoryId}
+        onCategoryChange={(id) => updateStateAndUrl({ categoryId: id, page: 0 })}
         searchQuery={searchQuery}
         onSearchChange={(q) => updateStateAndUrl({ query: q, page: 0 })}
         councils={councils}
+        categories={categories}
         councilKeyword={councilKeyword}
         onCouncilKeywordChange={setCouncilKeyword}
         hideCouncilFilter={isAdmin}

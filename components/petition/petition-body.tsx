@@ -9,7 +9,7 @@ export function PetitionBody({ content, images = [] }: PetitionBodyProps) {
       <div className="max-w-none text-[15px] leading-relaxed text-foreground whitespace-pre-line mb-8">
         {content}
       </div>
-      
+
       {images.length > 0 && (
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-2">
@@ -18,13 +18,13 @@ export function PetitionBody({ content, images = [] }: PetitionBodyProps) {
           </div>
           <div className="flex flex-col items-center gap-6">
             {images.map((img, index) => (
-              <div 
-                key={img.imageId || index} 
+              <div
+                key={img.imageId || index}
                 className="w-full max-w-2xl overflow-hidden rounded-lg border border-border bg-muted shadow-sm transition-transform hover:scale-[1.01]"
               >
-                <img 
-                  src={img.imageUrl} 
-                  alt="Petition attachment" 
+                <img
+                  src={img.imageUrl}
+                  alt="Petition attachment"
                   className="mx-auto block max-h-[500px] w-full object-contain"
                 />
               </div>

@@ -65,14 +65,55 @@ export function PetitionActions({
     }
   };
 
-  const showAuthorActions = false; // Hide author management box
-  const showAdminActions = canManageAsAdmin && status === "APPROVED";
   const canDelete = isAuthor;
+  const showAdminActions = canManageAsAdmin && status === "APPROVED";
 
-  if (!showAuthorActions && !showAdminActions) return null;
+  const handleDelete = async () => {
+    if (status !== "VOTING") {
+      toast.error("투표 중인 청원만 삭제할 수 있습니다.");
+      return;
+    }
+
+    if (!window.confirm("청원을 정말 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.")) {
+      return;
+    }
+    
+    setIsSubmitting(true);
+    try {
+      await postService.deletePost(petitionId);
+      toast.success("청원이 삭제되었습니다.");
+      window.location.href = "/my-petitions";
+    } catch (error: any) {
+      console.error("삭제 실패:", error);
+      toast.error(error.response?.data?.message || "삭제에 실패했습니다.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!canDelete && !showAdminActions) return null;
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Author Actions */}
+      {canDelete && (
+        <div className="flex justify-end">
+          <Button
+            variant="destructive"
+            size="sm"
+            className="gap-1.5"
+            onClick={handleDelete}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Trash2 className="h-3.5 w-3.5" />
+            )}
+            {"청원 삭제"}
+          </Button>
+        </div>
+      )}
       {/* Admin actions */}
       {showAdminActions && (
         <section

@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils"
 
 interface PetitionVoteProps extends VoteSummaryResponse {
   isActive: boolean
+  canVote?: boolean
   votingEndAt?: string
   onVote?: (choice: VoteChoice) => Promise<void>
 }
@@ -19,6 +20,7 @@ export function PetitionVote({
   disagreeCount,
   totalCount,
   isActive,
+  canVote = true,
   votingEndAt,
   onVote,
 }: PetitionVoteProps) {
@@ -127,59 +129,65 @@ export function PetitionVote({
 
         {isActive ? (
           user ? (
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-3">
-                <Button
-                  onClick={() => handleVote("AGREE")}
-                  disabled={isSubmitting}
-                  className={cn(
-                    "flex-1 gap-2",
-                    selectedChoice === "AGREE"
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
-                  )}
-                  variant={selectedChoice === "AGREE" ? "default" : "outline"}
-                >
-                  {isSubmitting && pendingChoice === "AGREE" ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <ThumbsUp className="h-4 w-4" />
-                  )}
-                  찬성
-                </Button>
-                <Button
-                  onClick={() => handleVote("DISAGREE")}
-                  disabled={isSubmitting}
-                  className={cn(
-                    "flex-1 gap-2",
-                    selectedChoice === "DISAGREE"
-                      ? "bg-foreground text-background"
-                      : "bg-transparent"
-                  )}
-                  variant={selectedChoice === "DISAGREE" ? "default" : "outline"}
-                >
-                  {isSubmitting && pendingChoice === "DISAGREE" ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <ThumbsDown className="h-4 w-4" />
-                  )}
-                  반대
-                </Button>
+            canVote === false ? (
+              <div className="rounded-md bg-secondary px-4 py-3 text-center text-sm text-muted-foreground">
+                본인 소속 또는 상위 학생회 게시글에만 투표할 수 있습니다.
               </div>
-
-              {feedback && (
-                <div
-                  className={cn(
-                    "rounded-md px-4 py-3 text-sm",
-                    feedback.type === "success"
-                      ? "bg-green-50 text-green-700"
-                      : "bg-destructive/10 text-destructive"
-                  )}
-                >
-                  {feedback.message}
+            ) : (
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <Button
+                    onClick={() => handleVote("AGREE")}
+                    disabled={isSubmitting}
+                    className={cn(
+                      "flex-1 gap-2",
+                      selectedChoice === "AGREE"
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground"
+                    )}
+                    variant={selectedChoice === "AGREE" ? "default" : "outline"}
+                  >
+                    {isSubmitting && pendingChoice === "AGREE" ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <ThumbsUp className="h-4 w-4" />
+                    )}
+                    찬성
+                  </Button>
+                  <Button
+                    onClick={() => handleVote("DISAGREE")}
+                    disabled={isSubmitting}
+                    className={cn(
+                      "flex-1 gap-2",
+                      selectedChoice === "DISAGREE"
+                        ? "bg-foreground text-background"
+                        : "bg-transparent"
+                    )}
+                    variant={selectedChoice === "DISAGREE" ? "default" : "outline"}
+                  >
+                    {isSubmitting && pendingChoice === "DISAGREE" ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <ThumbsDown className="h-4 w-4" />
+                    )}
+                    반대
+                  </Button>
                 </div>
-              )}
-            </div>
+
+                {feedback && (
+                  <div
+                    className={cn(
+                      "rounded-md px-4 py-3 text-sm",
+                      feedback.type === "success"
+                        ? "bg-green-50 text-green-700"
+                        : "bg-destructive/10 text-destructive"
+                    )}
+                  >
+                    {feedback.message}
+                  </div>
+                )}
+              </div>
+            )
           ) : (
             <Button asChild variant="outline" className="w-full gap-2">
               <Link href="/login">

@@ -6,9 +6,9 @@ export interface Council {
 }
 
 export const councilService = {
-  getCouncils: async (keyword?: string) => {
+  getCouncils: async (keyword?: string, accessible?: boolean) => {
     return api.get<Council[]>("/api/v1/councils", {
-      params: { keyword },
+      params: { keyword, accessible },
     });
   },
   earlyApprove: async (postId: string) => {

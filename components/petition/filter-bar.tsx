@@ -38,6 +38,9 @@ interface FilterBarProps {
   searchQuery: string
   onSearchChange: (query: string) => void
   councils: { id: string; name: string }[]
+  categories?: { id: string; name: string }[]
+  activeCategoryId?: string
+  onCategoryChange?: (id: string) => void
   councilKeyword?: string
   onCouncilKeywordChange?: (keyword: string) => void
   hideCouncilFilter?: boolean
@@ -52,6 +55,9 @@ export function FilterBar({
   searchQuery,
   onSearchChange,
   councils,
+  categories = [],
+  activeCategoryId,
+  onCategoryChange,
   councilKeyword = "",
   onCouncilKeywordChange,
   hideCouncilFilter = false,
@@ -60,29 +66,65 @@ export function FilterBar({
   const [open, setOpen] = useState(false)
   return (
     <div className="flex flex-col gap-4 border-b border-border pb-6">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        {!hideStatusFilter && (
-          <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="상태 필터">
-            {statuses.map((status) => (
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div className="flex flex-col gap-3">
+          {!hideStatusFilter && (
+            <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="상태 필터">
+              {statuses.map((status) => (
+                <button
+                  key={status.value}
+                  role="tab"
+                  aria-selected={activeStatus === status.value}
+                  onClick={() => onStatusChange(status.value)}
+                  className={cn(
+                    "rounded-md px-3.5 py-2 text-sm font-medium transition-colors",
+                    activeStatus === status.value
+                      ? "bg-foreground text-background"
+                      : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+                  )}
+                >
+                  {status.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {onCategoryChange && categories.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label="카테고리 필터">
               <button
-                key={status.value}
                 role="tab"
-                aria-selected={activeStatus === status.value}
-                onClick={() => onStatusChange(status.value)}
+                aria-selected={activeCategoryId === "ALL" || !activeCategoryId}
+                onClick={() => onCategoryChange("ALL")}
                 className={cn(
                   "rounded-md px-3.5 py-2 text-sm font-medium transition-colors",
-                  activeStatus === status.value
+                  activeCategoryId === "ALL" || !activeCategoryId
                     ? "bg-foreground text-background"
                     : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
                 )}
               >
-                {status.label}
+                {"전체"}
               </button>
-            ))}
-          </div>
-        )}
+              {categories.map((c) => (
+                <button
+                  key={c.id}
+                  role="tab"
+                  aria-selected={activeCategoryId === c.id}
+                  onClick={() => onCategoryChange(c.id)}
+                  className={cn(
+                    "rounded-md px-3.5 py-2 text-sm font-medium transition-colors",
+                    activeCategoryId === c.id
+                      ? "bg-foreground text-background"
+                      : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+                  )}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
 
-        <div className="relative w-full md:w-72">
+        <div className="relative w-full lg:w-72 shrink-0">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             type="search"
@@ -114,8 +156,8 @@ export function FilterBar({
             </PopoverTrigger>
             <PopoverContent className="w-full md:w-64 p-0">
               <Command shouldFilter={false}>
-                <CommandInput 
-                  placeholder="학생회 이름으로 검색..." 
+                <CommandInput
+                  placeholder="학생회 이름으로 검색..."
                   value={councilKeyword}
                   onValueChange={onCouncilKeywordChange}
                 />
@@ -162,6 +204,7 @@ export function FilterBar({
           </Popover>
         </div>
       )}
+
     </div>
   )
 }
