@@ -220,10 +220,7 @@ function MyPetitionsContent() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <SiteHeader />
-      <main className="mx-auto max-w-5xl px-6 py-8">
-        <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8">
           {/* Page header */}
           <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:flex-1">
@@ -261,14 +258,6 @@ function MyPetitionsContent() {
               </Link>
             </Button>
           </div>
-        </div>
-        <Button asChild className="shrink-0">
-          <Link href="/petition/new">
-            <Plus className="mr-1.5 h-4 w-4" />
-            {"청원 작성"}
-          </Link>
-        </Button>
-      </div>
 
       <FilterBar
         activeStatus={activeStatus}
