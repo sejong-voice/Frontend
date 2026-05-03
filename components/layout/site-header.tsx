@@ -20,6 +20,10 @@ const adminNavItems = [
   { label: "투표 통계", href: "/admin/statistics" },
 ]
 
+const supportNavItems = [
+  { label: "사용 매뉴얼", href: "/user-manual" },
+]
+
 interface SiteHeaderProps {
   userName?: string | null
   onLogout?: () => void
@@ -89,6 +93,21 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
                 href={item.href}
                 className={cn(
                   "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  pathname === item.href
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+
+            {supportNavItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "hidden rounded-md px-3 py-2 text-sm font-medium transition-colors md:inline-flex",
                   pathname === item.href
                     ? "bg-accent text-accent-foreground"
                     : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
