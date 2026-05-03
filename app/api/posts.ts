@@ -8,6 +8,7 @@ export interface GetPostsParams {
   sort?: string;
   status?: string;
   councilId?: string;
+  categoryId?: string;
   mine?: boolean;
   assignedToMe?: boolean;
 }
@@ -30,6 +31,7 @@ export interface CreatePostData {
   title: string;
   content: string;
   councilId: string;
+  categoryId: string;
   postVotingDuration: PostVotingDuration;
   imageIds: string[];
 }
@@ -71,6 +73,27 @@ export interface PostResultData {
   imageIds: string[];
 }
 
+export interface DepartmentDistribution {
+  department: string;
+  agreeCount: number;
+  disagreeCount: number;
+  totalCount: number;
+}
+
+export interface VoteStatisticsResponse {
+  agreeCount: number;
+  disagreeCount: number;
+  totalCount: number;
+  agreeRatio: number;
+  departmentDistributions: DepartmentDistribution[];
+}
+
+export interface AgreeVoterResponse {
+  studentNo: string;
+  department: string;
+  votedAt: string;
+}
+
 export const postService = {
   getPosts: async (params: GetPostsParams) => {
     return api.get<PaginatedResponse<Petition>>("/api/v1/posts", { params });
@@ -106,5 +129,13 @@ export const postService = {
 
   submitPostResult: async (id: string, data: PostResultData) => {
     return api.put(`/api/v1/posts/${id}/result`, data);
+  },
+
+  getVoteStatistics: async (id: string) => {
+    return api.get<VoteStatisticsResponse>(`/api/v1/posts/${id}/votes/statistics`);
+  },
+
+  getAgreeVoters: async (id: string) => {
+    return api.get<AgreeVoterResponse[]>(`/api/v1/posts/${id}/votes/agree-voters`);
   },
 };

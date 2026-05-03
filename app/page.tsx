@@ -1,15 +1,17 @@
-"use client"
+"use client";
 
-import { useState, useMemo, useEffect } from "react"
-import { ConnectedHeader } from "@/components/layout/connected-header"
-import { PageHeader } from "@/components/layout/page-header"
-import { FilterBar } from "@/components/petition/filter-bar"
+import { useState, useMemo, useEffect, Suspense, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
+import { ConnectedHeader } from "@/components/layout/connected-header";
+import { PageHeader } from "@/components/layout/page-header";
+import { FilterBar } from "@/components/petition/filter-bar";
 import {
   PetitionList,
   type Petition,
-} from "@/components/petition/petition-list"
-import { postService } from "@/app/api/posts"
-import { councilService, Council } from "@/app/api/councils"
+} from "@/components/petition/petition-list";
+import { postService } from "@/app/api/posts";
+import { councilService, Council } from "@/app/api/councils";
+import { categoryService, Category } from "@/app/api/categories";
 import {
   Pagination,
   PaginationContent,
@@ -18,46 +20,128 @@ import {
   PaginationNext,
   PaginationPrevious,
   PaginationEllipsis,
-} from "@/components/ui/pagination"
-import { Loader2 } from "lucide-react"
-import { useAuth } from "@/components/auth/auth-provider"
-import { toast } from "sonner"
+} from "@/components/ui/pagination";
+import { Loader2 } from "lucide-react";
+import { useAuth } from "@/components/auth/auth-provider";
+import { toast } from "sonner";
 
-export default function Page() {
-  const { isAdmin } = useAuth()
-  const [activeStatus, setActiveStatus] = useState("ALL")
-  const [activeCouncilId, setActiveCouncilId] = useState("ALL")
-  const [searchQuery, setSearchQuery] = useState("")
-  const [page, setPage] = useState(0)
-  const [councils, setCouncils] = useState<Council[]>([])
-  const [councilKeyword, setCouncilKeyword] = useState("")
+function DashboardContent() {
+  const { isAdmin } = useAuth();
+  const searchParams = useSearchParams();
+
+  const [activeStatus, setActiveStatus] = useState(
+    searchParams.get("status") || "ALL",
+  );
+  const [activeCouncilId, setActiveCouncilId] = useState(
+    searchParams.get("councilId") || "ALL",
+  );
+  const [activeCategoryId, setActiveCategoryId] = useState(
+    searchParams.get("categoryId") || "ALL",
+  );
+  const [searchQuery, setSearchQuery] = useState(
+    searchParams.get("query") || "",
+  );
+  const [page, setPage] = useState(
+    parseInt(searchParams.get("page") || "0", 10),
+  );
+
+  const [councils, setCouncils] = useState<Council[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [councilKeyword, setCouncilKeyword] = useState("");
   const [data, setData] = useState<{
-    content: Petition[]
-    totalPages: number
-    totalElements: number
-    number: number
-  } | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+    content: Petition[];
+    totalPages: number;
+    totalElements: number;
+    number: number;
+  } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // 뒤로가기 버튼 등으로 URL 파라미터가 변경되었을 때 로컬 상태 동기화
+  useEffect(() => {
+    setActiveStatus(searchParams.get("status") || "ALL");
+    setActiveCouncilId(searchParams.get("councilId") || "ALL");
+    setActiveCategoryId(searchParams.get("categoryId") || "ALL");
+    setSearchQuery(searchParams.get("query") || "");
+    setPage(parseInt(searchParams.get("page") || "0", 10));
+  }, [searchParams]);
+
+  // 로컬 상태와 URL 파라미터를 동시에 업데이트
+  const updateStateAndUrl = useCallback(
+    (updates: {
+      status?: string;
+      councilId?: string;
+      categoryId?: string;
+      query?: string;
+      page?: number;
+    }) => {
+      if (updates.status !== undefined) setActiveStatus(updates.status);
+      if (updates.councilId !== undefined)
+        setActiveCouncilId(updates.councilId);
+      if (updates.categoryId !== undefined)
+        setActiveCategoryId(updates.categoryId);
+      if (updates.query !== undefined) setSearchQuery(updates.query);
+      if (updates.page !== undefined) setPage(updates.page);
+
+      // Next.js 라우터 대신 브라우저 History API를 통해 URL을 부드럽게 업데이트
+      // 입력창 깜빡임 등 리렌더링 버그 예방
+      const params = new URLSearchParams(window.location.search);
+      if (updates.status !== undefined) {
+        if (updates.status === "ALL") params.delete("status");
+        else params.set("status", updates.status);
+      }
+      if (updates.councilId !== undefined) {
+        if (updates.councilId === "ALL") params.delete("councilId");
+        else params.set("councilId", updates.councilId);
+      }
+      if (updates.categoryId !== undefined) {
+        if (updates.categoryId === "ALL") params.delete("categoryId");
+        else params.set("categoryId", updates.categoryId);
+      }
+      if (updates.query !== undefined) {
+        if (!updates.query) params.delete("query");
+        else params.set("query", updates.query);
+      }
+      if (updates.page !== undefined) {
+        if (updates.page === 0) params.delete("page");
+        else params.set("page", updates.page.toString());
+      }
+
+      // update URL
+      const newUrl = `${window.location.pathname}?${params.toString()}`;
+      // remove trailing ? if params are completely empty
+      const finalUrl = newUrl.endsWith("?") ? newUrl.slice(0, -1) : newUrl;
+      window.history.replaceState(
+        { ...window.history.state, as: finalUrl, url: finalUrl },
+        "",
+        finalUrl,
+      );
+    },
+    [],
+  );
 
   useEffect(() => {
-    let active = true
+    categoryService.getCategories().then(res => setCategories(res.data)).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
     const timer = setTimeout(async () => {
       try {
-        const res = await councilService.getCouncils(councilKeyword)
-        if (active) setCouncils(res.data)
+        const res = await councilService.getCouncils(councilKeyword);
+        if (active) setCouncils(res.data);
       } catch (error) {
-        console.error("학생회 목록 로드 실패:", error)
+        console.error("학생회 목록 로드 실패:", error);
       }
-    }, 300)
+    }, 300);
 
     return () => {
-      active = false
-      clearTimeout(timer)
-    }
-  }, [councilKeyword])
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [councilKeyword]);
 
-  const fetchPetitions = async () => {
-    setIsLoading(true)
+  const fetchPetitions = useCallback(async () => {
+    setIsLoading(true);
     try {
       const res = await postService.getPosts({
         page,
@@ -65,133 +149,155 @@ export default function Page() {
         keyword: searchQuery || undefined,
         status: activeStatus === "ALL" ? undefined : activeStatus,
         councilId: activeCouncilId === "ALL" ? undefined : activeCouncilId,
-        sort: "createdAt,DESC"
-      })
-      setData(res.data)
+        categoryId: activeCategoryId === "ALL" ? undefined : activeCategoryId,
+        sort: "createdAt,DESC",
+      });
+      setData(res.data);
     } catch (error) {
-      console.error("청원 목록 로드 실패:", error)
-      toast.error("청원 목록을 불러오지 못했습니다.")
+      console.error("청원 목록 로드 실패:", error);
+      toast.error("청원 목록을 불러오지 못했습니다.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  }, [page, searchQuery, activeStatus, activeCouncilId, activeCategoryId]);
 
   useEffect(() => {
-    fetchPetitions()
-  }, [page, searchQuery, activeStatus, activeCouncilId])
+    // 디바운스 처리
+    const delay = setTimeout(() => {
+      fetchPetitions();
+    }, 200);
+    return () => clearTimeout(delay);
+  }, [fetchPetitions]);
 
   const stats = useMemo(() => {
-    const total = data?.totalElements || 0
-    return [
-      { label: "전체", count: total },
-    ]
-  }, [data])
+    const total = data?.totalElements || 0;
+    return [{ label: "전체", count: total }];
+  }, [data]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 0 && newPage < (data?.totalPages || 0)) {
-      setPage(newPage)
+      updateStateAndUrl({ page: newPage });
     }
-  }
+  };
 
+  return (
+    <div className="flex flex-col gap-8">
+      <PageHeader stats={stats} />
+      <FilterBar
+        activeStatus={activeStatus}
+        onStatusChange={(s) => updateStateAndUrl({ status: s, page: 0 })}
+        activeCouncilId={activeCouncilId}
+        onCouncilChange={(id) => updateStateAndUrl({ councilId: id, page: 0 })}
+        activeCategoryId={activeCategoryId}
+        onCategoryChange={(id) => updateStateAndUrl({ categoryId: id, page: 0 })}
+        searchQuery={searchQuery}
+        onSearchChange={(q) => updateStateAndUrl({ query: q, page: 0 })}
+        councils={councils}
+        categories={categories}
+        councilKeyword={councilKeyword}
+        onCouncilKeywordChange={setCouncilKeyword}
+        hideCouncilFilter={isAdmin}
+      />
+
+      {isLoading ? (
+        <div className="flex h-64 items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : (
+        <>
+          <PetitionList petitions={data?.content || []} />
+
+          {data && data.totalPages > 1 && (
+            <Pagination className="mt-8">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageChange(page - 1);
+                    }}
+                    className={
+                      page === 0
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+
+                {[...Array(data.totalPages)].map((_, i) => {
+                  if (
+                    data.totalPages <= 7 ||
+                    i === 0 ||
+                    i === data.totalPages - 1 ||
+                    (i >= page - 1 && i <= page + 1)
+                  ) {
+                    return (
+                      <PaginationItem key={i}>
+                        <PaginationLink
+                          href="#"
+                          isActive={page === i}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(i);
+                          }}
+                          className="cursor-pointer"
+                        >
+                          {i + 1}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  } else if (
+                    (i === 1 && page > 2) ||
+                    (i === data.totalPages - 2 && page < data.totalPages - 3)
+                  ) {
+                    return (
+                      <PaginationItem key={i}>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    );
+                  }
+                  return null;
+                })}
+
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageChange(page + 1);
+                    }}
+                    className={
+                      page === data.totalPages - 1
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+export default function Page() {
   return (
     <div className="min-h-screen bg-background">
       <ConnectedHeader />
       <main className="mx-auto max-w-5xl px-6 py-8">
-        <div className="flex flex-col gap-8">
-          <PageHeader stats={stats} />
-          <FilterBar
-            activeStatus={activeStatus}
-            onStatusChange={(s) => {
-              setActiveStatus(s)
-              setPage(0)
-            }}
-            activeCouncilId={activeCouncilId}
-            onCouncilChange={(id) => {
-              setActiveCouncilId(id)
-              setPage(0)
-            }}
-            searchQuery={searchQuery}
-            onSearchChange={(q) => {
-              setSearchQuery(q)
-              setPage(0) // 검색 시 첫 페이지로
-            }}
-            councils={councils}
-            councilKeyword={councilKeyword}
-            onCouncilKeywordChange={setCouncilKeyword}
-            hideCouncilFilter={isAdmin}
-          />
-
-          {isLoading ? (
-            <div className="flex h-64 items-center justify-center">
+        <Suspense
+          fallback={
+            <div className="flex h-screen items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
-          ) : (
-            <>
-              <PetitionList petitions={data?.content || []} />
-              
-              {data && data.totalPages > 1 && (
-                <Pagination className="mt-8">
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious 
-                        href="#" 
-                        onClick={(e) => {
-                          e.preventDefault()
-                          handlePageChange(page - 1)
-                        }}
-                        className={page === 0 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                      />
-                    </PaginationItem>
-                    
-                    {[...Array(data.totalPages)].map((_, i) => {
-                      // 페이지가 너무 많을 경우를 대비해 현재 페이지 주변만 표시하는 로직 (간략화)
-                      if (
-                        data.totalPages <= 7 ||
-                        i === 0 ||
-                        i === data.totalPages - 1 ||
-                        (i >= page - 1 && i <= page + 1)
-                      ) {
-                        return (
-                          <PaginationItem key={i}>
-                            <PaginationLink
-                              href="#"
-                              isActive={page === i}
-                              onClick={(e) => {
-                                e.preventDefault()
-                                handlePageChange(i)
-                              }}
-                              className="cursor-pointer"
-                            >
-                              {i + 1}
-                            </PaginationLink>
-                          </PaginationItem>
-                        )
-                      } else if (
-                        (i === 1 && page > 2) ||
-                        (i === data.totalPages - 2 && page < data.totalPages - 3)
-                      ) {
-                        return <PaginationItem key={i}><PaginationEllipsis /></PaginationItem>
-                      }
-                      return null
-                    })}
-
-                    <PaginationItem>
-                      <PaginationNext 
-                        href="#" 
-                        onClick={(e) => {
-                          e.preventDefault()
-                          handlePageChange(page + 1)
-                        }}
-                        className={page === data.totalPages - 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              )}
-            </>
-          )}
-        </div>
+          }
+        >
+          <DashboardContent />
+        </Suspense>
       </main>
     </div>
-  )
+  );
 }
