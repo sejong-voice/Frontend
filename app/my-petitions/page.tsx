@@ -152,7 +152,7 @@ export default function MyPetitionsPage() {
                 {stats.map((stat) => (
                   <div
                     key={stat.label}
-                    className="flex items-center gap-2 rounded-md border border-border bg-card px-4 py-2.5"
+                    className="flex h-[50px] items-center gap-2 rounded-md border border-border bg-card px-4"
                   >
                     <span className="text-xs font-medium text-muted-foreground">
                       {stat.label}
@@ -167,7 +167,7 @@ export default function MyPetitionsPage() {
                 ))}
               </div>
             </div>
-            <Button asChild className="shrink-0">
+            <Button asChild className="h-[50px] shrink-0">
               <Link href="/petition/new">
                 <Plus className="mr-1.5 h-4 w-4" />
                 {"청원 작성"}

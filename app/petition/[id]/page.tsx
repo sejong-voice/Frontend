@@ -54,6 +54,13 @@ interface PetitionDetailResponse {
   resultImages?: { imageId: string; imageUrl: string }[]
   resultCreatedAt?: string
   resultUpdatedAt?: string
+  statements?: {
+    id: string
+    sequence: number
+    content: string
+    createdAt: string
+    images?: { imageId: string; imageUrl: string }[]
+  }[]
 }
 
 interface PageProps {
@@ -503,11 +510,24 @@ export default function PetitionDetailPage({ params }: PageProps) {
 
   const canReportPost = !!user && petition.userId !== user.id;
   const isAuthor = !!user && petition.userId === user.id;
+  const latestStatement = petition.statements?.reduce<
+    NonNullable<PetitionDetailResponse["statements"]>[number] | undefined
+  >((latest, statement) => {
+    if (!latest) return statement;
+    return statement.sequence > latest.sequence ? statement : latest;
+  }, undefined);
+  const officialResponseContent =
+    latestStatement?.content ?? petition.resultContent ?? "";
+  const officialResponseDisplayImages =
+    latestStatement?.images ?? petition.resultImages;
   const shouldShowOfficialResponse =
     (petition.status === "COMPLETED" || petition.status === "REJECTED") &&
-    !!petition.resultContent?.trim();
+    !!officialResponseContent.trim();
   const officialResponseDateSource =
-    petition.resultCreatedAt || petition.resultUpdatedAt || "";
+    latestStatement?.createdAt ||
+    petition.resultCreatedAt ||
+    petition.resultUpdatedAt ||
+    "";
   const officialResponseDate = officialResponseDateSource
     ? `게시 ${formatDateTime(officialResponseDateSource)}`
     : "-";
@@ -556,10 +576,10 @@ export default function PetitionDetailPage({ params }: PageProps) {
           {shouldShowOfficialResponse && (
             <>
               <PetitionOfficialResponse
-                content={petition.resultContent ?? ""}
+                content={officialResponseContent}
                 respondent={petition.councilName || "담당 학생회"}
                 date={officialResponseDate}
-                images={petition.resultImages}
+                images={officialResponseDisplayImages}
                 showEditAction={canManageAsAdmin}
                 onEdit={handleStartEditingOfficialResponse}
               />
