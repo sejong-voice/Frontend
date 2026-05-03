@@ -40,25 +40,28 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 interface PetitionDetailResponse {
-  id: string;
-  userId: string;
-  userStudentNo: string;
-  councilId: string;
-  councilName: string;
-  categoryId: string;
-  categoryName: string;
-  title: string;
-  content: string;
-  status: PetitionStatus;
-  createdAt: string;
-  votingEndAt: string;
-  images?: { imageId: string; imageUrl: string }[];
-  resultContent?: string;
-  resultImages?: { imageId: string; imageUrl: string }[];
-  resultCreatedAt?: string;
-  resultUpdatedAt?: string;
-  canCloseEarly?: boolean;
-  canVote?: boolean;
+  id: string
+  userId: string
+  userStudentNo: string
+  councilId: string
+  councilName: string
+  title: string
+  content: string
+  status: PetitionStatus
+  createdAt: string
+  votingEndAt: string
+  images?: { imageId: string; imageUrl: string }[]
+  resultContent?: string
+  resultImages?: { imageId: string; imageUrl: string }[]
+  resultCreatedAt?: string
+  resultUpdatedAt?: string
+  statements?: {
+    id: string
+    sequence: number
+    content: string
+    createdAt: string
+    images?: { imageId: string; imageUrl: string }[]
+  }[]
 }
 
 interface PageProps {
@@ -456,11 +459,24 @@ export default function PetitionDetailPage({ params }: PageProps) {
 
   const canReportPost = !!user && petition.userId !== user.id;
   const isAuthor = !!user && petition.userId === user.id;
+  const latestStatement = petition.statements?.reduce<
+    NonNullable<PetitionDetailResponse["statements"]>[number] | undefined
+  >((latest, statement) => {
+    if (!latest) return statement;
+    return statement.sequence > latest.sequence ? statement : latest;
+  }, undefined);
+  const officialResponseContent =
+    latestStatement?.content ?? petition.resultContent ?? "";
+  const officialResponseDisplayImages =
+    latestStatement?.images ?? petition.resultImages;
   const shouldShowOfficialResponse =
     (petition.status === "COMPLETED" || petition.status === "REJECTED") &&
-    (!!petition.resultContent?.trim() || (petition.resultImages && petition.resultImages.length > 0));
+    !!officialResponseContent.trim();
   const officialResponseDateSource =
-    petition.resultCreatedAt || petition.resultUpdatedAt || "";
+    latestStatement?.createdAt ||
+    petition.resultCreatedAt ||
+    petition.resultUpdatedAt ||
+    "";
   const officialResponseDate = officialResponseDateSource
     ? `게시 ${formatDateTime(officialResponseDateSource)}`
     : "-";
@@ -513,12 +529,79 @@ export default function PetitionDetailPage({ params }: PageProps) {
           />
 
           {shouldShowOfficialResponse && (
-            <PetitionOfficialResponse
-              content={petition.resultContent ?? ""}
-              respondent={petition.councilName || "담당 학생회"}
-              date={officialResponseDate}
-              images={petition.resultImages}
-            />
+            <>
+              <PetitionOfficialResponse
+                content={officialResponseContent}
+                respondent={petition.councilName || "담당 학생회"}
+                date={officialResponseDate}
+                images={officialResponseDisplayImages}
+                showEditAction={canManageAsAdmin}
+                onEdit={handleStartEditingOfficialResponse}
+              />
+
+              {canManageAsAdmin && isEditingOfficialResponse && (
+                <div className="flex flex-col gap-3 rounded-md border border-border bg-card p-4">
+                  <p className="text-sm font-medium text-foreground">
+                    공식 입장문 수정
+                  </p>
+                  <Textarea
+                    value={officialResponseDraft}
+                    onChange={(e) => {
+                      if (e.target.value.length <= 2000) {
+                        setOfficialResponseDraft(e.target.value);
+                      }
+                    }}
+                    placeholder="학생회의 공식 입장을 수정해 주세요."
+                    disabled={isUpdatingOfficialResponse}
+                    className="min-h-[200px]"
+                  />
+                  <div className="flex justify-end pr-1">
+                    <span className={cn(
+                      "text-[10px] tabular-nums",
+                      officialResponseDraft.length > 1800 ? "text-destructive" : "text-muted-foreground"
+                    )}>
+                      {officialResponseDraft.length} / 2000자
+                    </span>
+                  </div>
+                  <div className="py-2">
+                    <ImageUploader 
+                      images={officialResponseImages} 
+                      onChange={setOfficialResponseImages}
+                      maxImages={3}
+                    />
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs text-muted-foreground">
+                      {officialResponseDraft.length} / 2000자
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCancelEditingOfficialResponse}
+                        disabled={isUpdatingOfficialResponse}
+                      >
+                        취소
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleUpdateOfficialResponse}
+                        disabled={
+                          !officialResponseDraft.trim() ||
+                          isUpdatingOfficialResponse
+                        }
+                      >
+                        {isUpdatingOfficialResponse ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          "저장"
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           <Separator />

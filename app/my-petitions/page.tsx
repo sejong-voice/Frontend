@@ -220,35 +220,46 @@ function MyPetitionsContent() {
   };
 
   return (
-    <div className="flex flex-col gap-8">
-      {/* Page header */}
-      <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:flex-1">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              {"내 청원"}
-            </h1>
-            <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
-              {"내가 작성한 청원의 현황을 확인하고 관리할 수 있습니다."}
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            {stats.map((stat) => (
-              <div
-                key={stat.label}
-                className="flex items-center gap-2 rounded-md border border-border bg-card px-4 py-2.5"
-              >
-                <span className="text-xs font-medium text-muted-foreground">
-                  {stat.label}
-                </span>
-                <span className="text-lg font-bold text-foreground">
-                  {stat.count}
-                  <span className="ml-0.5 text-xs font-normal text-muted-foreground">
-                    {"건"}
-                  </span>
-                </span>
+    <div className="min-h-screen bg-background">
+      <SiteHeader />
+      <main className="mx-auto max-w-5xl px-6 py-8">
+        <div className="flex flex-col gap-8">
+          {/* Page header */}
+          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between md:flex-1">
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">
+                  {"내 청원"}
+                </h1>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                  {"내가 작성한 청원의 현황을 확인하고 관리할 수 있습니다."}
+                </p>
               </div>
-            ))}
+              <div className="flex items-center gap-4">
+                {stats.map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="flex h-[50px] items-center gap-2 rounded-md border border-border bg-card px-4"
+                  >
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {stat.label}
+                    </span>
+                    <span className="text-lg font-bold text-foreground">
+                      {stat.count}
+                      <span className="ml-0.5 text-xs font-normal text-muted-foreground">
+                        {"건"}
+                      </span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <Button asChild className="h-[50px] shrink-0">
+              <Link href="/petition/new">
+                <Plus className="mr-1.5 h-4 w-4" />
+                {"청원 작성"}
+              </Link>
+            </Button>
           </div>
         </div>
         <Button asChild className="shrink-0">
