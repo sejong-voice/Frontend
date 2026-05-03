@@ -1,9 +1,7 @@
 "use client";
 
 import { use, useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import { Loader2, BarChart3 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 import {
   commentService,
   type CommentPageResponse,
@@ -33,10 +31,7 @@ import { PetitionOfficialResponse } from "@/components/petition/petition-officia
 import { PetitionStatusBanner } from "@/components/petition/petition-status-banner";
 import { PetitionVote } from "@/components/petition/petition-vote";
 import { PetitionActions } from "@/components/petition/petition-actions";
-import { ImageUploader } from "@/components/petition/image-uploader";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 interface PetitionDetailResponse {
@@ -48,6 +43,9 @@ interface PetitionDetailResponse {
   title: string
   content: string
   status: PetitionStatus
+  categoryName?: string
+  canVote?: boolean
+  canCloseEarly?: boolean
   createdAt: string
   votingEndAt: string
   images?: { imageId: string; imageUrl: string }[]
@@ -529,79 +527,12 @@ export default function PetitionDetailPage({ params }: PageProps) {
           />
 
           {shouldShowOfficialResponse && (
-            <>
-              <PetitionOfficialResponse
-                content={officialResponseContent}
-                respondent={petition.councilName || "담당 학생회"}
-                date={officialResponseDate}
-                images={officialResponseDisplayImages}
-                showEditAction={canManageAsAdmin}
-                onEdit={handleStartEditingOfficialResponse}
-              />
-
-              {canManageAsAdmin && isEditingOfficialResponse && (
-                <div className="flex flex-col gap-3 rounded-md border border-border bg-card p-4">
-                  <p className="text-sm font-medium text-foreground">
-                    공식 입장문 수정
-                  </p>
-                  <Textarea
-                    value={officialResponseDraft}
-                    onChange={(e) => {
-                      if (e.target.value.length <= 2000) {
-                        setOfficialResponseDraft(e.target.value);
-                      }
-                    }}
-                    placeholder="학생회의 공식 입장을 수정해 주세요."
-                    disabled={isUpdatingOfficialResponse}
-                    className="min-h-[200px]"
-                  />
-                  <div className="flex justify-end pr-1">
-                    <span className={cn(
-                      "text-[10px] tabular-nums",
-                      officialResponseDraft.length > 1800 ? "text-destructive" : "text-muted-foreground"
-                    )}>
-                      {officialResponseDraft.length} / 2000자
-                    </span>
-                  </div>
-                  <div className="py-2">
-                    <ImageUploader 
-                      images={officialResponseImages} 
-                      onChange={setOfficialResponseImages}
-                      maxImages={3}
-                    />
-                  </div>
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-xs text-muted-foreground">
-                      {officialResponseDraft.length} / 2000자
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleCancelEditingOfficialResponse}
-                        disabled={isUpdatingOfficialResponse}
-                      >
-                        취소
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={handleUpdateOfficialResponse}
-                        disabled={
-                          !officialResponseDraft.trim() ||
-                          isUpdatingOfficialResponse
-                        }
-                      >
-                        {isUpdatingOfficialResponse ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          "저장"
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </>
+            <PetitionOfficialResponse
+              content={officialResponseContent}
+              respondent={petition.councilName || "담당 학생회"}
+              date={officialResponseDate}
+              images={officialResponseDisplayImages}
+            />
           )}
 
           <Separator />
