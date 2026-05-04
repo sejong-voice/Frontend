@@ -236,7 +236,7 @@ export function PetitionForm() {
                   className={cn(
                     "rounded-md border px-4 py-2 text-sm font-medium transition-colors",
                     resultStatus === "REJECTED"
-                      ? "border-destructive bg-destructive text-destructive-foreground"
+                      ? "border-secondary-foreground bg-secondary-foreground text-background"
                       : "border-border bg-card text-muted-foreground hover:border-foreground/20 hover:text-foreground"
                   )}
                 >
