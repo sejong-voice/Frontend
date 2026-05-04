@@ -108,7 +108,7 @@ export default function AdminStatisticsPage() {
 
     const escapeCsvCell = (value: string) => {
       const normalized = String(value ?? "");
-      const formulaSafe = /^[=+\-@]/.test(normalized) ? `'${normalized}` : normalized;
+      const formulaSafe = /^[\s\t\r\n]*[=+\-@]/.test(normalized) ? `'${normalized}` : normalized;
       return `"${formulaSafe.replace(/"/g, '""')}"`;
     };
 
