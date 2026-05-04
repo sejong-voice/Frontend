@@ -29,7 +29,7 @@ const statusToKorean: Record<string, string> = {
 export default function AdminStatisticsPage() {
   const router = useRouter();
   const { isAdmin, loading: authLoading } = useAuth();
-  
+
   const [loading, setLoading] = useState(true);
   const [assignedPetitions, setAssignedPetitions] = useState<Petition[]>([]);
   const [selectedPetitionId, setSelectedPetitionId] = useState<string>("");
@@ -52,10 +52,10 @@ export default function AdminStatisticsPage() {
         setLoading(true);
         // Fetch all assigned petitions
         const res = await postService.getPosts({ assignedToMe: true, size: 1000 });
-        
+
         // Filter out non-allowed statuses
         const allowedStatuses = ["APPROVED", "COMPLETED", "REJECTED"];
-        const filteredPetitions = res.data.content.filter((p: Petition) => 
+        const filteredPetitions = res.data.content.filter((p: Petition) =>
           allowedStatuses.includes(p.status)
         );
 
@@ -106,15 +106,21 @@ export default function AdminStatisticsPage() {
       return;
     }
 
+    const escapeCsvCell = (value: string) => {
+      const normalized = String(value ?? "");
+      const formulaSafe = /^[\s\t\r\n]*[=+\-@]/.test(normalized) ? `'${normalized}` : normalized;
+      return `"${formulaSafe.replace(/"/g, '""')}"`;
+    };
+
     const headers = ["학번", "학과", "투표일시"];
     const rows = voters.map(voter => [
-      voter.studentNo,
-      voter.department,
-      new Date(voter.votedAt).toLocaleString()
+      escapeCsvCell(voter.studentNo),
+      escapeCsvCell(voter.department),
+      escapeCsvCell(new Date(voter.votedAt).toLocaleString())
     ]);
 
     const csvContent = "\uFEFF" + [
-      headers.join(","),
+      headers.map(escapeCsvCell).join(","),
       ...rows.map(e => e.join(","))
     ].join("\n");
 
@@ -202,7 +208,7 @@ export default function AdminStatisticsPage() {
                 <BarChart3 className="h-5 w-5 text-primary" />
                 <h2 className="text-lg font-semibold">전체 투표 통계</h2>
               </div>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-2">
                 <div className="flex flex-col gap-1 rounded-lg bg-secondary/50 p-4 text-center">
                   <span className="text-sm text-muted-foreground">총 투표 수</span>
@@ -218,7 +224,7 @@ export default function AdminStatisticsPage() {
                 </div>
                 <div className="flex flex-col gap-1 rounded-lg bg-secondary/50 p-4 text-center">
                   <span className="text-sm text-muted-foreground">찬성률</span>
-                  <span className="text-2xl font-bold">{stats.agreeRatio.toFixed(1)}%</span>
+                  <span className="text-2xl font-bold">{(stats.agreeRatio * 100).toFixed(1)}%</span>
                 </div>
               </div>
 
@@ -259,7 +265,7 @@ export default function AdminStatisticsPage() {
                 <Users className="h-5 w-5 text-primary" />
                 <h2 className="text-lg font-semibold">찬성자 명단 ({voters.length}명)</h2>
               </div>
-              
+
               {voters.length > 0 ? (
                 <div className="overflow-x-auto max-h-[500px] overflow-y-auto border rounded-md relative">
                   <table className="w-full text-sm text-left">
