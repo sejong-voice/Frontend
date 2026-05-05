@@ -101,6 +101,18 @@ function formatDateTime(value: string) {
   return `${year}.${month}.${day} ${hours}:${minutes}`;
 }
 
+function getStatementTitle(sequence: number) {
+  if (sequence <= 1) {
+    return "1차 입장문";
+  }
+
+  if (sequence === 2) {
+    return "추가 입장문";
+  }
+
+  return `${sequence}차 입장문`;
+}
+
 function getCommentAuthorLabel(authorName: string | undefined, postAuthor: boolean) {
   if (postAuthor) {
     return POST_AUTHOR_LABEL;
@@ -448,27 +460,37 @@ export default function PetitionDetailPage({ params }: PageProps) {
 
   const canReportPost = !!user && petition.userId !== user.id;
   const isAuthor = !!user && petition.userId === user.id;
-  const latestStatement = petition.statements?.reduce<
-    NonNullable<PetitionDetailResponse["statements"]>[number] | undefined
-  >((latest, statement) => {
-    if (!latest) return statement;
-    return statement.sequence > latest.sequence ? statement : latest;
-  }, undefined);
-  const officialResponseContent =
-    latestStatement?.content ?? petition.resultContent ?? "";
-  const officialResponseDisplayImages =
-    latestStatement?.images ?? petition.resultImages;
-  const shouldShowOfficialResponse =
-    (petition.status === "COMPLETED" || petition.status === "REJECTED") &&
-    !!officialResponseContent.trim();
-  const officialResponseDateSource =
-    latestStatement?.createdAt ||
-    petition.resultCreatedAt ||
-    petition.resultUpdatedAt ||
-    "";
-  const officialResponseDate = officialResponseDateSource
-    ? `게시 ${formatDateTime(officialResponseDateSource)}`
-    : "-";
+  const sortedStatements = [...(petition.statements || [])].sort(
+    (a, b) => a.sequence - b.sequence,
+  );
+  const statementResponses = sortedStatements.map((statement) => ({
+    id: statement.id,
+    title: getStatementTitle(statement.sequence),
+    content: statement.content,
+    images: statement.images,
+    date: statement.createdAt ? `게시 ${formatDateTime(statement.createdAt)}` : "-",
+  }));
+  const legacyOfficialResponseContent = petition.resultContent ?? "";
+  const legacyOfficialResponseDateSource =
+    petition.resultCreatedAt || petition.resultUpdatedAt || "";
+  const officialResponses =
+    statementResponses.length > 0
+      ? statementResponses
+      : legacyOfficialResponseContent.trim()
+        ? [
+            {
+              id: "legacy-result",
+              title: "학생회 공식 입장",
+              content: legacyOfficialResponseContent,
+              images: petition.resultImages,
+              date: legacyOfficialResponseDateSource
+                ? `게시 ${formatDateTime(legacyOfficialResponseDateSource)}`
+                : "-",
+            },
+          ]
+        : [];
+  const statementCount = officialResponses.length;
+  const shouldShowOfficialResponses = statementCount > 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -509,22 +531,29 @@ export default function PetitionDetailPage({ params }: PageProps) {
             </div>
           )}
 
+          {shouldShowOfficialResponses && (
+            <div className="flex flex-col gap-4">
+              {officialResponses.map((response) => (
+                <PetitionOfficialResponse
+                  key={response.id}
+                  title={response.title}
+                  content={response.content}
+                  respondent={petition.councilName || "담당 학생회"}
+                  date={response.date}
+                  images={response.images}
+                />
+              ))}
+            </div>
+          )}
+
           <PetitionActions
             petitionId={id}
             status={petition.status}
             isAuthor={isAuthor}
             canManageAsAdmin={canManageAsAdmin}
+            statementCount={statementCount}
             totalVotes={voteSummary?.totalCount || 0}
           />
-
-          {shouldShowOfficialResponse && (
-            <PetitionOfficialResponse
-              content={officialResponseContent}
-              respondent={petition.councilName || "담당 학생회"}
-              date={officialResponseDate}
-              images={officialResponseDisplayImages}
-            />
-          )}
 
           <Separator />
 

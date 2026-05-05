@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Pencil,
   Trash2,
   CheckCircle,
   XCircle,
@@ -23,6 +22,7 @@ interface PetitionActionsProps {
   status: PetitionStatus;
   isAuthor: boolean;
   canManageAsAdmin: boolean;
+  statementCount: number;
   totalVotes: number;
 }
 
@@ -31,6 +31,7 @@ export function PetitionActions({
   status,
   isAuthor,
   canManageAsAdmin,
+  statementCount,
   totalVotes,
 }: PetitionActionsProps) {
   const [showResponseForm, setShowResponseForm] = useState(false);
@@ -38,23 +39,30 @@ export function PetitionActions({
   const [statusToSubmit, setStatusToSubmit] = useState<
     "COMPLETED" | "REJECTED"
   >("COMPLETED");
-  const [images, setImages] = useState<{ imageId: string; imageUrl: string }[]>([]);
+  const [images, setImages] = useState<
+    { imageId: string; imageUrl: string }[]
+  >([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
     if (!responseText.trim()) return;
 
+    const isInitialStatement = status === "APPROVED" && statementCount === 0;
+    const payload = {
+      content: responseText,
+      imageIds: images.map((img) => img.imageId),
+      ...(isInitialStatement ? { finalStatus: statusToSubmit } : {}),
+    };
+
     setIsSubmitting(true);
     try {
-      await postService.submitPostResult(petitionId, {
-        finalStatus: statusToSubmit,
-        content: responseText,
-        imageIds: images.map((img) => img.imageId),
-      });
+      await postService.submitPostResult(petitionId, payload);
       toast.success(
-        statusToSubmit === "COMPLETED"
-          ? "완료 처리가 완료되었습니다."
-          : "반려 처리가 완료되었습니다.",
+        isInitialStatement
+          ? statusToSubmit === "COMPLETED"
+            ? "완료 처리가 완료되었습니다."
+            : "반려 처리가 완료되었습니다."
+          : "추가 입장문이 등록되었습니다.",
       );
       window.location.reload();
     } catch (error: any) {
@@ -66,7 +74,11 @@ export function PetitionActions({
   };
 
   const canDelete = isAuthor;
-  const showAdminActions = canManageAsAdmin && status === "APPROVED";
+  const isInitialStatement = status === "APPROVED" && statementCount === 0;
+  const canWriteAdditionalStatement =
+    statementCount === 1 && (status === "COMPLETED" || status === "REJECTED");
+  const canWriteStatement =
+    canManageAsAdmin && (isInitialStatement || canWriteAdditionalStatement);
 
   const handleDelete = async () => {
     if (status !== "VOTING") {
@@ -74,10 +86,14 @@ export function PetitionActions({
       return;
     }
 
-    if (!window.confirm("청원을 정말 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.")) {
+    if (
+      !window.confirm(
+        "청원을 정말 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.",
+      )
+    ) {
       return;
     }
-    
+
     setIsSubmitting(true);
     try {
       await postService.deletePost(petitionId);
@@ -91,7 +107,7 @@ export function PetitionActions({
     }
   };
 
-  if (!canDelete && !showAdminActions) return null;
+  if (!canDelete && !canWriteStatement) return null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -115,7 +131,7 @@ export function PetitionActions({
         </div>
       )}
       {/* Admin actions */}
-      {showAdminActions && (
+      {canWriteStatement && (
         <section
           className="flex flex-col gap-4 rounded-lg border-2 border-primary/15 bg-accent/30 px-6 py-5"
           aria-label="학생회 관리 영역"
@@ -123,44 +139,48 @@ export function PetitionActions({
           <div className="flex items-center gap-2">
             <div className="h-1.5 w-1.5 rounded-full bg-primary" />
             <span className="text-sm font-semibold text-foreground">
-              {"학생회 관리자 처리"}
+              {isInitialStatement ? "학생회 관리자 처리" : "추가 입장문 작성"}
             </span>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
-            <Button
-              size="sm"
-              className={cn(
-                "gap-1.5",
-                statusToSubmit === "COMPLETED" && showResponseForm
-                  ? "ring-2 ring-primary ring-offset-2"
-                  : "",
-              )}
-              onClick={() => {
-                setStatusToSubmit("COMPLETED");
-                setShowResponseForm(true);
-              }}
-            >
-              <CheckCircle className="h-3.5 w-3.5" />
-              {"완료 (승인/해결)"}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className={cn(
-                "gap-1.5 bg-transparent text-secondary-foreground hover:bg-secondary-foreground hover:text-background",
-                statusToSubmit === "REJECTED" && showResponseForm
-                  ? "ring-2 ring-secondary-foreground ring-offset-2 bg-secondary-foreground text-background"
-                  : "",
-              )}
-              onClick={() => {
-                setStatusToSubmit("REJECTED");
-                setShowResponseForm(true);
-              }}
-            >
-              <XCircle className="h-3.5 w-3.5" />
-              {"반려 (불가/거부)"}
-            </Button>
+            {isInitialStatement && (
+              <>
+                <Button
+                  size="sm"
+                  className={cn(
+                    "gap-1.5",
+                    statusToSubmit === "COMPLETED" && showResponseForm
+                      ? "ring-2 ring-primary ring-offset-2"
+                      : "",
+                  )}
+                  onClick={() => {
+                    setStatusToSubmit("COMPLETED");
+                    setShowResponseForm(true);
+                  }}
+                >
+                  <CheckCircle className="h-3.5 w-3.5" />
+                  {"완료 (승인/해결)"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    "gap-1.5 bg-transparent text-secondary-foreground hover:bg-secondary-foreground hover:text-background",
+                    statusToSubmit === "REJECTED" && showResponseForm
+                      ? "ring-2 ring-secondary-foreground ring-offset-2 bg-secondary-foreground text-background"
+                      : "",
+                  )}
+                  onClick={() => {
+                    setStatusToSubmit("REJECTED");
+                    setShowResponseForm(true);
+                  }}
+                >
+                  <XCircle className="h-3.5 w-3.5" />
+                  {"반려 (불가/거부)"}
+                </Button>
+              </>
+            )}
             <Button
               variant="outline"
               size="sm"
@@ -170,7 +190,11 @@ export function PetitionActions({
               }}
             >
               <FileText className="h-3.5 w-3.5" />
-              {showResponseForm ? "입장문 작성 취소" : "공식 입장문 작성"}
+              {showResponseForm
+                ? "입장문 작성 취소"
+                : isInitialStatement
+                  ? "공식 입장문 작성"
+                  : "추가 입장문 작성"}
             </Button>
           </div>
 
@@ -178,21 +202,27 @@ export function PetitionActions({
           {showResponseForm && (
             <div className="flex flex-col gap-3 rounded-md border border-border bg-card p-4">
               <p className="text-sm font-medium text-foreground">
-                {statusToSubmit === "COMPLETED"
-                  ? "완료 처리 - 공식 입장문 작성"
-                  : "반려 처리 - 반려 사유 작성"}
+                {isInitialStatement
+                  ? statusToSubmit === "COMPLETED"
+                    ? "완료 처리 - 공식 입장문 작성"
+                    : "반려 처리 - 반려 사유 작성"
+                  : "추가 입장문 작성"}
               </p>
               <Textarea
-                placeholder="학생회 공식 입장을 입력하세요..."
+                placeholder={
+                  isInitialStatement
+                    ? "학생회 공식 입장을 입력하세요..."
+                    : "추가 입장문을 입력하세요..."
+                }
                 value={responseText}
                 onChange={(e) => setResponseText(e.target.value)}
                 className="min-h-[120px] resize-none text-sm"
               />
               <div className="py-2">
-                <ImageUploader 
-                  images={images} 
-                  onChange={setImages} 
-                  maxImages={3} 
+                <ImageUploader
+                  images={images}
+                  onChange={setImages}
+                  maxImages={3}
                 />
               </div>
               <div className="flex items-center justify-between">
