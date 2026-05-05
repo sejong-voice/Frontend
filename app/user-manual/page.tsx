@@ -13,7 +13,7 @@ import {
   type CarouselApi,
 } from "@/components/ui/carousel"
 
-const studentManualImages = Array.from({ length: 8 }, (_, index) => ({
+const studentManualImages = Array.from({ length: 9 }, (_, index) => ({
   src: `/user_manual${index + 1}.png`,
   alt: `일반 학생 사용 매뉴얼 ${index + 1}`,
 }))
