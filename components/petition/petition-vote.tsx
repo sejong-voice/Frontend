@@ -24,7 +24,7 @@ export function PetitionVote({
   votingEndAt,
   onVote,
 }: PetitionVoteProps) {
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
   const [selectedChoice, setSelectedChoice] = useState<VoteChoice | null>(null)
   const [pendingChoice, setPendingChoice] = useState<VoteChoice | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -33,8 +33,9 @@ export function PetitionVote({
     message: string
   } | null>(null)
 
-  const agreePercent = totalCount > 0 ? Math.round((agreeCount / totalCount) * 100) : 0
-  const disagreePercent = totalCount > 0 ? 100 - agreePercent : 0
+  const actualTotalVotes = agreeCount + disagreeCount
+  const agreePercent = actualTotalVotes > 0 ? Math.round((agreeCount / actualTotalVotes) * 100) : 0
+  const disagreePercent = actualTotalVotes > 0 ? 100 - agreePercent : 0
   const votingEndDate = votingEndAt
     ? new Intl.DateTimeFormat("ko-KR", {
         year: "numeric",
@@ -83,7 +84,7 @@ export function PetitionVote({
         <div className="flex items-center justify-between">
           <h2 className="text-base font-semibold text-foreground">투표 현황</h2>
           <span className="text-sm text-muted-foreground">
-            총 <span className="font-semibold text-foreground">{totalCount}</span>명
+            총 <span className="font-semibold text-foreground">{actualTotalVotes}</span>명
             참여
           </span>
         </div>
@@ -107,7 +108,7 @@ export function PetitionVote({
           </div>
 
           <div className="flex h-3 w-full overflow-hidden rounded-full bg-secondary">
-            {totalCount > 0 && (
+            {actualTotalVotes > 0 && (
               <>
                 <div
                   className="rounded-l-full bg-primary transition-all duration-500"
@@ -128,7 +129,11 @@ export function PetitionVote({
         </div>
 
         {isActive ? (
-          user ? (
+          isAdmin ? (
+            <div className="rounded-md bg-secondary px-4 py-3 text-center text-sm text-muted-foreground">
+              학생회(관리자) 계정은 투표에 참여할 수 없습니다.
+            </div>
+          ) : user ? (
             canVote === false ? (
               <div className="rounded-md bg-secondary px-4 py-3 text-center text-sm text-muted-foreground">
                 본인 소속 또는 상위 학생회 게시글에만 투표할 수 있습니다.

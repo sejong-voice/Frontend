@@ -148,9 +148,9 @@ export function PetitionActions({
               variant="outline"
               size="sm"
               className={cn(
-                "gap-1.5 bg-transparent text-destructive hover:bg-destructive hover:text-destructive-foreground",
+                "gap-1.5 bg-transparent text-secondary-foreground hover:bg-secondary-foreground hover:text-background",
                 statusToSubmit === "REJECTED" && showResponseForm
-                  ? "ring-2 ring-destructive ring-offset-2"
+                  ? "ring-2 ring-secondary-foreground ring-offset-2 bg-secondary-foreground text-background"
                   : "",
               )}
               onClick={() => {

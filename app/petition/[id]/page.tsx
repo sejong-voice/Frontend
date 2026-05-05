@@ -383,7 +383,6 @@ export default function PetitionDetailPage({ params }: PageProps) {
         }
 
         setPetition(postResult.value.data as PetitionDetailResponse);
-        console.log("게시글 상세 정보 API 응답:", postResult.value.data);
 
         if (voteSummaryResult.status === "fulfilled") {
           setVoteSummary(voteSummaryResult.value.data);
