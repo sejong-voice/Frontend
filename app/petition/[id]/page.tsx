@@ -35,38 +35,38 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 
 interface PetitionDetailResponse {
-  id: string
-  userId: string
-  userStudentNo: string
-  councilId: string
-  councilName: string
-  title: string
-  content: string
-  status: PetitionStatus
-  categoryName?: string
-  canVote?: boolean
-  canCloseEarly?: boolean
-  createdAt: string
-  votingEndAt: string
-  images?: { imageId: string; imageUrl: string }[]
-  resultContent?: string
-  resultImages?: { imageId: string; imageUrl: string }[]
-  resultCreatedAt?: string
-  resultUpdatedAt?: string
+  id: string;
+  userId: string;
+  userStudentNo: string;
+  councilId: string;
+  councilName: string;
+  title: string;
+  content: string;
+  status: PetitionStatus;
+  categoryName?: string;
+  canVote?: boolean;
+  canCloseEarly?: boolean;
+  createdAt: string;
+  votingEndAt: string;
+  images?: { imageId: string; imageUrl: string }[];
+  resultContent?: string;
+  resultImages?: { imageId: string; imageUrl: string }[];
+  resultCreatedAt?: string;
+  resultUpdatedAt?: string;
   statements?: {
-    id: string
-    sequence: number
-    content: string
-    createdAt: string
-    images?: { imageId: string; imageUrl: string }[]
-  }[]
+    id: string;
+    sequence: number;
+    content: string;
+    createdAt: string;
+    images?: { imageId: string; imageUrl: string }[];
+  }[];
 }
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-const ANONYMOUS_LABEL = "익명";
+const POST_AUTHOR_LABEL = "익명(글쓴이)";
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -101,19 +101,12 @@ function formatDateTime(value: string) {
   return `${year}.${month}.${day} ${hours}:${minutes}`;
 }
 
-function getAnonymousAuthorLabel(
-  anonymousNumber: number | null,
-  postAuthor: boolean,
-) {
+function getCommentAuthorLabel(authorName: string | undefined, postAuthor: boolean) {
   if (postAuthor) {
-    return "익명(글쓴이)";
+    return POST_AUTHOR_LABEL;
   }
 
-  if (typeof anonymousNumber === "number") {
-    return `익명${anonymousNumber}`;
-  }
-
-  return "익명";
+  return authorName?.trim() || "익명";
 }
 
 function getRootPlaceholderContent(status: CommentResponse["status"]) {
@@ -131,7 +124,8 @@ function getRootPlaceholderContent(status: CommentResponse["status"]) {
 function mapReply(reply: ReplyResponse): ReplyData {
   return {
     id: reply.id,
-    author: getAnonymousAuthorLabel(reply.anonymousNumber, reply.postAuthor),
+    author: getCommentAuthorLabel(reply.authorName, reply.postAuthor),
+    isPostAuthor: reply.postAuthor,
     content: reply.content,
     date: formatDate(reply.createdAt),
     canDelete: reply.canDelete,
@@ -150,10 +144,8 @@ function mapComment(comment: CommentResponse): Comment | null {
 
   return {
     id: comment.id,
-    author: getAnonymousAuthorLabel(
-      comment.anonymousNumber,
-      comment.postAuthor,
-    ),
+    author: getCommentAuthorLabel(comment.authorName, comment.postAuthor),
+    isPostAuthor: comment.postAuthor,
     content:
       comment.status === "ACTIVE"
         ? comment.content

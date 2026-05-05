@@ -67,9 +67,9 @@ export interface PostReportData {
   description?: string;
 }
 
-export interface PostResultData {
-  status: "VOTING" | "COMPLETED" | "REJECTED";
-  resultContent: string;
+export interface PostStatementCreateData {
+  finalStatus: "COMPLETED" | "REJECTED";
+  content: string;
   imageIds: string[];
 }
 
@@ -127,8 +127,8 @@ export const postService = {
     return api.delete(`/api/v1/posts/${id}`);
   },
 
-  submitPostResult: async (id: string, data: PostResultData) => {
-    return api.put(`/api/v1/posts/${id}/result`, data);
+  submitPostResult: async (id: string, data: PostStatementCreateData) => {
+    return api.post(`/api/v1/posts/${id}/statements`, data);
   },
 
   getVoteStatistics: async (id: string) => {

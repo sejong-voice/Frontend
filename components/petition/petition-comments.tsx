@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils"
 export interface ReplyData {
   id: string
   author: string
+  isPostAuthor?: boolean
   content: string
   date: string
   canDelete: boolean
@@ -40,6 +41,7 @@ export interface ReplyData {
 export interface Comment {
   id: string
   author: string
+  isPostAuthor?: boolean
   content: string
   date: string
   canDelete: boolean
@@ -164,13 +166,25 @@ function CommentItem({
   return (
     <div className={cn("flex gap-3", isReply && "ml-10 md:ml-12")}>
       <Avatar className="h-8 w-8 shrink-0">
-        <AvatarFallback className="bg-secondary text-xs text-muted-foreground">
+        <AvatarFallback
+          className={cn(
+            "text-xs",
+            comment.isPostAuthor
+              ? "bg-primary text-primary-foreground"
+              : "bg-secondary text-muted-foreground"
+          )}
+        >
           {comment.author.slice(0, 1)}
         </AvatarFallback>
       </Avatar>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-foreground">
+          <span
+            className={cn(
+              "text-sm font-medium",
+              comment.isPostAuthor ? "text-primary" : "text-foreground"
+            )}
+          >
             {comment.author}
           </span>
           <span className="text-xs text-muted-foreground">{comment.date}</span>

@@ -47,8 +47,8 @@ export function PetitionActions({
     setIsSubmitting(true);
     try {
       await postService.submitPostResult(petitionId, {
-        status: statusToSubmit,
-        resultContent: responseText,
+        finalStatus: statusToSubmit,
+        content: responseText,
         imageIds: images.map((img) => img.imageId),
       });
       toast.success(
