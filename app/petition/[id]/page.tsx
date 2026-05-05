@@ -35,31 +35,31 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 
 interface PetitionDetailResponse {
-  id: string
-  userId: string
-  userStudentNo: string
-  councilId: string
-  councilName: string
-  title: string
-  content: string
-  status: PetitionStatus
-  categoryName?: string
-  canVote?: boolean
-  canCloseEarly?: boolean
-  createdAt: string
-  votingEndAt: string
-  images?: { imageId: string; imageUrl: string }[]
-  resultContent?: string
-  resultImages?: { imageId: string; imageUrl: string }[]
-  resultCreatedAt?: string
-  resultUpdatedAt?: string
+  id: string;
+  userId: string;
+  userStudentNo: string;
+  councilId: string;
+  councilName: string;
+  title: string;
+  content: string;
+  status: PetitionStatus;
+  categoryName?: string;
+  canVote?: boolean;
+  canCloseEarly?: boolean;
+  createdAt: string;
+  votingEndAt: string;
+  images?: { imageId: string; imageUrl: string }[];
+  resultContent?: string;
+  resultImages?: { imageId: string; imageUrl: string }[];
+  resultCreatedAt?: string;
+  resultUpdatedAt?: string;
   statements?: {
-    id: string
-    sequence: number
-    content: string
-    createdAt: string
-    images?: { imageId: string; imageUrl: string }[]
-  }[]
+    id: string;
+    sequence: number;
+    content: string;
+    createdAt: string;
+    images?: { imageId: string; imageUrl: string }[];
+  }[];
 }
 
 interface PageProps {
