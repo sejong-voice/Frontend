@@ -1,6 +1,7 @@
-import { Building2, Clock, Pencil } from "lucide-react"
+import { Building2, Clock } from "lucide-react"
 
 interface PetitionOfficialResponseProps {
+  title?: string
   content: string
   respondent: string
   date: string
@@ -8,6 +9,7 @@ interface PetitionOfficialResponseProps {
 }
 
 export function PetitionOfficialResponse({
+  title = "학생회 공식 입장",
   content,
   respondent,
   date,
@@ -16,14 +18,14 @@ export function PetitionOfficialResponse({
   return (
     <section
       className="rounded-lg border-2 border-primary/20 bg-accent/50"
-      aria-label="학생회 공식 입장"
+      aria-label={title}
     >
       <div className="border-b border-primary/10 px-6 py-4 md:px-8">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Building2 className="h-4 w-4 text-primary" />
             <h2 className="text-base font-semibold text-foreground">
-              {"학생회 공식 입장"}
+              {title}
             </h2>
           </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">

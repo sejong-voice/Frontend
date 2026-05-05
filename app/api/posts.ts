@@ -68,7 +68,7 @@ export interface PostReportData {
 }
 
 export interface PostStatementCreateData {
-  finalStatus: "COMPLETED" | "REJECTED";
+  finalStatus?: "COMPLETED" | "REJECTED";
   content: string;
   imageIds: string[];
 }
