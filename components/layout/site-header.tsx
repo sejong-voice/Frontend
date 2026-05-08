@@ -38,7 +38,7 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
         <Link href="/" className="flex items-center gap-2.5">
           <Image
-            src="/sejong-logo.png"
+            src="/sejong-logo.svg"
             alt="세종대학교 로고"
             width={32}
             height={32}

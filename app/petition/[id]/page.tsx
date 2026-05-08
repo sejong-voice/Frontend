@@ -139,7 +139,7 @@ function mapReply(reply: ReplyResponse): ReplyData {
     author: getCommentAuthorLabel(reply.authorName, reply.postAuthor),
     isPostAuthor: reply.postAuthor,
     content: reply.content,
-    date: formatDate(reply.createdAt),
+    date: formatDateTime(reply.createdAt),
     canDelete: reply.canDelete,
     isPlaceholder: false,
   };
@@ -162,7 +162,7 @@ function mapComment(comment: CommentResponse): Comment | null {
       comment.status === "ACTIVE"
         ? comment.content
         : getRootPlaceholderContent(comment.status),
-    date: formatDate(comment.createdAt),
+    date: formatDateTime(comment.createdAt),
     canDelete: comment.canDelete,
     replies: activeReplies.map(mapReply),
     isPlaceholder: comment.status !== "ACTIVE",
@@ -216,6 +216,46 @@ export default function PetitionDetailPage({ params }: PageProps) {
     applyCommentPageResponse(result.data, "replace");
   }, [applyCommentPageResponse, id]);
 
+  const refreshLoadedComments = useCallback(async () => {
+    const loadedComments: Comment[] = [];
+    let lastPageData: CommentPageResponse | null = null;
+
+    for (let page = 0; page <= commentPage; page += 1) {
+      const result = await commentService.getCommentsByPost(id, {
+        page,
+        size: COMMENT_PAGE_SIZE,
+        sort: "createdAt,asc",
+      });
+      const pageData = result.data;
+
+      loadedComments.push(...mapComments(pageData.content));
+      lastPageData = pageData;
+
+      if (pageData.last) {
+        break;
+      }
+    }
+
+    if (!lastPageData) return;
+
+    setComments(loadedComments);
+    setCommentTotalCount(lastPageData.activeCommentCount);
+    setCommentPage(lastPageData.page);
+    setHasMoreComments(!lastPageData.last);
+  }, [commentPage, id]);
+
+  const refreshLoadedCommentsSafely = useCallback(
+    async (failureMessage: string) => {
+      try {
+        await refreshLoadedComments();
+      } catch (error) {
+        console.error("댓글 목록 새로고침 실패:", error);
+        toast.error(failureMessage);
+      }
+    },
+    [refreshLoadedComments],
+  );
+
   const handleLoadMoreComments = useCallback(async () => {
     if (isLoadingMoreComments || !hasMoreComments) return;
 
@@ -255,15 +295,19 @@ export default function PetitionDetailPage({ params }: PageProps) {
           content,
         });
         toast.success("댓글이 등록되었습니다.");
-        await fetchComments();
       } catch (error: any) {
         console.error("댓글 등록 실패:", error);
         toast.error(
           error.response?.data?.message || "댓글 등록에 실패했습니다.",
         );
+        return;
       }
+
+      await refreshLoadedCommentsSafely(
+        "댓글은 등록되었지만 목록을 새로고침하지 못했습니다.",
+      );
     },
-    [fetchComments, id],
+    [id, refreshLoadedCommentsSafely],
   );
 
   const handleCreateReply = useCallback(
@@ -275,15 +319,19 @@ export default function PetitionDetailPage({ params }: PageProps) {
           content,
         });
         toast.success("답글이 등록되었습니다.");
-        await fetchComments();
       } catch (error: any) {
         console.error("답글 등록 실패:", error);
         toast.error(
           error.response?.data?.message || "답글 등록에 실패했습니다.",
         );
+        return;
       }
+
+      await refreshLoadedCommentsSafely(
+        "답글은 등록되었지만 목록을 새로고침하지 못했습니다.",
+      );
     },
-    [fetchComments, id],
+    [id, refreshLoadedCommentsSafely],
   );
 
   const handleDeleteComment = useCallback(
@@ -291,15 +339,19 @@ export default function PetitionDetailPage({ params }: PageProps) {
       try {
         await commentService.deleteComment(commentId);
         toast.success("댓글이 삭제되었습니다.");
-        await fetchComments();
       } catch (error: any) {
         console.error("댓글 삭제 실패:", error);
         toast.error(
           error.response?.data?.message || "댓글 삭제에 실패했습니다.",
         );
+        return;
       }
+
+      await refreshLoadedCommentsSafely(
+        "댓글은 삭제되었지만 목록을 새로고침하지 못했습니다.",
+      );
     },
-    [fetchComments],
+    [refreshLoadedCommentsSafely],
   );
 
   const handleReportComment = useCallback(
