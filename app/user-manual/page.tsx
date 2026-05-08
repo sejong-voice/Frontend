@@ -36,19 +36,29 @@ function ManualCarousel({ images }: { images: ManualImage[] }) {
   const carouselRootRef = useRef<HTMLDivElement>(null)
   const imageRefs = useRef<(HTMLImageElement | null)[]>([])
 
-  const updateArrowTop = useCallback(() => {
+  const updateCarouselLayout = useCallback(() => {
     const root = carouselRootRef.current
-    const image = imageRefs.current[current]
+    const currentImage = imageRefs.current[current]
+    const firstImage = imageRefs.current[0]
 
-    if (!root || !image) return
+    if (!root) return
 
-    const rootRect = root.getBoundingClientRect()
-    const imageRect = image.getBoundingClientRect()
+    if (currentImage) {
+      const currentImageRect = currentImage.getBoundingClientRect()
 
-    if (imageRect.height === 0) return
+      if (currentImageRect.height > 0) {
+        setContentHeight(currentImageRect.height)
+      }
+    }
 
-    setArrowTop(imageRect.top - rootRect.top + imageRect.height / 2)
-    setContentHeight(imageRect.height)
+    if (firstImage) {
+      const rootRect = root.getBoundingClientRect()
+      const firstImageRect = firstImage.getBoundingClientRect()
+
+      if (firstImageRect.height > 0) {
+        setArrowTop(firstImageRect.top - rootRect.top + firstImageRect.height / 2)
+      }
+    }
   }, [current])
 
   useEffect(() => {
@@ -69,35 +79,43 @@ function ManualCarousel({ images }: { images: ManualImage[] }) {
   }, [api])
 
   useEffect(() => {
-    const frame = window.requestAnimationFrame(updateArrowTop)
+    const frame = window.requestAnimationFrame(updateCarouselLayout)
 
     return () => {
       window.cancelAnimationFrame(frame)
     }
-  }, [updateArrowTop])
+  }, [updateCarouselLayout])
 
   useEffect(() => {
-    window.addEventListener("resize", updateArrowTop)
+    window.addEventListener("resize", updateCarouselLayout)
 
     return () => {
-      window.removeEventListener("resize", updateArrowTop)
+      window.removeEventListener("resize", updateCarouselLayout)
     }
-  }, [updateArrowTop])
+  }, [updateCarouselLayout])
 
   useEffect(() => {
     const root = carouselRootRef.current
-    const image = imageRefs.current[current]
+    const currentImage = imageRefs.current[current]
+    const firstImage = imageRefs.current[0]
 
-    if (!root || !image || typeof ResizeObserver === "undefined") return
+    if (!root || typeof ResizeObserver === "undefined") return
 
-    const observer = new ResizeObserver(updateArrowTop)
+    const observer = new ResizeObserver(updateCarouselLayout)
     observer.observe(root)
-    observer.observe(image)
+
+    if (firstImage) {
+      observer.observe(firstImage)
+    }
+
+    if (currentImage && currentImage !== firstImage) {
+      observer.observe(currentImage)
+    }
 
     return () => {
       observer.disconnect()
     }
-  }, [current, updateArrowTop])
+  }, [current, updateCarouselLayout])
 
   useEffect(() => {
     if (!api) return
@@ -153,7 +171,7 @@ function ManualCarousel({ images }: { images: ManualImage[] }) {
                     alt={image.alt}
                     className="block w-full bg-white"
                     draggable={false}
-                    onLoad={updateArrowTop}
+                    onLoad={updateCarouselLayout}
                   />
                 </div>
               </CarouselItem>
