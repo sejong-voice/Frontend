@@ -244,6 +244,18 @@ export default function PetitionDetailPage({ params }: PageProps) {
     setHasMoreComments(!lastPageData.last);
   }, [commentPage, id]);
 
+  const refreshLoadedCommentsSafely = useCallback(
+    async (failureMessage: string) => {
+      try {
+        await refreshLoadedComments();
+      } catch (error) {
+        console.error("댓글 목록 새로고침 실패:", error);
+        toast.error(failureMessage);
+      }
+    },
+    [refreshLoadedComments],
+  );
+
   const handleLoadMoreComments = useCallback(async () => {
     if (isLoadingMoreComments || !hasMoreComments) return;
 
@@ -283,15 +295,19 @@ export default function PetitionDetailPage({ params }: PageProps) {
           content,
         });
         toast.success("댓글이 등록되었습니다.");
-        await refreshLoadedComments();
       } catch (error: any) {
         console.error("댓글 등록 실패:", error);
         toast.error(
           error.response?.data?.message || "댓글 등록에 실패했습니다.",
         );
+        return;
       }
+
+      await refreshLoadedCommentsSafely(
+        "댓글은 등록되었지만 목록을 새로고침하지 못했습니다.",
+      );
     },
-    [id, refreshLoadedComments],
+    [id, refreshLoadedCommentsSafely],
   );
 
   const handleCreateReply = useCallback(
@@ -303,15 +319,19 @@ export default function PetitionDetailPage({ params }: PageProps) {
           content,
         });
         toast.success("답글이 등록되었습니다.");
-        await refreshLoadedComments();
       } catch (error: any) {
         console.error("답글 등록 실패:", error);
         toast.error(
           error.response?.data?.message || "답글 등록에 실패했습니다.",
         );
+        return;
       }
+
+      await refreshLoadedCommentsSafely(
+        "답글은 등록되었지만 목록을 새로고침하지 못했습니다.",
+      );
     },
-    [id, refreshLoadedComments],
+    [id, refreshLoadedCommentsSafely],
   );
 
   const handleDeleteComment = useCallback(
@@ -319,15 +339,19 @@ export default function PetitionDetailPage({ params }: PageProps) {
       try {
         await commentService.deleteComment(commentId);
         toast.success("댓글이 삭제되었습니다.");
-        await refreshLoadedComments();
       } catch (error: any) {
         console.error("댓글 삭제 실패:", error);
         toast.error(
           error.response?.data?.message || "댓글 삭제에 실패했습니다.",
         );
+        return;
       }
+
+      await refreshLoadedCommentsSafely(
+        "댓글은 삭제되었지만 목록을 새로고침하지 못했습니다.",
+      );
     },
-    [refreshLoadedComments],
+    [refreshLoadedCommentsSafely],
   );
 
   const handleReportComment = useCallback(
