@@ -216,6 +216,34 @@ export default function PetitionDetailPage({ params }: PageProps) {
     applyCommentPageResponse(result.data, "replace");
   }, [applyCommentPageResponse, id]);
 
+  const refreshLoadedComments = useCallback(async () => {
+    const loadedComments: Comment[] = [];
+    let lastPageData: CommentPageResponse | null = null;
+
+    for (let page = 0; page <= commentPage; page += 1) {
+      const result = await commentService.getCommentsByPost(id, {
+        page,
+        size: COMMENT_PAGE_SIZE,
+        sort: "createdAt,asc",
+      });
+      const pageData = result.data;
+
+      loadedComments.push(...mapComments(pageData.content));
+      lastPageData = pageData;
+
+      if (pageData.last) {
+        break;
+      }
+    }
+
+    if (!lastPageData) return;
+
+    setComments(loadedComments);
+    setCommentTotalCount(lastPageData.activeCommentCount);
+    setCommentPage(lastPageData.page);
+    setHasMoreComments(!lastPageData.last);
+  }, [commentPage, id]);
+
   const handleLoadMoreComments = useCallback(async () => {
     if (isLoadingMoreComments || !hasMoreComments) return;
 
@@ -255,7 +283,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
           content,
         });
         toast.success("댓글이 등록되었습니다.");
-        await fetchComments();
+        await refreshLoadedComments();
       } catch (error: any) {
         console.error("댓글 등록 실패:", error);
         toast.error(
@@ -263,7 +291,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
         );
       }
     },
-    [fetchComments, id],
+    [id, refreshLoadedComments],
   );
 
   const handleCreateReply = useCallback(
@@ -275,7 +303,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
           content,
         });
         toast.success("답글이 등록되었습니다.");
-        await fetchComments();
+        await refreshLoadedComments();
       } catch (error: any) {
         console.error("답글 등록 실패:", error);
         toast.error(
@@ -283,7 +311,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
         );
       }
     },
-    [fetchComments, id],
+    [id, refreshLoadedComments],
   );
 
   const handleDeleteComment = useCallback(
@@ -291,7 +319,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
       try {
         await commentService.deleteComment(commentId);
         toast.success("댓글이 삭제되었습니다.");
-        await fetchComments();
+        await refreshLoadedComments();
       } catch (error: any) {
         console.error("댓글 삭제 실패:", error);
         toast.error(
@@ -299,7 +327,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
         );
       }
     },
-    [fetchComments],
+    [refreshLoadedComments],
   );
 
   const handleReportComment = useCallback(
