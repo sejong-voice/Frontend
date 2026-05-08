@@ -12,7 +12,7 @@ export function LoginScreen() {
         <div className="mb-10 flex flex-col items-center gap-4">
           <Link href="/" aria-label="메인 페이지로 이동">
             <Image
-              src="/sejong-logo.png"
+              src="/sejong-logo.svg"
               alt="세종대학교 로고"
               width={72}
               height={72}
