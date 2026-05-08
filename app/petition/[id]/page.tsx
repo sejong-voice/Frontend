@@ -139,7 +139,7 @@ function mapReply(reply: ReplyResponse): ReplyData {
     author: getCommentAuthorLabel(reply.authorName, reply.postAuthor),
     isPostAuthor: reply.postAuthor,
     content: reply.content,
-    date: formatDate(reply.createdAt),
+    date: formatDateTime(reply.createdAt),
     canDelete: reply.canDelete,
     isPlaceholder: false,
   };
@@ -162,7 +162,7 @@ function mapComment(comment: CommentResponse): Comment | null {
       comment.status === "ACTIVE"
         ? comment.content
         : getRootPlaceholderContent(comment.status),
-    date: formatDate(comment.createdAt),
+    date: formatDateTime(comment.createdAt),
     canDelete: comment.canDelete,
     replies: activeReplies.map(mapReply),
     isPlaceholder: comment.status !== "ACTIVE",
