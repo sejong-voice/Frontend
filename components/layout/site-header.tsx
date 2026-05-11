@@ -1,33 +1,29 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { LogIn, LogOut, User } from "lucide-react"
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { LogIn, LogOut, User } from "lucide-react";
 
-const publicNavItems = [
-  { label: "전체 청원", href: "/" },
-]
+const publicNavItems = [{ label: "전체 청원", href: "/" }];
 
-const authNavItems = [
-  { label: "내 청원", href: "/my-petitions" },
-]
+const authNavItems = [{ label: "내 청원", href: "/my-petitions" }];
 
 const adminNavItems = [
   { label: "청원 관리", href: "/admin/petitions" },
   { label: "투표 통계", href: "/admin/statistics" },
-]
+];
 
 interface SiteHeaderProps {
-  userName?: string | null
-  onLogout?: () => void
-  isAdmin?: boolean
+  userName?: string | null;
+  onLogout?: () => void;
+  isAdmin?: boolean;
 }
 
 export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   return (
     <header className="border-b border-border bg-card">
@@ -44,6 +40,9 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
             {"세종 신문고"}
           </span>
         </Link>
+        <span className="text-sm tracking-tight text-foreground text-gray-500">
+          {"현재는 베타버전 입니다. 문의사항은 개발자에게 알려주세요."}
+        </span>
 
         <div className="flex items-center gap-4">
           <nav
@@ -59,7 +58,7 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
                   "rounded-md px-3 py-2 text-sm font-medium transition-colors hidden md:inline-flex",
                   pathname === item.href
                     ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
                 )}
               >
                 {item.label}
@@ -67,36 +66,39 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
             ))}
 
             {/* Auth items (only for regular students) */}
-            {userName && !isAdmin && authNavItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                  pathname === item.href
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {userName &&
+              !isAdmin &&
+              authNavItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    pathname === item.href
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ))}
 
             {/* Admin items */}
-            {isAdmin && adminNavItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                  pathname === item.href
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {isAdmin &&
+              adminNavItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    pathname === item.href
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ))}
           </nav>
 
           {userName ? (
@@ -126,5 +128,5 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
         </div>
       </div>
     </header>
-  )
+  );
 }
