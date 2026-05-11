@@ -77,7 +77,7 @@ export function FilterBar({
                   aria-selected={activeStatus === status.value}
                   onClick={() => onStatusChange(status.value)}
                   className={cn(
-                    "rounded-md px-3.5 py-2 text-sm font-medium transition-colors",
+                    "rounded-md px-3.5 py-2 text-sm font-medium whitespace-nowrap transition-colors",
                     activeStatus === status.value
                       ? "bg-foreground text-background"
                       : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
@@ -96,7 +96,7 @@ export function FilterBar({
                 aria-selected={activeCategoryId === "ALL" || !activeCategoryId}
                 onClick={() => onCategoryChange("ALL")}
                 className={cn(
-                  "rounded-md px-3.5 py-2 text-sm font-medium transition-colors",
+                  "rounded-md px-3.5 py-2 text-sm font-medium whitespace-nowrap transition-colors",
                   activeCategoryId === "ALL" || !activeCategoryId
                     ? "bg-foreground text-background"
                     : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
@@ -111,7 +111,7 @@ export function FilterBar({
                   aria-selected={activeCategoryId === c.id}
                   onClick={() => onCategoryChange(c.id)}
                   className={cn(
-                    "rounded-md px-3.5 py-2 text-sm font-medium transition-colors",
+                    "rounded-md px-3.5 py-2 text-sm font-medium whitespace-nowrap transition-colors",
                     activeCategoryId === c.id
                       ? "bg-foreground text-background"
                       : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"

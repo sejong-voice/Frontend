@@ -31,8 +31,12 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
 
   return (
     <header className="border-b border-border bg-card">
+      {/* 모바일 베타 배너 */}
+      <div className="md:hidden border-b border-border bg-muted/50 px-4 py-1.5 text-center text-xs text-muted-foreground">
+        {"현재는 베타버전 입니다. 문의사항은 개발자에게 알려주세요."}
+      </div>
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
-        <Link href="/" className="flex items-center gap-2.5">
+        <Link href="/" className="flex shrink-0 items-center gap-2.5">
           <Image
             src="/sejong-logo.svg"
             alt="세종대학교 로고"
@@ -44,11 +48,11 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
             {"세종 신문고"}
           </span>
         </Link>
-        <span className="text-sm tracking-tight text-foreground text-gray-500">
+        <span className="hidden md:block min-w-0 flex-1 truncate px-4 text-center text-sm tracking-tight text-gray-500">
           {"현재는 베타버전 입니다. 문의사항은 개발자에게 알려주세요."}
         </span>
 
-        <div className="flex items-center gap-4">
+        <div className="flex shrink-0 items-center gap-2 md:gap-4">
           <nav
             className="flex items-center gap-0.5 md:gap-1"
             aria-label="메인 메뉴"
@@ -59,7 +63,7 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium transition-colors hidden md:inline-flex",
+                  "hidden md:inline-flex rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors",
                   pathname === item.href
                     ? "bg-accent text-accent-foreground"
                     : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
@@ -77,7 +81,7 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                    "rounded-md px-2 md:px-3 py-1.5 md:py-2 text-sm font-medium whitespace-nowrap transition-colors",
                     pathname === item.href
                       ? "bg-accent text-accent-foreground"
                       : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
@@ -88,30 +92,31 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
               ))}
 
             {/* Admin items */}
-            {isAdmin && adminNavItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                  pathname === item.href
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
+            {isAdmin &&
+              adminNavItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={cn(
+                    "rounded-md px-2 md:px-3 py-1.5 md:py-2 text-sm font-medium whitespace-nowrap transition-colors",
+                    pathname === item.href
+                      ? "bg-accent text-accent-foreground"
+                      : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+                  )}
+                >
+                  {item.label}
+                </Link>
+              ))}
 
             {supportNavItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "hidden rounded-md px-3 py-2 text-sm font-medium transition-colors md:inline-flex",
+                  "hidden md:inline-flex rounded-md px-2 md:px-3 py-1.5 md:py-2 text-sm font-medium whitespace-nowrap transition-colors",
                   pathname === item.href
                     ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
                 )}
               >
                 {item.label}

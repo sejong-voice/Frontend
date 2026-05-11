@@ -96,7 +96,7 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
                       {statusInfo.label}
                     </Badge>
                   </div>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="truncate text-xs text-muted-foreground">
                     {petition.categoryName || "기타"}
                   </span>
                   <span className="truncate text-sm font-medium text-foreground">
@@ -119,14 +119,14 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
 
                 {/* Mobile row */}
                 <div className="flex flex-col gap-2 px-5 py-4 md:hidden">
-                  <div className="flex items-center gap-2">
+                  <div className="flex min-w-0 items-center gap-2">
                     <Badge
                       variant="outline"
-                      className={cn("text-xs font-medium", statusInfo.style)}
+                      className={cn("shrink-0 text-xs font-medium", statusInfo.style)}
                     >
                       {statusInfo.label}
                     </Badge>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="truncate text-xs text-muted-foreground">
                       {petition.categoryName || "기타"}
                     </span>
                   </div>

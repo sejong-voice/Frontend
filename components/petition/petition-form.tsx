@@ -166,7 +166,7 @@ export function PetitionForm() {
   return (
     <div className="flex flex-col gap-8">
       {/* Author info */}
-      <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-3">
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card px-4 py-3">
         <User className="h-4 w-4 text-muted-foreground" />
         <span className="text-sm text-muted-foreground">{"작성자"}</span>
         <span className="text-sm font-medium text-foreground">{user?.name}</span>
@@ -222,7 +222,7 @@ export function PetitionForm() {
                   type="button"
                   onClick={() => setResultStatus("COMPLETED")}
                   className={cn(
-                    "rounded-md border px-4 py-2 text-sm font-medium transition-colors",
+                    "rounded-md border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors",
                     resultStatus === "COMPLETED"
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-border bg-card text-muted-foreground hover:border-foreground/20 hover:text-foreground"
@@ -234,7 +234,7 @@ export function PetitionForm() {
                   type="button"
                   onClick={() => setResultStatus("REJECTED")}
                   className={cn(
-                    "rounded-md border px-4 py-2 text-sm font-medium transition-colors",
+                    "rounded-md border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors",
                     resultStatus === "REJECTED"
                       ? "border-secondary-foreground bg-secondary-foreground text-background"
                       : "border-border bg-card text-muted-foreground hover:border-foreground/20 hover:text-foreground"
@@ -261,7 +261,7 @@ export function PetitionForm() {
                   type="button"
                   onClick={() => setCategory(cat.id)}
                   className={cn(
-                    "rounded-md border px-4 py-2 text-sm font-medium transition-colors",
+                    "rounded-md border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors",
                     category === cat.id
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-border bg-card text-muted-foreground hover:border-foreground/20 hover:text-foreground"
