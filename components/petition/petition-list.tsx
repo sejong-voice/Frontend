@@ -96,7 +96,7 @@ export function PetitionList({ petitions, from = "all" }: PetitionListProps) {
                       {statusInfo.label}
                     </Badge>
                   </div>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="truncate text-xs text-muted-foreground">
                     {petition.categoryName || "기타"}
                   </span>
                   <span className="truncate text-sm font-medium text-foreground">
