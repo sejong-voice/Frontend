@@ -278,26 +278,26 @@ export function PetitionDetailHeader({
           <p className="text-xs text-destructive">{reportError}</p>
         )}
 
-        <h1 className="text-balance text-2xl font-bold tracking-tight text-foreground">
+        <h1 className="text-balance text-xl sm:text-2xl font-bold tracking-tight text-foreground">
           {title}
         </h1>
 
         <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-muted-foreground">
           <span className="flex items-center gap-1.5">
-            <User className="h-3.5 w-3.5" />
+            <User className="h-3.5 w-3.5 shrink-0" />
             {userName || studentId}
           </span>
           <span className="flex items-center gap-1.5">
-            <Calendar className="h-3.5 w-3.5" />
+            <Calendar className="h-3.5 w-3.5 shrink-0" />
             {date}
           </span>
-          <span className="flex items-center gap-1.5">
-            <Building2 className="h-3.5 w-3.5" />
-            {council}
+          <span className="flex min-w-0 items-center gap-1.5">
+            <Building2 className="h-3.5 w-3.5 shrink-0" />
+            <span className="break-words">{council}</span>
           </span>
-          <span className="flex items-center gap-1.5">
-            <Folder className="h-3.5 w-3.5" />
-            {category}
+          <span className="flex min-w-0 items-center gap-1.5">
+            <Folder className="h-3.5 w-3.5 shrink-0" />
+            <span className="break-words">{category}</span>
           </span>
         </div>
       </div>
