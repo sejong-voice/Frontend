@@ -14,6 +14,7 @@ import {
   Reply,
   Send,
   Trash2,
+  User,
 } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -31,6 +32,7 @@ import { cn } from "@/lib/utils"
 export interface ReplyData {
   id: string
   author: string
+  isPostAuthor?: boolean
   content: string
   date: string
   canDelete: boolean
@@ -40,6 +42,7 @@ export interface ReplyData {
 export interface Comment {
   id: string
   author: string
+  isPostAuthor?: boolean
   content: string
   date: string
   canDelete: boolean
@@ -164,13 +167,20 @@ function CommentItem({
   return (
     <div className={cn("flex gap-3", isReply && "ml-10 md:ml-12")}>
       <Avatar className="h-8 w-8 shrink-0">
-        <AvatarFallback className="bg-secondary text-xs text-muted-foreground">
-          {comment.author.slice(0, 1)}
+        <AvatarFallback
+          className="bg-secondary text-muted-foreground"
+        >
+          <User className="h-4 w-4" aria-hidden="true" />
         </AvatarFallback>
       </Avatar>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-foreground">
+          <span
+            className={cn(
+              "text-sm font-medium",
+              comment.isPostAuthor ? "text-primary" : "text-foreground"
+            )}
+          >
             {comment.author}
           </span>
           <span className="text-xs text-muted-foreground">{comment.date}</span>

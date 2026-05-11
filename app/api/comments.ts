@@ -4,7 +4,7 @@ export type CommentStatus = "ACTIVE" | "DELETED" | "BLINDED";
 
 export interface ReplyResponse {
   id: string;
-  anonymousNumber: number | null;
+  authorName: string;
   postAuthor: boolean;
   content: string;
   status: CommentStatus;
@@ -14,7 +14,7 @@ export interface ReplyResponse {
 
 export interface CommentResponse {
   id: string;
-  anonymousNumber: number | null;
+  authorName: string;
   content: string;
   status: CommentStatus;
   postAuthor: boolean;

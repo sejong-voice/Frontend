@@ -1,9 +1,7 @@
 "use client";
 
 import { use, useCallback, useEffect, useState } from "react";
-import Link from "next/link";
-import { Loader2, BarChart3 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 import {
   commentService,
   type CommentPageResponse,
@@ -33,10 +31,7 @@ import { PetitionOfficialResponse } from "@/components/petition/petition-officia
 import { PetitionStatusBanner } from "@/components/petition/petition-status-banner";
 import { PetitionVote } from "@/components/petition/petition-vote";
 import { PetitionActions } from "@/components/petition/petition-actions";
-import { ImageUploader } from "@/components/petition/image-uploader";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 interface PetitionDetailResponse {
@@ -45,11 +40,12 @@ interface PetitionDetailResponse {
   userStudentNo: string;
   councilId: string;
   councilName: string;
-  categoryId: string;
-  categoryName: string;
   title: string;
   content: string;
   status: PetitionStatus;
+  categoryName?: string;
+  canVote?: boolean;
+  canCloseEarly?: boolean;
   createdAt: string;
   votingEndAt: string;
   images?: { imageId: string; imageUrl: string }[];
@@ -57,15 +53,20 @@ interface PetitionDetailResponse {
   resultImages?: { imageId: string; imageUrl: string }[];
   resultCreatedAt?: string;
   resultUpdatedAt?: string;
-  canCloseEarly?: boolean;
-  canVote?: boolean;
+  statements?: {
+    id: string;
+    sequence: number;
+    content: string;
+    createdAt: string;
+    images?: { imageId: string; imageUrl: string }[];
+  }[];
 }
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-const ANONYMOUS_LABEL = "익명";
+const POST_AUTHOR_LABEL = "익명(글쓴이)";
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -100,19 +101,24 @@ function formatDateTime(value: string) {
   return `${year}.${month}.${day} ${hours}:${minutes}`;
 }
 
-function getAnonymousAuthorLabel(
-  anonymousNumber: number | null,
-  postAuthor: boolean,
-) {
+function getStatementTitle(sequence: number) {
+  if (sequence <= 1) {
+    return "1차 입장문";
+  }
+
+  if (sequence === 2) {
+    return "추가 입장문";
+  }
+
+  return `${sequence}차 입장문`;
+}
+
+function getCommentAuthorLabel(authorName: string | undefined, postAuthor: boolean) {
   if (postAuthor) {
-    return "익명(글쓴이)";
+    return POST_AUTHOR_LABEL;
   }
 
-  if (typeof anonymousNumber === "number") {
-    return `익명${anonymousNumber}`;
-  }
-
-  return "익명";
+  return authorName?.trim() || "익명";
 }
 
 function getRootPlaceholderContent(status: CommentResponse["status"]) {
@@ -130,9 +136,10 @@ function getRootPlaceholderContent(status: CommentResponse["status"]) {
 function mapReply(reply: ReplyResponse): ReplyData {
   return {
     id: reply.id,
-    author: getAnonymousAuthorLabel(reply.anonymousNumber, reply.postAuthor),
+    author: getCommentAuthorLabel(reply.authorName, reply.postAuthor),
+    isPostAuthor: reply.postAuthor,
     content: reply.content,
-    date: formatDate(reply.createdAt),
+    date: formatDateTime(reply.createdAt),
     canDelete: reply.canDelete,
     isPlaceholder: false,
   };
@@ -149,15 +156,13 @@ function mapComment(comment: CommentResponse): Comment | null {
 
   return {
     id: comment.id,
-    author: getAnonymousAuthorLabel(
-      comment.anonymousNumber,
-      comment.postAuthor,
-    ),
+    author: getCommentAuthorLabel(comment.authorName, comment.postAuthor),
+    isPostAuthor: comment.postAuthor,
     content:
       comment.status === "ACTIVE"
         ? comment.content
         : getRootPlaceholderContent(comment.status),
-    date: formatDate(comment.createdAt),
+    date: formatDateTime(comment.createdAt),
     canDelete: comment.canDelete,
     replies: activeReplies.map(mapReply),
     isPlaceholder: comment.status !== "ACTIVE",
@@ -211,6 +216,46 @@ export default function PetitionDetailPage({ params }: PageProps) {
     applyCommentPageResponse(result.data, "replace");
   }, [applyCommentPageResponse, id]);
 
+  const refreshLoadedComments = useCallback(async () => {
+    const loadedComments: Comment[] = [];
+    let lastPageData: CommentPageResponse | null = null;
+
+    for (let page = 0; page <= commentPage; page += 1) {
+      const result = await commentService.getCommentsByPost(id, {
+        page,
+        size: COMMENT_PAGE_SIZE,
+        sort: "createdAt,asc",
+      });
+      const pageData = result.data;
+
+      loadedComments.push(...mapComments(pageData.content));
+      lastPageData = pageData;
+
+      if (pageData.last) {
+        break;
+      }
+    }
+
+    if (!lastPageData) return;
+
+    setComments(loadedComments);
+    setCommentTotalCount(lastPageData.activeCommentCount);
+    setCommentPage(lastPageData.page);
+    setHasMoreComments(!lastPageData.last);
+  }, [commentPage, id]);
+
+  const refreshLoadedCommentsSafely = useCallback(
+    async (failureMessage: string) => {
+      try {
+        await refreshLoadedComments();
+      } catch (error) {
+        console.error("댓글 목록 새로고침 실패:", error);
+        toast.error(failureMessage);
+      }
+    },
+    [refreshLoadedComments],
+  );
+
   const handleLoadMoreComments = useCallback(async () => {
     if (isLoadingMoreComments || !hasMoreComments) return;
 
@@ -250,15 +295,19 @@ export default function PetitionDetailPage({ params }: PageProps) {
           content,
         });
         toast.success("댓글이 등록되었습니다.");
-        await fetchComments();
       } catch (error: any) {
         console.error("댓글 등록 실패:", error);
         toast.error(
           error.response?.data?.message || "댓글 등록에 실패했습니다.",
         );
+        return;
       }
+
+      await refreshLoadedCommentsSafely(
+        "댓글은 등록되었지만 목록을 새로고침하지 못했습니다.",
+      );
     },
-    [fetchComments, id],
+    [id, refreshLoadedCommentsSafely],
   );
 
   const handleCreateReply = useCallback(
@@ -270,15 +319,19 @@ export default function PetitionDetailPage({ params }: PageProps) {
           content,
         });
         toast.success("답글이 등록되었습니다.");
-        await fetchComments();
       } catch (error: any) {
         console.error("답글 등록 실패:", error);
         toast.error(
           error.response?.data?.message || "답글 등록에 실패했습니다.",
         );
+        return;
       }
+
+      await refreshLoadedCommentsSafely(
+        "답글은 등록되었지만 목록을 새로고침하지 못했습니다.",
+      );
     },
-    [fetchComments, id],
+    [id, refreshLoadedCommentsSafely],
   );
 
   const handleDeleteComment = useCallback(
@@ -286,15 +339,19 @@ export default function PetitionDetailPage({ params }: PageProps) {
       try {
         await commentService.deleteComment(commentId);
         toast.success("댓글이 삭제되었습니다.");
-        await fetchComments();
       } catch (error: any) {
         console.error("댓글 삭제 실패:", error);
         toast.error(
           error.response?.data?.message || "댓글 삭제에 실패했습니다.",
         );
+        return;
       }
+
+      await refreshLoadedCommentsSafely(
+        "댓글은 삭제되었지만 목록을 새로고침하지 못했습니다.",
+      );
     },
-    [fetchComments],
+    [refreshLoadedCommentsSafely],
   );
 
   const handleReportComment = useCallback(
@@ -455,14 +512,37 @@ export default function PetitionDetailPage({ params }: PageProps) {
 
   const canReportPost = !!user && petition.userId !== user.id;
   const isAuthor = !!user && petition.userId === user.id;
-  const shouldShowOfficialResponse =
-    (petition.status === "COMPLETED" || petition.status === "REJECTED") &&
-    (!!petition.resultContent?.trim() || (petition.resultImages && petition.resultImages.length > 0));
-  const officialResponseDateSource =
+  const sortedStatements = [...(petition.statements || [])].sort(
+    (a, b) => a.sequence - b.sequence,
+  );
+  const statementResponses = sortedStatements.map((statement) => ({
+    id: statement.id,
+    title: getStatementTitle(statement.sequence),
+    content: statement.content,
+    images: statement.images,
+    date: statement.createdAt ? `게시 ${formatDateTime(statement.createdAt)}` : "-",
+  }));
+  const legacyOfficialResponseContent = petition.resultContent ?? "";
+  const legacyOfficialResponseDateSource =
     petition.resultCreatedAt || petition.resultUpdatedAt || "";
-  const officialResponseDate = officialResponseDateSource
-    ? `게시 ${formatDateTime(officialResponseDateSource)}`
-    : "-";
+  const officialResponses =
+    statementResponses.length > 0
+      ? statementResponses
+      : legacyOfficialResponseContent.trim()
+        ? [
+            {
+              id: "legacy-result",
+              title: "학생회 공식 입장",
+              content: legacyOfficialResponseContent,
+              images: petition.resultImages,
+              date: legacyOfficialResponseDateSource
+                ? `게시 ${formatDateTime(legacyOfficialResponseDateSource)}`
+                : "-",
+            },
+          ]
+        : [];
+  const statementCount = officialResponses.length;
+  const shouldShowOfficialResponses = statementCount > 0;
 
   return (
     <div className="min-h-screen bg-background">
@@ -503,22 +583,29 @@ export default function PetitionDetailPage({ params }: PageProps) {
             </div>
           )}
 
+          {shouldShowOfficialResponses && (
+            <div className="flex flex-col gap-4">
+              {officialResponses.map((response) => (
+                <PetitionOfficialResponse
+                  key={response.id}
+                  title={response.title}
+                  content={response.content}
+                  respondent={petition.councilName || "담당 학생회"}
+                  date={response.date}
+                  images={response.images}
+                />
+              ))}
+            </div>
+          )}
+
           <PetitionActions
             petitionId={id}
             status={petition.status}
             isAuthor={isAuthor}
             canManageAsAdmin={canManageAsAdmin}
+            statementCount={statementCount}
             totalVotes={voteSummary?.totalCount || 0}
           />
-
-          {shouldShowOfficialResponse && (
-            <PetitionOfficialResponse
-              content={petition.resultContent ?? ""}
-              respondent={petition.councilName || "담당 학생회"}
-              date={officialResponseDate}
-              images={petition.resultImages}
-            />
-          )}
 
           <Separator />
 

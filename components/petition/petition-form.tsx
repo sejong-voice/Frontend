@@ -135,8 +135,8 @@ export function PetitionForm() {
     try {
       if (isAdmin) {
         await postService.submitPostResult(selectedPostId, {
-          status: resultStatus,
-          resultContent: content,
+          finalStatus: resultStatus,
+          content,
           imageIds: images.map((img) => img.imageId),
         })
       } else {

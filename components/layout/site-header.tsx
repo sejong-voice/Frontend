@@ -16,6 +16,10 @@ const adminNavItems = [
   { label: "투표 통계", href: "/admin/statistics" },
 ];
 
+const supportNavItems = [
+  { label: "사용 매뉴얼", href: "/user-manual" },
+]
+
 interface SiteHeaderProps {
   userName?: string | null;
   onLogout?: () => void;
@@ -30,7 +34,7 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
         <Link href="/" className="flex items-center gap-2.5">
           <Image
-            src="/sejong-logo.png"
+            src="/sejong-logo.svg"
             alt="세종대학교 로고"
             width={32}
             height={32}
@@ -84,21 +88,35 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
               ))}
 
             {/* Admin items */}
-            {isAdmin &&
-              adminNavItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                    pathname === item.href
-                      ? "bg-accent text-accent-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
-                  )}
-                >
-                  {item.label}
-                </Link>
-              ))}
+            {isAdmin && adminNavItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                  pathname === item.href
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
+
+            {supportNavItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "hidden rounded-md px-3 py-2 text-sm font-medium transition-colors md:inline-flex",
+                  pathname === item.href
+                    ? "bg-accent text-accent-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                )}
+              >
+                {item.label}
+              </Link>
+            ))}
           </nav>
 
           {userName ? (
