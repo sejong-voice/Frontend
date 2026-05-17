@@ -26,10 +26,23 @@ interface PetitionVoteProps extends VoteSummaryResponse {
   onVote?: (choice: VoteChoice) => Promise<void>
 }
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value)
+}
+
+function formatRatioPercent(value: number) {
+  const percent = value <= 1 ? value * 100 : value
+  return Math.round(percent)
+}
+
 export function PetitionVote({
   agreeCount,
   disagreeCount,
   totalCount,
+  minVote,
+  remainingVotesToMinVote,
+  requiredAgreeRatio,
+  agreeRatio,
   isActive,
   canVote = true,
   myVoteChoice = null,
@@ -51,6 +64,20 @@ export function PetitionVote({
   const actualTotalVotes = agreeCount + disagreeCount
   const agreePercent = actualTotalVotes > 0 ? Math.round((agreeCount / actualTotalVotes) * 100) : 0
   const disagreePercent = actualTotalVotes > 0 ? 100 - agreePercent : 0
+  const hasApprovalCriteria =
+    isFiniteNumber(minVote) &&
+    isFiniteNumber(remainingVotesToMinVote) &&
+    isFiniteNumber(requiredAgreeRatio) &&
+    isFiniteNumber(agreeRatio)
+  const remainingVoteCount = hasApprovalCriteria
+    ? Math.max(remainingVotesToMinVote, 0)
+    : 0
+  const currentAgreeRatioPercent = hasApprovalCriteria
+    ? formatRatioPercent(agreeRatio)
+    : agreePercent
+  const requiredAgreeRatioPercent = hasApprovalCriteria
+    ? formatRatioPercent(requiredAgreeRatio)
+    : 0
   const votingEndDate = votingEndAt
     ? new Intl.DateTimeFormat("ko-KR", {
         year: "numeric",
@@ -161,6 +188,19 @@ export function PetitionVote({
               <span>반대 {disagreeCount}표</span>
             </div>
           </div>
+
+          {hasApprovalCriteria && (
+            <div className="flex flex-col gap-1.5 rounded-md bg-secondary/60 px-4 py-3 text-xs leading-relaxed text-muted-foreground">
+              <p>
+                <span className="font-medium text-foreground">최소 투표수</span>{" "}
+                {actualTotalVotes} / {minVote}표 · {remainingVoteCount}표 더 필요
+              </p>
+              <p>
+                <span className="font-medium text-foreground">찬성률</span>{" "}
+                {currentAgreeRatioPercent}% / 기준 {requiredAgreeRatioPercent}%
+              </p>
+            </div>
+          )}
 
           {isActive ? (
             isAdmin ? (

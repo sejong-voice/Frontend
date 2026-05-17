@@ -86,6 +86,10 @@ export interface VoteSummaryResponse {
   agreeCount: number;
   disagreeCount: number;
   totalCount: number;
+  minVote?: number;
+  remainingVotesToMinVote?: number;
+  requiredAgreeRatio?: number;
+  agreeRatio?: number;
 }
 
 export interface VoteRequest {
