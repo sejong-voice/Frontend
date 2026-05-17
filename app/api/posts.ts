@@ -1,5 +1,5 @@
 import { api } from "./axios";
-import { Petition } from "@/components/petition/petition-list";
+import type { Petition, PetitionStatus } from "@/components/petition/petition-list";
 
 export interface GetPostsParams {
   page?: number;
@@ -27,6 +27,46 @@ export interface PaginatedResponse<T> {
 
 export type PostVotingDuration = "ONE_WEEK" | "TWO_WEEK" | "FOUR_WEEK";
 
+export type VoteChoice = "AGREE" | "DISAGREE";
+
+export interface PostImageResponse {
+  imageId: string;
+  imageUrl: string;
+}
+
+export interface PostStatementResponse {
+  id: string;
+  sequence: number;
+  content: string;
+  createdAt: string;
+  images?: PostImageResponse[];
+}
+
+export interface PostDetailResponse {
+  id: string;
+  userId: string;
+  userStudentNo: string;
+  councilId: string;
+  councilName: string;
+  categoryId: string;
+  categoryName: string;
+  title: string;
+  content: string;
+  status: PetitionStatus;
+  postVotingDuration: PostVotingDuration;
+  canVote?: boolean;
+  canCloseEarly?: boolean;
+  myVoteChoice?: VoteChoice | null;
+  createdAt: string;
+  votingEndAt: string;
+  images?: PostImageResponse[];
+  resultContent?: string;
+  resultImages?: PostImageResponse[];
+  resultCreatedAt?: string;
+  resultUpdatedAt?: string;
+  statements?: PostStatementResponse[];
+}
+
 export interface CreatePostData {
   title: string;
   content: string;
@@ -46,9 +86,11 @@ export interface VoteSummaryResponse {
   agreeCount: number;
   disagreeCount: number;
   totalCount: number;
+  minVote?: number;
+  remainingVotesToMinVote?: number;
+  requiredAgreeRatio?: number;
+  agreeRatio?: number;
 }
-
-export type VoteChoice = "AGREE" | "DISAGREE";
 
 export interface VoteRequest {
   choice: VoteChoice;
@@ -100,7 +142,7 @@ export const postService = {
   },
 
   getPost: async (id: string) => {
-    return api.get<Petition>(`/api/v1/posts/${id}`);
+    return api.get<PostDetailResponse>(`/api/v1/posts/${id}`);
   },
 
   getVoteSummary: async (id: string) => {
