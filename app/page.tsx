@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, Suspense, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { ConnectedHeader } from "@/components/layout/connected-header";
+import { NoticeModal } from "@/components/layout/notice-modal";
 import { PageHeader } from "@/components/layout/page-header";
 import { FilterBar } from "@/components/petition/filter-bar";
 import {
@@ -286,6 +287,7 @@ function DashboardContent() {
 export default function Page() {
   return (
     <div className="min-h-screen bg-background">
+      <NoticeModal />
       <ConnectedHeader />
       <main className="mx-auto max-w-5xl px-6 py-8">
         <Suspense
