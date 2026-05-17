@@ -11,6 +11,7 @@ import {
 } from "@/app/api/comments";
 import {
   postService,
+  type PostDetailResponse,
   type PostReportReason,
   type VoteChoice,
   type VoteSummaryResponse,
@@ -25,7 +26,6 @@ import {
 } from "@/components/petition/petition-comments";
 import {
   PetitionDetailHeader,
-  type PetitionStatus,
 } from "@/components/petition/petition-detail-header";
 import { PetitionOfficialResponse } from "@/components/petition/petition-official-response";
 import { PetitionStatusBanner } from "@/components/petition/petition-status-banner";
@@ -33,34 +33,6 @@ import { PetitionVote } from "@/components/petition/petition-vote";
 import { PetitionActions } from "@/components/petition/petition-actions";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-
-interface PetitionDetailResponse {
-  id: string;
-  userId: string;
-  userStudentNo: string;
-  councilId: string;
-  councilName: string;
-  title: string;
-  content: string;
-  status: PetitionStatus;
-  categoryName?: string;
-  canVote?: boolean;
-  canCloseEarly?: boolean;
-  createdAt: string;
-  votingEndAt: string;
-  images?: { imageId: string; imageUrl: string }[];
-  resultContent?: string;
-  resultImages?: { imageId: string; imageUrl: string }[];
-  resultCreatedAt?: string;
-  resultUpdatedAt?: string;
-  statements?: {
-    id: string;
-    sequence: number;
-    content: string;
-    createdAt: string;
-    images?: { imageId: string; imageUrl: string }[];
-  }[];
-}
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -180,7 +152,7 @@ const COMMENT_PAGE_SIZE = 20;
 export default function PetitionDetailPage({ params }: PageProps) {
   const { id } = use(params);
   const { user, isAdmin } = useAuth();
-  const [petition, setPetition] = useState<PetitionDetailResponse | null>(null);
+  const [petition, setPetition] = useState<PostDetailResponse | null>(null);
   const [voteSummary, setVoteSummary] = useState<VoteSummaryResponse | null>(
     null,
   );
@@ -438,7 +410,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
           throw postResult.reason;
         }
 
-        setPetition(postResult.value.data as PetitionDetailResponse);
+        setPetition(postResult.value.data);
 
         if (voteSummaryResult.status === "fulfilled") {
           setVoteSummary(voteSummaryResult.value.data);
@@ -577,6 +549,7 @@ export default function PetitionDetailPage({ params }: PageProps) {
                 {...voteSummary}
                 isActive={petition.status === "VOTING"}
                 canVote={petition.canVote}
+                myVoteChoice={petition.myVoteChoice ?? null}
                 votingEndAt={petition.votingEndAt}
                 onVote={handleVote}
               />
