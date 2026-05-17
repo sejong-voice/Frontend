@@ -34,9 +34,14 @@ export function NoticeModal() {
   if (!mounted || !isOpen) return null;
 
   return (
-    <div className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-[450px] translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-2xl sm:rounded-lg animate-in fade-in-0 zoom-in-95 duration-200">
+    <div 
+      role="dialog"
+      aria-modal="false"
+      aria-labelledby="notice-title"
+      className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-[450px] translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-2xl sm:rounded-lg animate-in fade-in-0 zoom-in-95 duration-200"
+    >
       <div className="flex flex-col space-y-1.5 text-center sm:text-left">
-        <h2 className="text-xl font-bold tracking-tight">공지사항</h2>
+        <h2 id="notice-title" className="text-xl font-bold tracking-tight">공지사항</h2>
       </div>
 
       <button
