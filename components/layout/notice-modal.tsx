@@ -68,6 +68,15 @@ export function NoticeModal() {
           </p>
         </div>
 
+        <div className="bg-primary/10 border-l-4 border-primary p-3 rounded-r-lg text-[13.5px] leading-relaxed">
+          <p>
+            현재 참여가 확정되지 않은 학생회 소속 청원은 실제 안건 처리 대상이 아니므로, <strong className="text-primary">임시로 승인 기준이 높게 설정</strong>되어 있습니다.
+          </p>
+          <p className="mt-1 text-muted-foreground text-[13px]">
+            참여 학생회가 확정되면 해당 소속 청원은 정상 기준으로 운영될 예정입니다.
+          </p>
+        </div>
+
 
         <div className="bg-muted/40 p-3 rounded-lg text-[13px] mt-1 space-y-1">
           <p>💡 학교생활 중 개선되었으면 하는 부분이 있다면 세종 신문고에 청원으로 남겨주세요.</p>
