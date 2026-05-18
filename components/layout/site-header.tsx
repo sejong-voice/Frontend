@@ -31,10 +31,7 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
 
   return (
     <header className="border-b border-border bg-card">
-      {/* 모바일 베타 배너 */}
-      <div className="md:hidden border-b border-border bg-muted/50 px-4 py-1.5 text-center text-xs text-muted-foreground">
-        {"현재는 베타버전 입니다. 문의사항은 개발자에게 알려주세요."}
-      </div>
+
       <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
         <Link href="/" className="flex shrink-0 items-center gap-2.5">
           <Image
@@ -48,9 +45,7 @@ export function SiteHeader({ userName, onLogout, isAdmin }: SiteHeaderProps) {
             {"세종 신문고"}
           </span>
         </Link>
-        <span className="hidden md:block min-w-0 flex-1 truncate px-4 text-center text-sm tracking-tight text-gray-500">
-          {"현재는 베타버전 입니다. 문의사항은 개발자에게 알려주세요."}
-        </span>
+
 
         <div className="flex shrink-0 items-center gap-2 md:gap-4">
           <nav
